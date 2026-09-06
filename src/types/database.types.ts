@@ -46,6 +46,38 @@ export type RegistrarVentaResult = {
   total: number
 }
 
+export type ProveedoresRow = {
+  id: string
+  nombre: string
+  empresa: string | null
+  created_at: string
+}
+
+export type ProveedoresInsert = Omit<ProveedoresRow, 'id' | 'created_at'>
+
+export type IngresosMercaderiaRow = {
+  id: string
+  proveedor_id: string | null
+  producto_id: string | null
+  cantidad_ingresada: number
+  costo_total: number
+  fecha: string
+}
+
+export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
+
+export type RegistrarIngresoArgs = {
+  p_proveedor_id: string
+  p_producto_id: string
+  p_cantidad: number
+  p_costo_total: number
+}
+
+export type RegistrarIngresoResult = {
+  ingreso_id: string
+  stock_actual: number
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -67,6 +99,18 @@ export type Database = {
         Update: Partial<DetalleVentasInsert>
         Relationships: []
       }
+      proveedores: {
+        Row: ProveedoresRow
+        Insert: ProveedoresInsert
+        Update: Partial<ProveedoresInsert>
+        Relationships: []
+      }
+      ingresos_mercaderia: {
+        Row: IngresosMercaderiaRow
+        Insert: IngresosMercaderiaInsert
+        Update: Partial<IngresosMercaderiaInsert>
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -75,6 +119,10 @@ export type Database = {
       registrar_venta: {
         Args: { p_articulos: Json[] }
         Returns: RegistrarVentaResult
+      }
+      registrar_ingreso: {
+        Args: RegistrarIngresoArgs
+        Returns: RegistrarIngresoResult
       }
     }
     Enums: {

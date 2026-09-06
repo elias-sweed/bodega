@@ -36,6 +36,9 @@ export function PosLayout({ children }: PosLayoutProps) {
           <NavLink to="/inventario" className={navLinkClass}>
             Inventario
           </NavLink>
+          <NavLink to="/compras" className={navLinkClass}>
+            Compras
+          </NavLink>
         </nav>
         <div className="flex items-center gap-4 text-sm text-slate-300">
           <span>Caja 1</span>
