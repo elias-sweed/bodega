@@ -6,7 +6,7 @@ interface PosLayoutProps {
 }
 
 function todayLabel(): string {
-  return new Date().toLocaleDateString('es-MX', {
+  return new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -31,6 +31,9 @@ export function PosLayout({ children }: PosLayoutProps) {
         </div>
         <nav className="flex items-center gap-2">
           <NavLink to="/" end className={navLinkClass}>
+            Resumen
+          </NavLink>
+          <NavLink to="/caja" className={navLinkClass}>
             Caja
           </NavLink>
           <NavLink to="/inventario" className={navLinkClass}>
