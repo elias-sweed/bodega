@@ -1,10 +1,10 @@
-import type { Product } from '../../types'
+import type { ProductosRow } from '../../types/database.types'
 import { ProductButton } from './ProductButton'
 
 interface ProductGridProps {
-  products: Product[]
+  products: ProductosRow[]
   title: string
-  onAdd: (product: Product) => void
+  onAdd: (product: ProductosRow) => void
 }
 
 export function ProductGrid({ products, title, onAdd }: ProductGridProps) {

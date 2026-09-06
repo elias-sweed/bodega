@@ -4,15 +4,22 @@ import { CartItemRow } from './CartItemRow'
 
 interface CartProps {
   items: CartItem[]
+  charging: boolean
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
-  onCharge: (total: number) => void
+  onCharge: () => void
 }
 
-export function Cart({ items, onIncrease, onDecrease, onCharge }: CartProps) {
+export function Cart({
+  items,
+  charging,
+  onIncrease,
+  onDecrease,
+  onCharge,
+}: CartProps) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const total = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) => sum + item.product.precio_venta * item.quantity,
     0,
   )
 
@@ -58,11 +65,11 @@ export function Cart({ items, onIncrease, onDecrease, onCharge }: CartProps) {
         </div>
         <button
           type="button"
-          disabled={items.length === 0}
-          onClick={() => onCharge(total)}
+          disabled={items.length === 0 || charging}
+          onClick={onCharge}
           className="h-16 w-full rounded-2xl bg-emerald-500 text-2xl font-black tracking-widest text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
-          COBRAR
+          {charging ? 'PROCESANDO…' : 'COBRAR'}
         </button>
       </footer>
     </aside>

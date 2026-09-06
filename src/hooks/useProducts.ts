@@ -41,8 +41,10 @@ export function useProducts() {
     }
   }, [reloadToken])
 
-  const refresh = useCallback((): void => {
-    setLoading(true)
+  const refresh = useCallback((silent = false): void => {
+    if (!silent) {
+      setLoading(true)
+    }
     setError(null)
     setReloadToken((token) => token + 1)
   }, [])

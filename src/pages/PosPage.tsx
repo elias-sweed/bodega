@@ -1,38 +1,68 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Toast } from '../components/common/Toast'
 import { Cart } from '../components/pos/Cart'
 import { CategoryGrid } from '../components/pos/CategoryGrid'
 import { ProductGrid } from '../components/pos/ProductGrid'
 import { SearchBar } from '../components/pos/SearchBar'
-import { CATEGORIES, PRODUCTS } from '../data/mockData'
-import type { CartItem, Category, Product } from '../types'
+import { useProducts } from '../hooks/useProducts'
+import { registrarVenta } from '../services/sales'
+import type { CartItem, Category } from '../types'
+import type { ProductosRow } from '../types/database.types'
+import { deriveCategories } from '../utils/categories'
 import { formatMoney } from '../utils/format'
 
+type Notice = {
+  type: 'success' | 'error'
+  message: string
+}
+
 export function PosPage() {
+  const { products, loading, error, refresh } = useProducts()
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-  const [chargedTotal, setChargedTotal] = useState<string | null>(null)
+  const [charging, setCharging] = useState(false)
+  const [notice, setNotice] = useState<Notice | null>(null)
+  const noticeTimer = useRef<number | undefined>(undefined)
+
+  const showNotice = useCallback((type: Notice['type'], message: string): void => {
+    window.clearTimeout(noticeTimer.current)
+    setNotice({ type, message })
+    noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
+  }, [])
+
+  useEffect(() => {
+    return () => window.clearTimeout(noticeTimer.current)
+  }, [])
+
+  const categories = useMemo(() => deriveCategories(products), [products])
 
   const query = search.trim().toLowerCase()
   const isSearching = query.length > 0
 
-  const filteredProducts = useMemo((): Product[] => {
-    const source = isSearching ? PRODUCTS : PRODUCTS.filter(
-      (product) => product.categoryId === selectedCategory?.id,
-    )
+  const filteredProducts = useMemo((): ProductosRow[] => {
+    const source = isSearching
+      ? products
+      : selectedCategory
+        ? products.filter(
+            (product) => product.categoria === selectedCategory.id,
+          )
+        : []
 
     return source.filter((product) => {
-      const name = product.name.toLowerCase()
-      const barcode = product.barcode?.toLowerCase() ?? ''
+      const name = product.nombre.toLowerCase()
+      const barcode = product.codigo_barras?.toLowerCase() ?? ''
       return name.includes(query) || barcode.includes(query)
     })
-  }, [query, isSearching, selectedCategory])
+  }, [products, query, isSearching, selectedCategory])
 
-  const addProduct = (product: Product): void => {
-    setChargedTotal(null)
+  const addProduct = (product: ProductosRow): void => {
     setCart((current) => {
       const existing = current.find((item) => item.product.id === product.id)
       if (existing) {
+        if (existing.quantity >= product.stock_actual) {
+          return current
+        }
         return current.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
@@ -44,37 +74,37 @@ export function PosPage() {
   }
 
   const increaseQuantity = (productId: string): void => {
-    setChargedTotal(null)
     setCart((current) =>
-      current.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item,
-      ),
+      current.map((item) => {
+        if (item.product.id !== productId) {
+          return item
+        }
+        if (item.quantity >= item.product.stock_actual) {
+          return item
+        }
+        return { ...item, quantity: item.quantity + 1 }
+      }),
     )
   }
 
   const decreaseQuantity = (productId: string): void => {
-    setChargedTotal(null)
     setCart((current) =>
-      current
-        .flatMap((item) =>
-          item.product.id === productId
-            ? item.quantity > 1
-              ? [{ ...item, quantity: item.quantity - 1 }]
-              : []
-            : [item],
-        )
-        .filter((item): item is CartItem => item !== undefined),
+      current.flatMap((item) =>
+        item.product.id === productId
+          ? item.quantity > 1
+            ? [{ ...item, quantity: item.quantity - 1 }]
+            : []
+          : [item],
+      ),
     )
   }
 
   const handleSearchEnter = (): void => {
     if (!query) return
-    const match = PRODUCTS.find(
+    const match = products.find(
       (product) =>
-        product.barcode?.toLowerCase() === query ||
-        product.name.toLowerCase() === query,
+        product.codigo_barras?.toLowerCase() === query ||
+        product.nombre.toLowerCase() === query,
     )
     if (match) {
       addProduct(match)
@@ -82,12 +112,47 @@ export function PosPage() {
     }
   }
 
-  const handleCharge = (total: number): void => {
-    setCart([])
-    setChargedTotal(formatMoney(total))
+  const handleCharge = async (): Promise<void> => {
+    if (cart.length === 0 || charging) return
+    setCharging(true)
+    try {
+      const result = await registrarVenta(cart)
+      setCart([])
+      setSearch('')
+      showNotice('success', `Venta por ${formatMoney(result.total)} registrada`)
+      refresh(true)
+    } catch (cause) {
+      showNotice(
+        'error',
+        cause instanceof Error
+          ? cause.message
+          : 'No se pudo registrar la venta',
+      )
+    } finally {
+      setCharging(false)
+    }
   }
 
-  const content = isSearching ? (
+  const retry = useCallback((): void => refresh(), [refresh])
+
+  const content = loading ? (
+    <p className="py-10 text-center text-lg text-slate-400">
+      Cargando productos…
+    </p>
+  ) : error ? (
+    <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
+      <p className="text-lg font-semibold text-rose-700">
+        No se pudieron cargar los productos: {error}
+      </p>
+      <button
+        type="button"
+        onClick={retry}
+        className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+      >
+        Reintentar
+      </button>
+    </div>
+  ) : isSearching ? (
     <ProductGrid
       products={filteredProducts}
       title="Resultados de búsqueda"
@@ -110,7 +175,7 @@ export function PosPage() {
     </div>
   ) : (
     <CategoryGrid
-      categories={CATEGORIES}
+      categories={categories}
       onSelect={(category) => {
         setSelectedCategory(category)
         setSearch('')
@@ -132,20 +197,14 @@ export function PosPage() {
       <div className="min-h-0">
         <Cart
           items={cart}
+          charging={charging}
           onIncrease={increaseQuantity}
           onDecrease={decreaseQuantity}
-          onCharge={handleCharge}
+          onCharge={() => void handleCharge()}
         />
       </div>
 
-      {chargedTotal && (
-        <div
-          role="status"
-          className="fixed inset-x-0 bottom-6 z-10 mx-auto w-max rounded-2xl bg-emerald-500 px-6 py-3 text-lg font-bold text-white shadow-xl"
-        >
-          ✓ Venta por {chargedTotal} cobrada
-        </div>
-      )}
+      {notice && <Toast type={notice.type} message={notice.message} />}
     </div>
   )
 }

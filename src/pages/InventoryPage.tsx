@@ -59,7 +59,7 @@ export function InventoryPage() {
           </p>
           <button
             type="button"
-            onClick={refresh}
+            onClick={() => refresh()}
             className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
           >
             Reintentar

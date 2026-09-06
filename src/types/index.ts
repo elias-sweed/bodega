@@ -1,3 +1,5 @@
+import type { ProductosRow } from './database.types'
+
 export interface Category {
   id: string
   label: string
@@ -5,15 +7,7 @@ export interface Category {
   className: string
 }
 
-export interface Product {
-  id: string
-  name: string
-  price: number
-  categoryId: string
-  barcode?: string
-}
-
 export interface CartItem {
-  product: Product
+  product: ProductosRow
   quantity: number
 }
