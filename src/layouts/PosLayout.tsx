@@ -27,7 +27,7 @@ export function PosLayout({ children }: PosLayoutProps) {
       <header className="flex shrink-0 items-center justify-between gap-4 bg-slate-900 px-6 py-3 text-white">
         <div className="flex items-center gap-2 text-lg font-bold">
           <span aria-hidden="true">🛒</span>
-          <span>Bodega POS</span>
+          <span>Corporación EVANLU S.A.C</span>
         </div>
         <nav className="flex items-center gap-2">
           <NavLink to="/" end className={navLinkClass}>
