@@ -1,9 +1,5 @@
-import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
-
-interface PosLayoutProps {
-  children: ReactNode
-}
+import { NavLink, Outlet } from 'react-router-dom'
+import { UserMenu } from '../components/auth/UserMenu'
 
 function todayLabel(): string {
   return new Date().toLocaleDateString('es-PE', {
@@ -21,15 +17,15 @@ function navLinkClass({ isActive }: { isActive: boolean }): string {
   }`
 }
 
-export function PosLayout({ children }: PosLayoutProps) {
+export function PosLayout() {
   return (
     <div className="flex h-screen flex-col bg-slate-100">
-      <header className="flex shrink-0 items-center justify-between gap-4 bg-slate-900 px-6 py-3 text-white">
+      <header className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 px-6 py-3 text-white">
         <div className="flex items-center gap-2 text-lg font-bold">
           <span aria-hidden="true">🛒</span>
-          <span>Corporación EVANLU S.A.C</span>
+          <span>Bodega POS</span>
         </div>
-        <nav className="flex items-center gap-2">
+        <nav className="flex flex-wrap items-center gap-1 lg:gap-2">
           <NavLink to="/" end className={navLinkClass}>
             Resumen
           </NavLink>
@@ -42,14 +38,21 @@ export function PosLayout({ children }: PosLayoutProps) {
           <NavLink to="/compras" className={navLinkClass}>
             Compras
           </NavLink>
+          <NavLink to="/historial" className={navLinkClass}>
+            Historial
+          </NavLink>
         </nav>
-        <div className="flex items-center gap-4 text-sm text-slate-300">
-          <span>Caja 1</span>
-          <span className="hidden capitalize md:inline">{todayLabel()}</span>
+        <div className="flex items-center gap-4">
+          <span className="hidden text-sm text-slate-300 md:inline">
+            {todayLabel()}
+          </span>
+          <UserMenu />
         </div>
       </header>
 
-      <main className="min-h-0 flex-1 p-4 lg:p-6">{children}</main>
+      <main className="min-h-0 flex-1 p-4 lg:p-6">
+        <Outlet />
+      </main>
     </div>
   )
 }

@@ -1,21 +1,35 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PosLayout } from './layouts/PosLayout'
 import { DashboardPage } from './pages/DashboardPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { HistoryPage } from './pages/HistoryPage'
 import { InventoryPage } from './pages/InventoryPage'
+import { LoginPage } from './pages/LoginPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 
 function App() {
   return (
     <BrowserRouter>
-      <PosLayout>
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/caja" element={<PosPage />} />
-          <Route path="/inventario" element={<InventoryPage />} />
-          <Route path="/compras" element={<PurchasesPage />} />
-        </Routes>
-      </PosLayout>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<PosLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/caja" element={<PosPage />} />
+            <Route path="/inventario" element={<InventoryPage />} />
+            <Route path="/compras" element={<PurchasesPage />} />
+            <Route path="/historial" element={<HistoryPage />} />
+          </Route>
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   )
 }
