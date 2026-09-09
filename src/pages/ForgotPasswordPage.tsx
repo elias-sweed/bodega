@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import Aurora from '../components/Aurora'
+import {
+  AuthCard,
+  authButtonClass,
+  authInputClass,
+  authLabelClass,
+} from '../components/auth/AuthCard'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
@@ -21,9 +26,8 @@ const COOLDOWN_HOURS = 3
 const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000
 const STORAGE_KEY = 'pwd_reset_limit'
 
-const inputClass =
-  'h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-lg text-white outline-none transition-all placeholder:text-slate-500 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20'
-const labelClass = 'mb-1 block text-sm font-semibold text-slate-300'
+const cancelButtonClass =
+  'h-12 w-full rounded-xl border border-white/10 text-base font-semibold text-slate-300 transition-colors hover:bg-white/5'
 
 function readLimit(): LimitState {
   try {
@@ -132,31 +136,13 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 p-4">
-      <div className="absolute inset-0" aria-hidden="true">
-        <Aurora
-          colorStops={['#7cff67', '#B497CF', '#5227FF']}
-          blend={0.5}
-          amplitude={1.0}
-          speed={0.35}
-        />
-      </div>
-
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
-        <div className="mb-8 text-center">
-          <span className="text-4xl" aria-hidden="true">
-            🛒
-          </span>
-          <h1 className="mt-2 text-2xl font-black text-white">
-            Recuperar contraseña
-          </h1>
-          <p className="text-sm text-slate-400">
-            Te enviaremos un enlace para restablecer tu contraseña.
-          </p>
-        </div>
-
+    <>
+      <AuthCard
+        title="Recuperar contraseña"
+        subtitle="Te enviaremos un enlace para restablecer tu contraseña."
+      >
         {sent ? (
-          <div className="rounded-2xl bg-emerald-500/10 p-6 text-center">
+          <div className="fade-up rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-6 text-center">
             <p className="text-lg font-bold text-emerald-200">
               Revisa tu correo electrónico
             </p>
@@ -166,17 +152,14 @@ export function ForgotPasswordPage() {
               sirve una vez; si lo pides varias veces seguidas, espera unos
               minutos entre pedido y pedido.
             </p>
-            <Link
-              to="/login"
-              className="mt-5 inline-block rounded-xl bg-indigo-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98]"
-            >
+            <Link to="/login" className={`mt-5 inline-block ${authButtonClass}`}>
               Volver al inicio de sesión
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label htmlFor="email" className={labelClass}>
+              <label htmlFor="email" className={authLabelClass}>
                 Correo electrónico
               </label>
               <input
@@ -186,23 +169,23 @@ export function ForgotPasswordPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
+                className={authInputClass}
                 placeholder="tucorreo@ejemplo.com"
               />
             </div>
 
             {attemptsUsed > 0 && remaining > 0 ? (
-              <p className="rounded-xl bg-amber-500/10 px-4 py-3 text-center text-sm font-semibold text-amber-200">
+              <p className="rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-center text-sm font-semibold text-amber-200">
                 Ya usaste {attemptsUsed} de {MAX_ATTEMPTS} intentos. Te quedan{' '}
                 {remaining} {remaining === 1 ? 'intento' : 'intentos'}.
               </p>
             ) : remaining === MAX_ATTEMPTS ? (
-              <p className="rounded-xl bg-white/5 px-4 py-3 text-center text-sm font-semibold text-slate-400">
+              <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-slate-400">
                 Tienes {MAX_ATTEMPTS} intentos. Al agotarlos, deberás esperar{' '}
                 {COOLDOWN_HOURS} horas para volver a intentar.
               </p>
             ) : (
-              <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-center text-sm font-bold text-rose-200">
+              <p className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-center text-sm font-bold text-rose-200">
                 Agotaste tus {MAX_ATTEMPTS} intentos. Podrás volver a intentar{' '}
                 {formatUntil(blockedUntilMs)}.
               </p>
@@ -211,7 +194,7 @@ export function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={submitting || remaining <= 0}
-              className="h-14 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className={authButtonClass}
             >
               {submitting
                 ? 'Enviando…'
@@ -230,8 +213,8 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS - 1 && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-slate-900/90 p-8 backdrop-blur-sm">
-            <div className="text-center">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2rem] bg-slate-950/90 p-8 backdrop-blur-sm">
+            <div className="fade-up text-center">
               <span className="text-4xl" aria-hidden="true">
                 🤔
               </span>
@@ -247,7 +230,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void doSend()}
-                  className="h-12 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:opacity-60"
+                  className={`${authButtonClass} disabled:opacity-60`}
                 >
                   {submitting ? 'Enviando…' : 'Sí, enviar el enlace'}
                 </button>
@@ -255,7 +238,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => setConfirmingAttempt(0)}
-                  className="h-12 w-full rounded-2xl border border-white/10 text-lg font-semibold text-slate-300 transition-colors hover:bg-white/5"
+                  className={cancelButtonClass}
                 >
                   Cancelar
                 </button>
@@ -265,8 +248,8 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-slate-900/90 p-8 backdrop-blur-sm">
-            <div className="text-center">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2rem] bg-slate-950/90 p-8 backdrop-blur-sm">
+            <div className="fade-up text-center">
               <span className="text-4xl" aria-hidden="true">
                 ⚠️
               </span>
@@ -283,7 +266,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void doSend()}
-                  className="h-12 w-full rounded-2xl bg-rose-600 text-lg font-bold text-white shadow-lg transition-all hover:bg-rose-500 active:scale-[0.98] disabled:opacity-60"
+                  className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-base font-black uppercase tracking-[0.15em] text-white shadow-[0_14px_35px_-12px_rgba(244,63,94,0.6)] transition-all hover:from-rose-400 hover:to-rose-500 active:scale-[0.99] disabled:opacity-60"
                 >
                   {submitting ? 'Enviando…' : 'Sí, estoy seguro'}
                 </button>
@@ -291,7 +274,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => setConfirmingAttempt(0)}
-                  className="h-12 w-full rounded-2xl border border-white/10 text-lg font-semibold text-slate-300 transition-colors hover:bg-white/5"
+                  className={cancelButtonClass}
                 >
                   Cancelar
                 </button>
@@ -299,9 +282,9 @@ export function ForgotPasswordPage() {
             </div>
           </div>
         )}
-      </div>
+      </AuthCard>
 
       {notice && <Toast type={notice.type} message={notice.message} />}
-    </div>
+    </>
   )
 }

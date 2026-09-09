@@ -8,6 +8,7 @@ interface CartProps {
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
   onCharge: () => void
+  onSuspend: () => void
 }
 
 export function Cart({
@@ -16,6 +17,7 @@ export function Cart({
   onIncrease,
   onDecrease,
   onCharge,
+  onSuspend,
 }: CartProps) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const total = items.reduce(
@@ -70,6 +72,14 @@ export function Cart({
           className="h-16 w-full rounded-2xl bg-emerald-500 text-2xl font-black tracking-widest text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
           {charging ? 'PROCESANDO…' : 'COBRAR'}
+        </button>
+        <button
+          type="button"
+          disabled={items.length === 0 || charging}
+          onClick={onSuspend}
+          className="h-12 w-full rounded-2xl border-2 border-slate-200 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+        >
+          Suspender venta
         </button>
       </footer>
     </aside>

@@ -3,6 +3,7 @@ import { Toast } from '../components/common/Toast'
 import { Cart } from '../components/pos/Cart'
 import { CategoryGrid } from '../components/pos/CategoryGrid'
 import { ProductGrid } from '../components/pos/ProductGrid'
+import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { SearchBar } from '../components/pos/SearchBar'
 import { useProducts } from '../hooks/useProducts'
 import { registrarVenta } from '../services/sales'
@@ -16,6 +17,27 @@ type Notice = {
   message: string
 }
 
+const SUSPENDED_SALE_KEY = 'pos_venta_suspendida'
+
+function readSuspendedSale(): CartItem[] | null {
+  try {
+    const raw = window.localStorage.getItem(SUSPENDED_SALE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as CartItem[]
+    return Array.isArray(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function writeSuspendedSale(items: CartItem[]): void {
+  window.localStorage.setItem(SUSPENDED_SALE_KEY, JSON.stringify(items))
+}
+
+function clearSuspendedSale(): void {
+  window.localStorage.removeItem(SUSPENDED_SALE_KEY)
+}
+
 export function PosPage() {
   const { products, loading, error, refresh } = useProducts()
   const [cart, setCart] = useState<CartItem[]>([])
@@ -23,6 +45,10 @@ export function PosPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [charging, setCharging] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
+  const [suspendedSale, setSuspendedSale] = useState<CartItem[] | null>(() =>
+    readSuspendedSale(),
+  )
+  const [lastSale, setLastSale] = useState<LastSale | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
 
   const showNotice = useCallback((type: Notice['type'], message: string): void => {
@@ -117,6 +143,12 @@ export function PosPage() {
     setCharging(true)
     try {
       const result = await registrarVenta(cart)
+      setLastSale({
+        venta_id: result.venta_id,
+        total: result.total,
+        fecha: new Date().toISOString(),
+        items: cart,
+      })
       setCart([])
       setSearch('')
       showNotice('success', `Venta por ${formatMoney(result.total)} registrada`)
@@ -131,6 +163,35 @@ export function PosPage() {
     } finally {
       setCharging(false)
     }
+  }
+
+  const handleSuspend = (): void => {
+    if (cart.length === 0) return
+    const saved = [...cart]
+    writeSuspendedSale(saved)
+    setSuspendedSale(saved)
+    setCart([])
+    showNotice('success', `Venta suspendida (${saved.length} ${
+      saved.length === 1 ? 'artículo' : 'artículos'
+    })`)
+  }
+
+  const handleResume = (): void => {
+    if (!suspendedSale) return
+    setCart(suspendedSale)
+    clearSuspendedSale()
+    setSuspendedSale(null)
+    showNotice('success', 'Venta retomada')
+  }
+
+  const handleDiscardSuspended = (): void => {
+    const ok = window.confirm(
+      '¿Descartar la venta suspendida?\nLos artículos guardados se perderán.',
+    )
+    if (!ok) return
+    clearSuspendedSale()
+    setSuspendedSale(null)
+    showNotice('success', 'Venta suspendida descartada')
   }
 
   const retry = useCallback((): void => refresh(), [refresh])
@@ -184,25 +245,71 @@ export function PosPage() {
   )
 
   return (
-    <div className="grid h-full grid-cols-1 gap-6 overflow-y-auto pb-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:overflow-hidden lg:pb-0">
-      <section className="flex min-h-0 flex-col gap-4">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          onEnter={handleSearchEnter}
-        />
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">{content}</div>
-      </section>
+    <div className="flex h-full flex-col gap-4">
+      {suspendedSale && (
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl" aria-hidden="true">
+              ⏸️
+            </span>
+            <div>
+              <p className="font-bold text-amber-800">Hay una venta suspendida</p>
+              <p className="text-sm text-amber-700">
+                {suspendedSale.length} {suspendedSale.length === 1 ? 'artículo' : 'artículos'} ·{' '}
+                {formatMoney(
+                  suspendedSale.reduce(
+                    (sum, item) =>
+                      sum + item.product.precio_venta * item.quantity,
+                    0,
+                  ),
+                )}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleResume}
+              className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+            >
+              Retomar venta
+            </button>
+            <button
+              type="button"
+              onClick={handleDiscardSuspended}
+              className="rounded-xl border-2 border-amber-300 px-4 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+            >
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
 
-      <div className="min-h-0">
-        <Cart
-          items={cart}
-          charging={charging}
-          onIncrease={increaseQuantity}
-          onDecrease={decreaseQuantity}
-          onCharge={() => void handleCharge()}
-        />
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-y-auto pb-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:overflow-hidden lg:pb-0">
+        <section className="flex min-h-0 flex-col gap-4">
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            onEnter={handleSearchEnter}
+          />
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1">{content}</div>
+        </section>
+
+        <div className="min-h-0">
+          <Cart
+            items={cart}
+            charging={charging}
+            onIncrease={increaseQuantity}
+            onDecrease={decreaseQuantity}
+            onCharge={() => void handleCharge()}
+            onSuspend={handleSuspend}
+          />
+        </div>
       </div>
+
+      {lastSale && (
+        <ReceiptModal sale={lastSale} onClose={() => setLastSale(null)} />
+      )}
 
       {notice && <Toast type={notice.type} message={notice.message} />}
     </div>

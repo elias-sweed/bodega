@@ -736,10 +736,38 @@ En `supabase/roles.sql`: tabla `usuarios_autorizados(email, rol)` con `rol` en
   (sin parpadeos), y muestra "Acceso no autorizado" con botón de cerrar sesión si el
   correo no está en la whitelist. `UserMenu` muestra el rol ("Admin"/"Cajero").
 
+### 9.9 Gestión de usuarios (`/usuarios`)
+
+En `supabase/usuarios.sql` (ejecutar después de `roles.sql`):
+
+- Helper `public.es_admin()` **SECURITY DEFINER**: `true` solo si el email de la
+  sesión es `admin` en `usuarios_autorizados` (evita recursión de RLS al
+  consultar la misma tabla).
+- Políticas nuevas en `usuarios_autorizados` para `admin`: `SELECT` de toda la
+  lista, `INSERT` (otorgar acceso), `UPDATE` (cambiar rol), `DELETE` (quitar
+  acceso). La política `select_own` de `roles.sql` sigue para usuarios normales.
+- `UsersPage` (solo admin; si un cajero entra, ve "Acceso no autorizado"):
+  lista de accesos con rol, formulario para agregar correo+rol, botones
+  "Cambiar rol" y "Quitar acceso" (no deja quitarse el acceso a uno mismo).
+  Servicios en `src/services/users.ts`.
+- El enlace "Usuarios" en el header (`PosLayout`) solo aparece si `rol === 'admin'`.
+
 ### 9.7 Configuración externa (Supabase, Google, Vercel)
 
 Ver el detalle completo en la sección de entregables del desarrollo de la Fase 6
 (variables, Redirect URLs, OAuth Client ID/Secret, `VITE_APP_URL` en Vercel).
+
+### 9.10 Caja: suspender venta y recibo (imprimir / WhatsApp)
+
+- **Suspender venta**: botón en el carrito guarda el carrito en `localStorage`
+  (`pos_venta_suspendida`), limpia la pantalla y muestra un banner ámbar con
+  **Retomar venta** / **Descartar**. Se conserva aunque se cierre el navegador.
+- **Ver cobro**: al registrar una venta se abre `ReceiptModal` con el detalle
+  del ticket (artículos, recibo corto, fecha y total):
+  - **Imprimir** abre una ventana limpia con el recibo en fuente monoespaciada
+    y lanza `window.print()`.
+  - **WhatsApp** abre `https://wa.me/?text=...` con el ticket como mensaje de
+    texto (para enviarlo al cliente o al grupo de la familia).
 
 ---
 
@@ -769,8 +797,6 @@ Ver el detalle completo en la sección de entregables del desarrollo de la Fase 
 
 ## 11. Pendientes / mejoras posibles
 
-- Añadir **Supabase Auth** y reemplazar las políticas `using (true)` por
-  `auth.uid()` para multi-sucursal o personal con roles.
 - Historial/exportación de ventas (la tabla `fecha` ya está indexada) y reportes de
   compras por período (`ingresos_mercaderia.fecha`).
 - Recalcular el **costo promedio** del producto al registrar un ingreso (hoy solo suma stock).

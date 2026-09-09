@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Aurora from '../components/Aurora'
+import {
+  AuthCard,
+  authButtonClass,
+  authInputClass,
+  authLabelClass,
+} from '../components/auth/AuthCard'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
@@ -10,10 +15,6 @@ type Notice = {
   type: 'success' | 'error'
   message: string
 }
-
-const inputClass =
-  'h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-lg text-white outline-none transition-all placeholder:text-slate-500 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20'
-const labelClass = 'mb-1 block text-sm font-semibold text-slate-300'
 
 export function ResetPasswordPage() {
   const { user, loading, updatePassword, signOut } = useAuth()
@@ -63,31 +64,13 @@ export function ResetPasswordPage() {
   const sessionReady = !loading
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 p-4">
-      <div className="absolute inset-0" aria-hidden="true">
-        <Aurora
-          colorStops={['#7cff67', '#B497CF', '#5227FF']}
-          blend={0.5}
-          amplitude={1.0}
-          speed={0.35}
-        />
-      </div>
-
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
-        <div className="mb-8 text-center">
-          <span className="text-4xl" aria-hidden="true">
-            🛒
-          </span>
-          <h1 className="mt-2 text-2xl font-black text-white">
-            Nueva contraseña
-          </h1>
-          <p className="text-sm text-slate-400">
-            Define una nueva contraseña para tu cuenta.
-          </p>
-        </div>
-
+    <>
+      <AuthCard
+        title="Nueva contraseña"
+        subtitle="Define una nueva contraseña para tu cuenta."
+      >
         {sessionReady && !user ? (
-          <div className="rounded-2xl bg-rose-500/10 p-6 text-center">
+          <div className="fade-up rounded-2xl border border-rose-400/20 bg-rose-500/10 p-6 text-center">
             <p className="text-lg font-bold text-rose-200">
               El enlace no es válido
             </p>
@@ -95,17 +78,14 @@ export function ResetPasswordPage() {
               Este enlace de recuperación es inválido, expiró o ya fue usado.
               Solicita uno nuevo para continuar.
             </p>
-            <Link
-              to="/forgot-password"
-              className="mt-5 inline-block rounded-xl bg-indigo-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98]"
-            >
+            <Link to="/forgot-password" className={`mt-5 inline-block ${authButtonClass}`}>
               Solicitar nuevo enlace
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label htmlFor="new-password" className={labelClass}>
+              <label htmlFor="new-password" className={authLabelClass}>
                 Nueva contraseña
               </label>
               <input
@@ -116,13 +96,13 @@ export function ResetPasswordPage() {
                 minLength={6}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className={inputClass}
+                className={authInputClass}
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className={labelClass}>
+              <label htmlFor="confirm-password" className={authLabelClass}>
                 Confirmar nueva contraseña
               </label>
               <input
@@ -133,7 +113,7 @@ export function ResetPasswordPage() {
                 minLength={6}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
+                className={authInputClass}
                 placeholder="Repite la contraseña"
               />
             </div>
@@ -141,7 +121,7 @@ export function ResetPasswordPage() {
             <button
               type="submit"
               disabled={submitting || loading}
-              className="h-14 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className={authButtonClass}
             >
               {submitting ? 'Guardando…' : 'Actualizar contraseña'}
             </button>
@@ -154,9 +134,9 @@ export function ResetPasswordPage() {
             </Link>
           </form>
         )}
-      </div>
+      </AuthCard>
 
       {notice && <Toast type={notice.type} message={notice.message} />}
-    </div>
+    </>
   )
 }

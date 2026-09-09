@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { UserMenu } from '../components/auth/UserMenu'
+import { useAuth } from '../hooks/useAuth'
 
 function todayLabel(): string {
   return new Date().toLocaleDateString('es-PE', {
@@ -18,6 +19,8 @@ function navLinkClass({ isActive }: { isActive: boolean }): string {
 }
 
 export function PosLayout() {
+  const { rol } = useAuth()
+
   return (
     <div className="flex h-screen flex-col bg-slate-100">
       <header className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 px-6 py-3 text-white">
@@ -41,6 +44,11 @@ export function PosLayout() {
           <NavLink to="/historial" className={navLinkClass}>
             Historial
           </NavLink>
+          {rol === 'admin' && (
+            <NavLink to="/usuarios" className={navLinkClass}>
+              Usuarios
+            </NavLink>
+          )}
         </nav>
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-slate-300 md:inline">

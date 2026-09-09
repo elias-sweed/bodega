@@ -24,6 +24,10 @@
   .fade-up {
     animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
+  .fade-in {
+    animation: fade-in 0.8s ease both;
+  }
 }
 
 @keyframes toast-in {
@@ -47,5 +51,14 @@
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
