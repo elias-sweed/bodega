@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Toast } from '../components/common/Toast'
 import { CostoStep } from '../components/purchases/CostoStep'
 import { ProductoSelect } from '../components/purchases/ProductoSelect'
-import { ProveedorSelect } from '../components/purchases/ProveedorSelect'
+import { PROVEEDOR_OTROS, ProveedorSelect } from '../components/purchases/ProveedorSelect'
 import { StepIndicator } from '../components/purchases/StepIndicator'
 import { useProducts } from '../hooks/useProducts'
 import { useProveedores } from '../hooks/useProveedores'
@@ -20,9 +20,9 @@ type Notice = {
 }
 
 export function PurchasesPage() {
-  const { proveedores, loading: proveedoresLoading, error: proveedoresError, refresh: refreshProveedores } =
+  const { proveedores, loading: proveedoresLoading, error: proveedoresError, refresh: refreshProveedores, addProveedor } =
     useProveedores()
-  const { products: productos, refresh: refreshProductos } = useProducts()
+  const { products: productos, refresh: refreshProductos, addProduct } = useProducts()
 
   const [step, setStep] = useState(1)
   const [proveedorId, setProveedorId] = useState('')
@@ -75,7 +75,7 @@ export function PurchasesPage() {
     setSaving(true)
     try {
       const result = await registrarIngreso({
-        p_proveedor_id: proveedorId,
+        p_proveedor_id: proveedorId === PROVEEDOR_OTROS ? null : proveedorId,
         p_producto_id: productoId,
         p_cantidad: Number(cantidad),
         p_costo_total: Number(costoTotal),
@@ -105,6 +105,9 @@ export function PurchasesPage() {
             proveedores={proveedores}
             value={proveedorId}
             onChange={setProveedorId}
+            onAddProveedor={async (nombre, empresa) =>
+              addProveedor({ nombre, empresa: empresa ?? null })
+            }
           />
         )
       case 2:
@@ -113,6 +116,7 @@ export function PurchasesPage() {
             productos={productos}
             value={productoId}
             onChange={setProductoId}
+            onCreateProduct={addProduct}
           />
         )
       case 3:

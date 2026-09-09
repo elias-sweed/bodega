@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchProveedores } from '../services/purchases'
-import type { ProveedoresRow } from '../types/database.types'
+import { createProveedor, fetchProveedores } from '../services/purchases'
+import type { ProveedoresInsert, ProveedoresRow } from '../types/database.types'
+
+function sortByName(proveedores: ProveedoresRow[]): ProveedoresRow[] {
+  return [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+}
 
 export function useProveedores() {
   const [proveedores, setProveedores] = useState<ProveedoresRow[]>([])
@@ -45,5 +49,14 @@ export function useProveedores() {
     setReloadToken((token) => token + 1)
   }, [])
 
-  return { proveedores, loading, error, refresh }
+  const addProveedor = useCallback(
+    async (input: ProveedoresInsert): Promise<ProveedoresRow> => {
+      const created = await createProveedor(input)
+      setProveedores((current) => sortByName([...current, created]))
+      return created
+    },
+    [],
+  )
+
+  return { proveedores, loading, error, refresh, addProveedor }
 }

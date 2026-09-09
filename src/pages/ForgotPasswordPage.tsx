@@ -10,9 +10,58 @@ type Notice = {
   message: string
 }
 
+type LimitState = {
+  count: number
+  windowStart: number
+}
+
+const MAX_ATTEMPTS = 3
+const COOLDOWN_HOURS = 3
+const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000
+const STORAGE_KEY = 'pwd_reset_limit'
+
 const inputClass =
   'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
 const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
+
+function readLimit(): LimitState {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<LimitState>
+      if (
+        typeof parsed.count === 'number' &&
+        typeof parsed.windowStart === 'number'
+      ) {
+        return { count: parsed.count, windowStart: parsed.windowStart }
+      }
+    }
+  } catch {
+    // almacenamiento no disponible: se ignora
+  }
+  return { count: 0, windowStart: 0 }
+}
+
+function writeLimit(state: LimitState): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // almacenamiento no disponible: se ignora
+  }
+}
+
+function formatUntil(ms: number): string {
+  const totalMinutes = Math.max(1, Math.ceil(ms / 60000))
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  if (hours <= 0) {
+    return `en ${minutes} minuto${minutes === 1 ? '' : 's'}`
+  }
+  if (minutes === 0) {
+    return `${hours} hora${hours === 1 ? '' : 's'}`
+  }
+  return `${hours} hora${hours === 1 ? '' : 's'} y ${minutes} minutos`
+}
 
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth()
@@ -21,21 +70,40 @@ export function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
+  const [limit, setLimit] = useState<LimitState>(() => readLimit())
+  const [confirmingAttempt, setConfirmingAttempt] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
 
   const showNotice = (type: Notice['type'], message: string): void => {
     window.clearTimeout(noticeTimer.current)
     setNotice({ type, message })
-    noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
+    noticeTimer.current = window.setTimeout(() => setNotice(null), 5000)
   }
 
   useEffect(() => {
     return () => window.clearTimeout(noticeTimer.current)
   }, [])
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault()
-    if (submitting) return
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  const inCooldown = limit.windowStart > 0 && now < limit.windowStart + COOLDOWN_MS
+  const attemptsUsed = inCooldown ? Math.min(limit.count, MAX_ATTEMPTS) : 0
+  const remaining = MAX_ATTEMPTS - attemptsUsed
+  const blockedUntilMs = inCooldown ? limit.windowStart + COOLDOWN_MS - now : 0
+
+  const doSend = async (): Promise<void> => {
+    if (submitting || remaining <= 0) return
     setSubmitting(true)
+    const at = Date.now()
+    const nextState: LimitState =
+      inCooldown && limit.windowStart > 0
+        ? { count: attemptsUsed + 1, windowStart: limit.windowStart }
+        : { count: 1, windowStart: at }
+    setLimit(nextState)
+    writeLimit(nextState)
     try {
       await resetPassword(email.trim())
       setSent(true)
@@ -46,9 +114,25 @@ export function ForgotPasswordPage() {
     }
   }
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault()
+    if (submitting || remaining <= 0) return
+
+    const attemptNumber = MAX_ATTEMPTS - remaining + 1
+    if (attemptNumber === MAX_ATTEMPTS) {
+      setConfirmingAttempt(MAX_ATTEMPTS)
+      return
+    }
+    if (attemptNumber === MAX_ATTEMPTS - 1) {
+      setConfirmingAttempt(MAX_ATTEMPTS - 1)
+      return
+    }
+    await doSend()
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
+      <div className="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
         <div className="mb-8 text-center">
           <span className="text-4xl" aria-hidden="true">
             🛒
@@ -67,8 +151,10 @@ export function ForgotPasswordPage() {
               Revisa tu correo electrónico
             </p>
             <p className="mt-2 text-sm text-emerald-600">
-              Si existe una cuenta asociada a ese correo, recibirás un enlace
-              para definir una nueva contraseña.
+              Si existe una cuenta con ese correo, el enlace llegará en unos
+              minutos. Míralo también en Spam y Promociones. Dura 1 hora y solo
+              sirve una vez; si lo pides varias veces seguidas, espera unos
+              minutos entre pedido y pedido.
             </p>
             <Link
               to="/login"
@@ -95,12 +181,33 @@ export function ForgotPasswordPage() {
               />
             </div>
 
+            {attemptsUsed > 0 && remaining > 0 ? (
+              <p className="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-700">
+                Ya usaste {attemptsUsed} de {MAX_ATTEMPTS} intentos. Te quedan{' '}
+                {remaining} {remaining === 1 ? 'intento' : 'intentos'}.
+              </p>
+            ) : remaining === MAX_ATTEMPTS ? (
+              <p className="rounded-xl bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">
+                Tienes {MAX_ATTEMPTS} intentos. Al agotarlos, deberás esperar{' '}
+                {COOLDOWN_HOURS} horas para volver a intentar.
+              </p>
+            ) : (
+              <p className="rounded-xl bg-rose-50 px-4 py-3 text-center text-sm font-bold text-rose-700">
+                Agotaste tus {MAX_ATTEMPTS} intentos. Podrás volver a intentar{' '}
+                {formatUntil(blockedUntilMs)}.
+              </p>
+            )}
+
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || remaining <= 0}
               className="h-14 w-full rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
             >
-              {submitting ? 'Enviando…' : 'Enviar enlace'}
+              {submitting
+                ? 'Enviando…'
+                : remaining <= 0
+                  ? 'Intenta más tarde'
+                  : 'Enviar enlace'}
             </button>
 
             <Link
@@ -110,6 +217,77 @@ export function ForgotPasswordPage() {
               ← Volver al inicio de sesión
             </Link>
           </form>
+        )}
+
+        {confirmingAttempt === MAX_ATTEMPTS - 1 && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/90 p-8 backdrop-blur-sm">
+            <div className="text-center">
+              <span className="text-4xl" aria-hidden="true">
+                🤔
+              </span>
+              <h2 className="mt-2 text-lg font-black text-slate-900">
+                ¿Quieres recuperar tu contraseña?
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Este es tu intento número {MAX_ATTEMPTS - 1} de {MAX_ATTEMPTS}.
+                Si confirmas, te quedará solo 1 intento más.
+              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => void doSend()}
+                  className="h-12 w-full rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:opacity-60"
+                >
+                  {submitting ? 'Enviando…' : 'Sí, enviar el enlace'}
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setConfirmingAttempt(0)}
+                  className="h-12 w-full rounded-2xl border-2 border-slate-200 text-lg font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {confirmingAttempt === MAX_ATTEMPTS && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/90 p-8 backdrop-blur-sm">
+            <div className="text-center">
+              <span className="text-4xl" aria-hidden="true">
+                ⚠️
+              </span>
+              <h2 className="mt-2 text-lg font-black text-rose-700">
+                ¡Cuidado! Es tu último intento
+              </h2>
+              <p className="mt-3 text-sm text-slate-600">
+                Este es el intento {MAX_ATTEMPTS} de {MAX_ATTEMPTS}. Después de
+                este, <strong>no podrás intentarlo de nuevo durante{' '}
+                {COOLDOWN_HOURS} horas</strong>. ¿Quieres continuar?
+              </p>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => void doSend()}
+                  className="h-12 w-full rounded-2xl bg-rose-600 text-lg font-bold text-white shadow-lg transition-all hover:bg-rose-500 active:scale-[0.98] disabled:opacity-60"
+                >
+                  {submitting ? 'Enviando…' : 'Sí, estoy seguro'}
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setConfirmingAttempt(0)}
+                  className="h-12 w-full rounded-2xl border-2 border-slate-200 text-lg font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

@@ -67,7 +67,7 @@ export type IngresosMercaderiaRow = {
 export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
 
 export type RegistrarIngresoArgs = {
-  p_proveedor_id: string
+  p_proveedor_id: string | null
   p_producto_id: string
   p_cantidad: number
   p_costo_total: number

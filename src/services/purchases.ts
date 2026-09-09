@@ -1,4 +1,5 @@
 import type {
+  ProveedoresInsert,
   ProveedoresRow,
   RegistrarIngresoArgs,
   RegistrarIngresoResult,
@@ -10,6 +11,22 @@ export async function fetchProveedores(): Promise<ProveedoresRow[]> {
     .from('proveedores')
     .select('*')
     .order('nombre', { ascending: true })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data
+}
+
+export async function createProveedor(
+  proveedor: ProveedoresInsert,
+): Promise<ProveedoresRow> {
+  const { data, error } = await supabase
+    .from('proveedores')
+    .insert(proveedor)
+    .select()
+    .single()
 
   if (error) {
     throw new Error(error.message)

@@ -21,9 +21,12 @@ export function getAuthErrorMessage(error: unknown): string {
   }
   if (
     message.toLowerCase().includes('rate limit') ||
-    message.toLowerCase().includes('security purposes')
+    message.toLowerCase().includes('security purposes') ||
+    message.toLowerCase().includes('too many') ||
+    message.toLowerCase().includes('hourly') ||
+    message.toLowerCase().includes('429')
   ) {
-    return 'Demasiados intentos en poco tiempo. Espera un momento y vuelve a intentarlo.'
+    return 'Estás pidiendo correos muy seguido. Esta función solo permite unos pocos envíos por hora; espera unos minutos y vuelve a intentarlo.'
   }
   if (message.toLowerCase().includes('expired')) {
     return 'El enlace ha expirado o ya fue usado. Solicita uno nuevo.'

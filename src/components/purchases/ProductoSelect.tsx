@@ -1,14 +1,22 @@
 import { useMemo, useState } from 'react'
-import type { ProductosRow } from '../../types/database.types'
+import type { ProductosInsert, ProductosRow } from '../../types/database.types'
+import { ProductFormModal } from '../inventory/ProductFormModal'
 
 interface ProductoSelectProps {
   productos: ProductosRow[]
   value: string
   onChange: (productoId: string) => void
+  onCreateProduct: (product: ProductosInsert) => Promise<ProductosRow>
 }
 
-export function ProductoSelect({ productos, value, onChange }: ProductoSelectProps) {
+export function ProductoSelect({
+  productos,
+  value,
+  onChange,
+  onCreateProduct,
+}: ProductoSelectProps) {
   const [search, setSearch] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -47,6 +55,25 @@ export function ProductoSelect({ productos, value, onChange }: ProductoSelectPro
           </option>
         ))}
       </select>
+
+      <button
+        type="button"
+        onClick={() => setShowCreate(true)}
+        className="mt-3 text-sm font-bold text-sky-600 hover:text-sky-700"
+      >
+        + ¿El producto no existe? Créalo ahora
+      </button>
+
+      {showCreate && (
+        <ProductFormModal
+          onClose={() => setShowCreate(false)}
+          onSubmit={async (product) => {
+            const created = await onCreateProduct(product)
+            onChange(created.id)
+            setShowCreate(false)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { ProductosInsert } from '../../types/database.types'
+import type { ProductosInsert, ProductosRow } from '../../types/database.types'
 
 interface ProductFormModalProps {
   onClose: () => void
   onSubmit: (product: ProductosInsert) => Promise<void>
+  initial?: ProductosRow | null
 }
 
 interface FormValues {
@@ -27,8 +28,20 @@ const EMPTY_VALUES: FormValues = {
   stock_minimo: '',
 }
 
-export function ProductFormModal({ onClose, onSubmit }: ProductFormModalProps) {
-  const [values, setValues] = useState<FormValues>(EMPTY_VALUES)
+export function ProductFormModal({ onClose, onSubmit, initial }: ProductFormModalProps) {
+  const [values, setValues] = useState<FormValues>(() =>
+    initial
+      ? {
+          nombre: initial.nombre,
+          categoria: initial.categoria,
+          codigo_barras: initial.codigo_barras ?? '',
+          precio_venta: String(initial.precio_venta),
+          costo: String(initial.costo),
+          stock_actual: String(initial.stock_actual),
+          stock_minimo: String(initial.stock_minimo),
+        }
+      : EMPTY_VALUES,
+  )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -78,7 +91,7 @@ export function ProductFormModal({ onClose, onSubmit }: ProductFormModalProps) {
       >
         <div className="mb-5 flex items-center justify-between">
           <h2 id="nuevo-producto-title" className="text-2xl font-bold text-slate-900">
-            Nuevo producto
+            {initial ? 'Editar producto' : 'Nuevo producto'}
           </h2>
           <button
             type="button"
@@ -227,7 +240,7 @@ export function ProductFormModal({ onClose, onSubmit }: ProductFormModalProps) {
             disabled={submitting}
             className="h-14 flex-[2] rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
           >
-            {submitting ? 'Guardando…' : 'Guardar producto'}
+            {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Guardar producto'}
           </button>
         </div>
       </form>

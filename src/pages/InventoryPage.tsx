@@ -1,28 +1,68 @@
 import { useCallback, useState } from 'react'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
+import { StockAdjustModal } from '../components/inventory/StockAdjustModal'
+import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
-import type { ProductosInsert } from '../types/database.types'
+import type { ProductosInsert, ProductosRow } from '../types/database.types'
 
 export function InventoryPage() {
-  const { products, loading, error, refresh, addProduct } = useProducts()
+  const { rol } = useAuth()
+  const isAdmin = rol === 'admin'
+  const { products, loading, error, refresh, addProduct, updateProduct, deleteProduct } =
+    useProducts()
   const [modalOpen, setModalOpen] = useState(false)
-  const [notice, setNotice] = useState<string | null>(null)
+  const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
+  const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
+  const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const lowStockCount = products.filter(
     (product) => product.stock_actual <= product.stock_minimo,
   ).length
   const totalProducts = products.length
 
-  const showNotice = useCallback((message: string): void => {
-    setNotice(message)
-    window.setTimeout(() => setNotice(null), 4000)
-  }, [])
+  const showNotice = useCallback(
+    (type: 'success' | 'error', message: string): void => {
+      setNotice({ type, message })
+      window.setTimeout(() => setNotice(null), 4000)
+    },
+    [],
+  )
 
   const handleAddProduct = async (product: ProductosInsert): Promise<void> => {
     await addProduct(product)
     setModalOpen(false)
-    showNotice(`Producto "${product.nombre}" agregado correctamente`)
+    showNotice('success', `Producto "${product.nombre}" agregado correctamente`)
+  }
+
+  const handleEditProduct = async (product: ProductosInsert): Promise<void> => {
+    if (!editingProduct) return
+    await updateProduct(editingProduct.id, product)
+    setEditingProduct(null)
+    showNotice('success', `Producto "${product.nombre}" actualizado`)
+  }
+
+  const handleAdjustStock = async (newStock: number): Promise<void> => {
+    if (!adjustingProduct) return
+    await updateProduct(adjustingProduct.id, { stock_actual: newStock })
+    setAdjustingProduct(null)
+    showNotice('success', `Stock de "${adjustingProduct.nombre}" ajustado a ${newStock}`)
+  }
+
+  const handleDelete = async (product: ProductosRow): Promise<void> => {
+    const ok = window.confirm(
+      `¿Seguro que quieres eliminar "${product.nombre}"?\nSe quitará del catálogo y de fututas ventas.`,
+    )
+    if (!ok) return
+    try {
+      await deleteProduct(product.id)
+      showNotice('success', `Producto "${product.nombre}" eliminado`)
+    } catch (cause) {
+      showNotice(
+        'error',
+        cause instanceof Error ? cause.message : 'No se pudo eliminar el producto',
+      )
+    }
   }
 
   return (
@@ -70,7 +110,13 @@ export function InventoryPage() {
           Aún no hay productos. Agrega el primero.
         </p>
       ) : (
-        <ProductTable products={products} />
+        <ProductTable
+          products={products}
+          isAdmin={isAdmin}
+          onEdit={(product) => setEditingProduct(product)}
+          onAdjustStock={(product) => setAdjustingProduct(product)}
+          onDelete={(product) => void handleDelete(product)}
+        />
       )}
 
       {modalOpen && (
@@ -80,12 +126,31 @@ export function InventoryPage() {
         />
       )}
 
+      {editingProduct && (
+        <ProductFormModal
+          initial={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onSubmit={handleEditProduct}
+        />
+      )}
+
+      {adjustingProduct && (
+        <StockAdjustModal
+          product={adjustingProduct}
+          onClose={() => setAdjustingProduct(null)}
+          onSubmit={handleAdjustStock}
+        />
+      )}
+
       {notice && (
         <div
           role="status"
-          className="fixed inset-x-0 bottom-6 z-10 mx-auto w-max rounded-2xl bg-emerald-500 px-6 py-3 text-lg font-bold text-white shadow-xl"
+          className={`fixed inset-x-0 bottom-6 z-10 mx-auto w-max rounded-2xl px-6 py-3 text-lg font-bold text-white shadow-xl ${
+            notice.type === 'success' ? 'bg-emerald-500' : 'bg-rose-600'
+          }`}
         >
-          ✓ {notice}
+          {notice.type === 'success' ? '✓ ' : '✕ '}
+          {notice.message}
         </div>
       )}
     </div>

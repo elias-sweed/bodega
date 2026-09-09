@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchProducts, insertProduct } from '../services/products'
-import type { ProductosInsert, ProductosRow } from '../types/database.types'
+import {
+  deleteProduct as removeProduct,
+  fetchProducts,
+  insertProduct,
+  updateProduct as editProduct,
+} from '../services/products'
+import type {
+  ProductosInsert,
+  ProductosRow,
+  ProductosUpdate,
+} from '../types/database.types'
 
 function sortByName(products: ProductosRow[]): ProductosRow[] {
   return [...products].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
@@ -58,5 +67,20 @@ export function useProducts() {
     [],
   )
 
-  return { products, loading, error, refresh, addProduct }
+  const updateProduct = useCallback(
+    async (id: string, updates: ProductosUpdate): Promise<void> => {
+      const updated = await editProduct(id, updates)
+      setProducts((current) =>
+        sortByName(current.map((product) => (product.id === id ? updated : product))),
+      )
+    },
+    [],
+  )
+
+  const deleteProduct = useCallback(async (id: string): Promise<void> => {
+    await removeProduct(id)
+    setProducts((current) => current.filter((product) => product.id !== id))
+  }, [])
+
+  return { products, loading, error, refresh, addProduct, updateProduct, deleteProduct }
 }
