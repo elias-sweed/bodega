@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Aurora from '../components/Aurora'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
@@ -11,8 +12,8 @@ type Notice = {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
+  'h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-lg text-white outline-none transition-all placeholder:text-slate-500 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20'
+const labelClass = 'mb-1 block text-sm font-semibold text-slate-300'
 
 export function ResetPasswordPage() {
   const { user, loading, updatePassword, signOut } = useAuth()
@@ -62,32 +63,41 @@ export function ResetPasswordPage() {
   const sessionReady = !loading
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 p-4">
+      <div className="absolute inset-0" aria-hidden="true">
+        <Aurora
+          colorStops={['#7cff67', '#B497CF', '#5227FF']}
+          blend={0.5}
+          amplitude={1.0}
+          speed={0.35}
+        />
+      </div>
+
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
         <div className="mb-8 text-center">
           <span className="text-4xl" aria-hidden="true">
             🛒
           </span>
-          <h1 className="mt-2 text-2xl font-black text-slate-900">
+          <h1 className="mt-2 text-2xl font-black text-white">
             Nueva contraseña
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-400">
             Define una nueva contraseña para tu cuenta.
           </p>
         </div>
 
         {sessionReady && !user ? (
-          <div className="rounded-2xl bg-rose-50 p-6 text-center">
-            <p className="text-lg font-bold text-rose-700">
+          <div className="rounded-2xl bg-rose-500/10 p-6 text-center">
+            <p className="text-lg font-bold text-rose-200">
               El enlace no es válido
             </p>
-            <p className="mt-2 text-sm text-rose-600">
+            <p className="mt-2 text-sm text-rose-300">
               Este enlace de recuperación es inválido, expiró o ya fue usado.
               Solicita uno nuevo para continuar.
             </p>
             <Link
               to="/forgot-password"
-              className="mt-5 inline-block rounded-xl bg-sky-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98]"
+              className="mt-5 inline-block rounded-xl bg-indigo-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98]"
             >
               Solicitar nuevo enlace
             </Link>
@@ -131,14 +141,14 @@ export function ResetPasswordPage() {
             <button
               type="submit"
               disabled={submitting || loading}
-              className="h-14 w-full rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className="h-14 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
             >
               {submitting ? 'Guardando…' : 'Actualizar contraseña'}
             </button>
 
             <Link
               to="/login"
-              className="text-center text-sm font-semibold text-slate-500 hover:text-slate-700"
+              className="text-center text-sm font-semibold text-slate-400 hover:text-white"
             >
               ← Volver al inicio de sesión
             </Link>

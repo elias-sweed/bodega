@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import Aurora from '../components/Aurora'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
@@ -21,8 +22,8 @@ const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000
 const STORAGE_KEY = 'pwd_reset_limit'
 
 const inputClass =
-  'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
+  'h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-lg text-white outline-none transition-all placeholder:text-slate-500 focus:border-indigo-400 focus:bg-white/10 focus:ring-4 focus:ring-indigo-500/20'
+const labelClass = 'mb-1 block text-sm font-semibold text-slate-300'
 
 function readLimit(): LimitState {
   try {
@@ -131,26 +132,35 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="relative w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950 p-4">
+      <div className="absolute inset-0" aria-hidden="true">
+        <Aurora
+          colorStops={['#7cff67', '#B497CF', '#5227FF']}
+          blend={0.5}
+          amplitude={1.0}
+          speed={0.35}
+        />
+      </div>
+
+      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
         <div className="mb-8 text-center">
           <span className="text-4xl" aria-hidden="true">
             🛒
           </span>
-          <h1 className="mt-2 text-2xl font-black text-slate-900">
+          <h1 className="mt-2 text-2xl font-black text-white">
             Recuperar contraseña
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-400">
             Te enviaremos un enlace para restablecer tu contraseña.
           </p>
         </div>
 
         {sent ? (
-          <div className="rounded-2xl bg-emerald-50 p-6 text-center">
-            <p className="text-lg font-bold text-emerald-700">
+          <div className="rounded-2xl bg-emerald-500/10 p-6 text-center">
+            <p className="text-lg font-bold text-emerald-200">
               Revisa tu correo electrónico
             </p>
-            <p className="mt-2 text-sm text-emerald-600">
+            <p className="mt-2 text-sm text-emerald-300">
               Si existe una cuenta con ese correo, el enlace llegará en unos
               minutos. Míralo también en Spam y Promociones. Dura 1 hora y solo
               sirve una vez; si lo pides varias veces seguidas, espera unos
@@ -158,7 +168,7 @@ export function ForgotPasswordPage() {
             </p>
             <Link
               to="/login"
-              className="mt-5 inline-block rounded-xl bg-sky-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98]"
+              className="mt-5 inline-block rounded-xl bg-indigo-500 px-6 py-3 font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98]"
             >
               Volver al inicio de sesión
             </Link>
@@ -182,17 +192,17 @@ export function ForgotPasswordPage() {
             </div>
 
             {attemptsUsed > 0 && remaining > 0 ? (
-              <p className="rounded-xl bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-700">
+              <p className="rounded-xl bg-amber-500/10 px-4 py-3 text-center text-sm font-semibold text-amber-200">
                 Ya usaste {attemptsUsed} de {MAX_ATTEMPTS} intentos. Te quedan{' '}
                 {remaining} {remaining === 1 ? 'intento' : 'intentos'}.
               </p>
             ) : remaining === MAX_ATTEMPTS ? (
-              <p className="rounded-xl bg-slate-50 px-4 py-3 text-center text-sm font-semibold text-slate-500">
+              <p className="rounded-xl bg-white/5 px-4 py-3 text-center text-sm font-semibold text-slate-400">
                 Tienes {MAX_ATTEMPTS} intentos. Al agotarlos, deberás esperar{' '}
                 {COOLDOWN_HOURS} horas para volver a intentar.
               </p>
             ) : (
-              <p className="rounded-xl bg-rose-50 px-4 py-3 text-center text-sm font-bold text-rose-700">
+              <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-center text-sm font-bold text-rose-200">
                 Agotaste tus {MAX_ATTEMPTS} intentos. Podrás volver a intentar{' '}
                 {formatUntil(blockedUntilMs)}.
               </p>
@@ -201,7 +211,7 @@ export function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={submitting || remaining <= 0}
-              className="h-14 w-full rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+              className="h-14 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
             >
               {submitting
                 ? 'Enviando…'
@@ -212,7 +222,7 @@ export function ForgotPasswordPage() {
 
             <Link
               to="/login"
-              className="text-center text-sm font-semibold text-slate-500 hover:text-slate-700"
+              className="text-center text-sm font-semibold text-slate-400 hover:text-white"
             >
               ← Volver al inicio de sesión
             </Link>
@@ -220,15 +230,15 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS - 1 && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/90 p-8 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-slate-900/90 p-8 backdrop-blur-sm">
             <div className="text-center">
               <span className="text-4xl" aria-hidden="true">
                 🤔
               </span>
-              <h2 className="mt-2 text-lg font-black text-slate-900">
+              <h2 className="mt-2 text-lg font-black text-white">
                 ¿Quieres recuperar tu contraseña?
               </h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-sm text-slate-300">
                 Este es tu intento número {MAX_ATTEMPTS - 1} de {MAX_ATTEMPTS}.
                 Si confirmas, te quedará solo 1 intento más.
               </p>
@@ -237,7 +247,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void doSend()}
-                  className="h-12 w-full rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:opacity-60"
+                  className="h-12 w-full rounded-2xl bg-indigo-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-indigo-400 active:scale-[0.98] disabled:opacity-60"
                 >
                   {submitting ? 'Enviando…' : 'Sí, enviar el enlace'}
                 </button>
@@ -245,7 +255,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => setConfirmingAttempt(0)}
-                  className="h-12 w-full rounded-2xl border-2 border-slate-200 text-lg font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                  className="h-12 w-full rounded-2xl border border-white/10 text-lg font-semibold text-slate-300 transition-colors hover:bg-white/5"
                 >
                   Cancelar
                 </button>
@@ -255,15 +265,15 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/90 p-8 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-slate-900/90 p-8 backdrop-blur-sm">
             <div className="text-center">
               <span className="text-4xl" aria-hidden="true">
                 ⚠️
               </span>
-              <h2 className="mt-2 text-lg font-black text-rose-700">
+              <h2 className="mt-2 text-lg font-black text-rose-300">
                 ¡Cuidado! Es tu último intento
               </h2>
-              <p className="mt-3 text-sm text-slate-600">
+              <p className="mt-3 text-sm text-slate-300">
                 Este es el intento {MAX_ATTEMPTS} de {MAX_ATTEMPTS}. Después de
                 este, <strong>no podrás intentarlo de nuevo durante{' '}
                 {COOLDOWN_HOURS} horas</strong>. ¿Quieres continuar?
@@ -281,7 +291,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => setConfirmingAttempt(0)}
-                  className="h-12 w-full rounded-2xl border-2 border-slate-200 text-lg font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                  className="h-12 w-full rounded-2xl border border-white/10 text-lg font-semibold text-slate-300 transition-colors hover:bg-white/5"
                 >
                   Cancelar
                 </button>
