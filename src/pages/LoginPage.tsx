@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { GoogleIcon } from '../components/auth/GoogleIcon'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
@@ -16,7 +15,7 @@ const inputClass =
 const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
 
 export function LoginPage() {
-  const { user, loading, signInWithGoogle, signInWithPassword } = useAuth()
+  const { user, loading, signInWithPassword } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectParam = searchParams.get('redirect')
@@ -25,7 +24,6 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [googleLoading, setGoogleLoading] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
 
@@ -59,17 +57,6 @@ export function LoginPage() {
     }
   }
 
-  const handleGoogle = async (): Promise<void> => {
-    if (googleLoading) return
-    setGoogleLoading(true)
-    try {
-      await signInWithGoogle(redirectParam)
-    } catch (cause) {
-      showNotice('error', getAuthErrorMessage(cause))
-      setGoogleLoading(false)
-    }
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
@@ -81,22 +68,6 @@ export function LoginPage() {
           <p className="text-sm text-slate-500">
             Inicia sesión para gestionar tu bodega.
           </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => void handleGoogle()}
-          disabled={googleLoading || loading}
-          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-200 bg-white text-lg font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <GoogleIcon className="h-6 w-6" />
-          {googleLoading ? 'Conectando…' : 'Continuar con Google'}
-        </button>
-
-        <div className="my-6 flex items-center gap-3 text-sm font-semibold text-slate-400">
-          <span className="h-px flex-1 bg-slate-200" />
-          o
-          <span className="h-px flex-1 bg-slate-200" />
         </div>
 
         <form onSubmit={handleLogin} className="flex flex-col gap-4">

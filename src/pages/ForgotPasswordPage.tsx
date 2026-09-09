@@ -40,8 +40,7 @@ export function ForgotPasswordPage() {
       await resetPassword(email.trim())
       setSent(true)
     } catch (cause) {
-      showNotice('success', getAuthErrorMessage(cause))
-      setSent(true)
+      showNotice('error', getAuthErrorMessage(cause))
     } finally {
       setSubmitting(false)
     }

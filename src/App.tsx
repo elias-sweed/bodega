@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { PosLayout } from './layouts/PosLayout'
 import { DashboardPage } from './pages/DashboardPage'
@@ -9,10 +9,26 @@ import { LoginPage } from './pages/LoginPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { useAuth } from './hooks/useAuth'
+import { useEffect } from 'react'
+
+function RecoveryRedirect() {
+  const { isPasswordRecovery } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (isPasswordRecovery) {
+      navigate('/reset-password', { replace: true })
+    }
+  }, [isPasswordRecovery, navigate])
+
+  return null
+}
 
 function App() {
   return (
     <BrowserRouter>
+      <RecoveryRedirect />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

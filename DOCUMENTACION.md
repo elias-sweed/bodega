@@ -717,6 +717,25 @@ Contexto de autenticación dividido en 3 archivos (para mantener Fast Refresh li
 Google, nombre desde `user_metadata` con fallback al email, botón "Cerrar sesión" con
 loading que redirige a `/login`). `main.tsx` envuelve la app en `AuthProvider`.
 
+### 9.8 Roles de usuario (whitelist admin/cajero)
+
+En `supabase/roles.sql`: tabla `usuarios_autorizados(email, rol)` con `rol` en
+`admin | cajero` y RLS que permite a cada usuario leer **solo su propio rol**
+(`email = auth.jwt() ->> 'email'`).
+
+- Todas las políticas de negocio pasan a exigir que `auth.jwt() ->> 'email'`
+  exista en `usuarios_autorizados` (whitelist). Un usuario autenticado que NO esté
+  en la tabla no puede leer ni escribir nada (bloquea a extraños aunque entren
+  con Google).
+- **`admin`**: todas las funciones (incluye UPDATE/DELETE de `productos`).
+- **`cajero`**: SELECT de todo + INSERT de `productos` (crear producto) + usar las
+  RPC de ventas/compras. Sin UPDATE/DELETE de `productos` (no puede editar precios
+  ni borrar) hasta que sea necesario exponerlas.
+- Frontend: `AuthProvider` consulta el rol (`fetchRol`) al iniciar sesión y lo expone
+  en `useAuth().rol` / `roleLoading`. `ProtectedRoute` espera la sesión Y el rol
+  (sin parpadeos), y muestra "Acceso no autorizado" con botón de cerrar sesión si el
+  correo no está en la whitelist. `UserMenu` muestra el rol ("Admin"/"Cajero").
+
 ### 9.7 Configuración externa (Supabase, Google, Vercel)
 
 Ver el detalle completo en la sección de entregables del desarrollo de la Fase 6

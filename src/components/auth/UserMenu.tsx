@@ -11,7 +11,7 @@ function getMetaString(user: User | null, key: string): string {
 }
 
 export function UserMenu() {
-  const { user, signOut } = useAuth()
+  const { user, rol, signOut } = useAuth()
   const navigate = useNavigate()
   const [signingOut, setSigningOut] = useState(false)
   const [notice, setNotice] = useState<{ type: 'error'; message: string } | null>(null)
@@ -23,6 +23,7 @@ export function UserMenu() {
     ''
   const avatarUrl = getMetaString(user, 'avatar_url') || getMetaString(user, 'picture')
   const initial = displayName.trim().charAt(0).toUpperCase() || '?'
+  const rolLabel = rol === 'admin' ? 'Admin' : 'Cajero'
 
   const handleSignOut = async (): Promise<void> => {
     if (signingOut) return
@@ -56,6 +57,9 @@ export function UserMenu() {
         )}
         <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-slate-200 lg:block">
           {displayName}
+          <span className="ml-2 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-bold text-sky-300">
+            {rolLabel}
+          </span>
         </span>
         <button
           type="button"

@@ -78,6 +78,16 @@ export type RegistrarIngresoResult = {
   stock_actual: number
 }
 
+export type UsuarioRol = 'admin' | 'cajero'
+
+export type UsuariosAutorizadosRow = {
+  email: string
+  rol: UsuarioRol
+  created_at: string
+}
+
+export type UsuariosAutorizadosInsert = Omit<UsuariosAutorizadosRow, 'created_at'>
+
 export type Database = {
   public: {
     Tables: {
@@ -109,6 +119,12 @@ export type Database = {
         Row: IngresosMercaderiaRow
         Insert: IngresosMercaderiaInsert
         Update: Partial<IngresosMercaderiaInsert>
+        Relationships: []
+      }
+      usuarios_autorizados: {
+        Row: UsuariosAutorizadosRow
+        Insert: UsuariosAutorizadosInsert
+        Update: Partial<UsuariosAutorizadosInsert>
         Relationships: []
       }
     }
