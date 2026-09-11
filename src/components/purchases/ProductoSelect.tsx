@@ -66,6 +66,7 @@ export function ProductoSelect({
 
       {showCreate && (
         <ProductFormModal
+          isFromPurchase
           onClose={() => setShowCreate(false)}
           onSubmit={async (product) => {
             const created = await onCreateProduct(product)

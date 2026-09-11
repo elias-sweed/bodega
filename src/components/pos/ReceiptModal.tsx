@@ -87,8 +87,8 @@ function whatsappMessage(sale: LastSale): string {
     ),
     '---------------------------',
     `TOTAL: ${formatMoney(sale.total)}`,
-    'Gracias por su compra',
   ]
+  lines.push('Gracias por su compra')
   return lines.join('\n')
 }
 

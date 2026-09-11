@@ -34,6 +34,9 @@ create policy "ingresos_select" on public.ingresos_mercaderia
 -- ---------------------------------------------------------------------------
 -- Función transaccional: inserta el ingreso de mercadería y suma al stock.
 -- Atómica: si algo falla, se revierte por completo.
+-- Además recalcula el COSTO UNITARIO del producto (promedio ponderado entre el
+-- costo del stock existente y el costo de esta compra), para que Inventario y
+-- el cálculo de márgenes trabajen con el costo real de la última compra.
 -- ---------------------------------------------------------------------------
 create or replace function public.registrar_ingreso(
   p_proveedor_id uuid,
@@ -49,19 +52,31 @@ as $$
 declare
   v_ingreso_id uuid;
   v_stock_actual integer;
+  v_costo_previo numeric(12, 2);
 begin
   if p_cantidad <= 0 then
     raise exception 'La cantidad debe ser mayor a 0';
   end if;
 
-  update public.productos
-  set stock_actual = stock_actual + p_cantidad
+  select stock_actual, costo
+    into v_stock_actual, v_costo_previo
+  from public.productos
   where id = p_producto_id
-  returning stock_actual into v_stock_actual;
+  for update;
 
   if not found then
     raise exception 'El producto % no existe', p_producto_id;
   end if;
+
+  update public.productos
+  set stock_actual = stock_actual + p_cantidad,
+      costo = round(
+        (coalesce(v_costo_previo, 0) * (v_stock_actual) + p_costo_total)
+        / (v_stock_actual + p_cantidad),
+        2
+      )
+  where id = p_producto_id
+  returning stock_actual into v_stock_actual;
 
   insert into public.ingresos_mercaderia (proveedor_id, producto_id, cantidad_ingresada, costo_total)
   values (p_proveedor_id, p_producto_id, p_cantidad, p_costo_total)

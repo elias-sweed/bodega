@@ -78,6 +78,30 @@ export type RegistrarIngresoResult = {
   stock_actual: number
 }
 
+export type AjustesStockRow = {
+  id: string
+  producto_id: string | null
+  tipo: 'entrada' | 'salida'
+  cantidad: number
+  motivo: string
+  stock_resultante: number
+  fecha: string
+}
+
+export type AjustesStockInsert = Omit<AjustesStockRow, 'id' | 'fecha'>
+
+export type RegistrarAjusteStockArgs = {
+  p_producto_id: string
+  p_tipo: 'entrada' | 'salida'
+  p_cantidad: number
+  p_motivo: string
+}
+
+export type RegistrarAjusteStockResult = {
+  ajuste_id: string
+  stock_resultante: number
+}
+
 export type UsuarioRol = 'admin' | 'cajero'
 
 export type UsuariosAutorizadosRow = {
@@ -121,13 +145,19 @@ export type Database = {
         Update: Partial<IngresosMercaderiaInsert>
         Relationships: []
       }
+      ajustes_stock: {
+        Row: AjustesStockRow
+        Insert: AjustesStockInsert
+        Update: Partial<AjustesStockInsert>
+        Relationships: []
+      }
       usuarios_autorizados: {
         Row: UsuariosAutorizadosRow
         Insert: UsuariosAutorizadosInsert
         Update: Partial<UsuariosAutorizadosInsert>
         Relationships: []
       }
-    }
+      }
     Views: {
       [_ in never]: never
     }
@@ -139,6 +169,10 @@ export type Database = {
       registrar_ingreso: {
         Args: RegistrarIngresoArgs
         Returns: RegistrarIngresoResult
+      }
+      registrar_ajuste_stock: {
+        Args: RegistrarAjusteStockArgs
+        Returns: RegistrarAjusteStockResult
       }
     }
     Enums: {

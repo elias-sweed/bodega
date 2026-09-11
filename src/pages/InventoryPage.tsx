@@ -1,9 +1,13 @@
 import { useCallback, useState } from 'react'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
-import { StockAdjustModal } from '../components/inventory/StockAdjustModal'
+import {
+  StockAdjustModal,
+  type StockAdjustPayload,
+} from '../components/inventory/StockAdjustModal'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
+import { registrarAjusteStock } from '../services/products'
 import type { ProductosInsert, ProductosRow } from '../types/database.types'
 
 export function InventoryPage() {
@@ -42,11 +46,28 @@ export function InventoryPage() {
     showNotice('success', `Producto "${product.nombre}" actualizado`)
   }
 
-  const handleAdjustStock = async (newStock: number): Promise<void> => {
+  const handleAdjustStock = async (payload: StockAdjustPayload): Promise<void> => {
     if (!adjustingProduct) return
-    await updateProduct(adjustingProduct.id, { stock_actual: newStock })
-    setAdjustingProduct(null)
-    showNotice('success', `Stock de "${adjustingProduct.nombre}" ajustado a ${newStock}`)
+    const delta = payload.stock - adjustingProduct.stock_actual
+    try {
+      const result = await registrarAjusteStock({
+        p_producto_id: adjustingProduct.id,
+        p_tipo: delta > 0 ? 'entrada' : 'salida',
+        p_cantidad: Math.abs(delta),
+        p_motivo: payload.motivo,
+      })
+      setAdjustingProduct(null)
+      showNotice(
+        'success',
+        `Stock de "${adjustingProduct.nombre}" ajustado a ${result.stock_resultante} (${payload.motivo})`,
+      )
+      refresh(true)
+    } catch (cause) {
+      showNotice(
+        'error',
+        cause instanceof Error ? cause.message : 'No se pudo ajustar el stock',
+      )
+    }
   }
 
   const handleDelete = async (product: ProductosRow): Promise<void> => {

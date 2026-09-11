@@ -1,20 +1,47 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { PackageMinus, PackagePlus } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
+
+export interface StockAdjustPayload {
+  stock: number
+  motivo: string
+}
 
 interface StockAdjustModalProps {
   product: ProductosRow
   onClose: () => void
-  onSubmit: (newStock: number) => Promise<void>
+  onSubmit: (payload: StockAdjustPayload) => Promise<void>
 }
+
+const MOTIVOS_ENTRADA = ['Corrección de inventario'] as const
+const MOTIVOS_SALIDA = ['Producto vencido', 'Producto dañado/roto', 'Consumo interno'] as const
 
 const inputClass =
   'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+const labelClass = 'mt-4 mb-1 block text-sm font-semibold text-slate-600'
 
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
   const [stock, setStock] = useState(String(product.stock_actual))
+  const [motivo, setMotivo] = useState<string>(MOTIVOS_ENTRADA[0])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const parsed = Number(stock)
+  const hasValue = stock !== '' && Number.isFinite(parsed)
+  const delta = hasValue ? parsed - product.stock_actual : 0
+  const movementType = delta > 0 ? 'entrada' : delta < 0 ? 'salida' : null
+
+  const handleStockChange = (value: string): void => {
+    setStock(value)
+    const numeric = value === '' ? Number.NaN : Number(value)
+    const nextDelta = Number.isFinite(numeric) ? numeric - product.stock_actual : 0
+    if (nextDelta > 0) {
+      setMotivo(MOTIVOS_ENTRADA[0])
+    } else if (nextDelta < 0) {
+      setMotivo(MOTIVOS_SALIDA[0])
+    }
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
@@ -24,9 +51,17 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
       setError('Ingresa una cantidad válida (0 o más).')
       return
     }
+    if (delta === 0) {
+      setError('El nuevo stock es igual al actual. Cambia la cantidad para ajustar.')
+      return
+    }
+    if (!motivo.trim()) {
+      setError('Selecciona un motivo para el ajuste.')
+      return
+    }
     setSubmitting(true)
     try {
-      await onSubmit(value)
+      await onSubmit({ stock: value, motivo: motivo.trim() })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo ajustar el stock')
       setSubmitting(false)
@@ -65,7 +100,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
           actual: {product.stock_actual}
         </p>
 
-        <label htmlFor="nuevo-stock" className="mt-4 mb-1 block text-sm font-semibold text-slate-600">
+        <label htmlFor="nuevo-stock" className={labelClass}>
           Nuevo stock
         </label>
         <input
@@ -76,10 +111,59 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
           step="1"
           inputMode="numeric"
           value={stock}
-          onChange={(e) => setStock(e.target.value)}
+          onChange={(e) => handleStockChange(e.target.value)}
           className={inputClass}
           placeholder="0"
         />
+
+        {movementType && (
+          <label htmlFor="motivo-ajuste" className={labelClass}>
+            Motivo del ajuste
+          </label>
+        )}
+        {movementType === 'entrada' && (
+          <select
+            id="motivo-ajuste"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            className="h-12 w-full cursor-pointer rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors focus:border-sky-400"
+          >
+            {MOTIVOS_ENTRADA.map((name) => (
+              <option key={name} value={name}>
+                {name} (+)
+              </option>
+            ))}
+          </select>
+        )}
+        {movementType === 'salida' && (
+          <select
+            id="motivo-ajuste"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            className="h-12 w-full cursor-pointer rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors focus:border-sky-400"
+          >
+            {MOTIVOS_SALIDA.map((name) => (
+              <option key={name} value={name}>
+                {name} (−)
+              </option>
+            ))}
+          </select>
+        )}
+
+        {delta !== 0 && (
+          <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+            {movementType === 'entrada' ? (
+              <PackagePlus size={14} className="shrink-0 text-emerald-600" aria-hidden="true" />
+            ) : (
+              <PackageMinus size={14} className="shrink-0 text-rose-600" aria-hidden="true" />
+            )}
+            Se registrará un movimiento de{' '}
+            <span className={delta > 0 ? 'font-bold text-emerald-600' : 'font-bold text-rose-600'}>
+              {movementType} {Math.abs(delta)}
+            </span>{' '}
+            · {motivo} · queda en {parsed}.
+          </p>
+        )}
 
         {error && (
           <p

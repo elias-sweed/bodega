@@ -50,6 +50,9 @@ export function CostoStep({
           className={inputClass}
           placeholder="0.00"
         />
+        <p className="mt-2 text-xs text-slate-400">
+          Con este importe se recalcula el costo unitario del producto en Inventario.
+        </p>
       </div>
     </div>
   )

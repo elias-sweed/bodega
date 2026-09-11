@@ -25,6 +25,8 @@ export function Cart({
     0,
   )
 
+  const canCharge = items.length > 0 && !charging
+
   return (
     <aside className="flex h-full min-h-0 flex-col rounded-3xl bg-white shadow-sm">
       <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
@@ -58,21 +60,23 @@ export function Cart({
         </ul>
       )}
 
-      <footer className="space-y-4 border-t border-slate-100 p-5">
+      <footer className="shrink-0 space-y-3 border-t border-slate-100 p-5 pt-4">
         <div className="flex items-end justify-between gap-4">
           <span className="text-lg font-semibold text-slate-600">Total</span>
           <span className="text-4xl font-black tracking-tight text-slate-900">
             {formatMoney(total)}
           </span>
         </div>
+
         <button
           type="button"
-          disabled={items.length === 0 || charging}
+          disabled={!canCharge}
           onClick={onCharge}
           className="h-16 w-full rounded-2xl bg-emerald-500 text-2xl font-black tracking-widest text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
           {charging ? 'PROCESANDO…' : 'COBRAR'}
         </button>
+
         <button
           type="button"
           disabled={items.length === 0 || charging}

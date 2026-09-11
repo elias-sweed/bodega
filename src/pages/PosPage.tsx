@@ -83,6 +83,7 @@ export function PosPage() {
   }, [products, query, isSearching, selectedCategory])
 
   const addProduct = (product: ProductosRow): void => {
+    if (product.stock_actual <= 0) return
     setCart((current) => {
       const existing = current.find((item) => item.product.id === product.id)
       if (existing) {
