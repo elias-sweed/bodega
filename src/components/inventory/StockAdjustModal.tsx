@@ -6,6 +6,7 @@ import type { ProductosRow } from '../../types/database.types'
 export interface StockAdjustPayload {
   stock: number
   motivo: string
+  esRegalo: boolean
 }
 
 interface StockAdjustModalProps {
@@ -24,6 +25,7 @@ const labelClass = 'mt-4 mb-1 block text-sm font-semibold text-slate-600'
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
   const [stock, setStock] = useState(String(product.stock_actual))
   const [motivo, setMotivo] = useState<string>(MOTIVOS_ENTRADA[0])
+  const [esRegalo, setEsRegalo] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,7 +63,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
     }
     setSubmitting(true)
     try {
-      await onSubmit({ stock: value, motivo: motivo.trim() })
+      await onSubmit({ stock: value, motivo: motivo.trim(), esRegalo })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo ajustar el stock')
       setSubmitting(false)
@@ -163,6 +165,29 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             </span>{' '}
             · {motivo} · queda en {parsed}.
           </p>
+        )}
+
+        {movementType === 'entrada' && (
+          <label
+            htmlFor="es-regalo"
+            className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 transition-colors has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50"
+          >
+            <input
+              id="es-regalo"
+              type="checkbox"
+              checked={esRegalo}
+              onChange={(e) => setEsRegalo(e.target.checked)}
+              className="mt-1 h-5 w-5 shrink-0 accent-emerald-500"
+            />
+            <span>
+              <span className="block text-sm font-bold text-slate-800">
+                Regalo / Bonificación
+              </span>
+              <span className="block text-xs text-slate-500">
+                El ingreso se registra sin costo para el negocio (0.00).
+              </span>
+            </span>
+          </label>
         )}
 
         {error && (

@@ -14,16 +14,25 @@ create table public.ingresos_mercaderia (
   proveedor_id uuid references public.proveedores(id) on delete set null,
   nombre_proveedor text,
   producto_id uuid references public.productos(id) on delete set null,
-  cantidad_ingresada integer not null check (cantidad_ingresada > 0),
-  costo_total numeric(12, 2) not null default 0 check (costo_total >= 0),
+  -- cantidad_ingresada puede ser negativa (salidas por merma/ajuste manual).
+  cantidad_ingresada integer not null check (cantidad_ingresada <> 0),
+  -- costo_total puede ser negativo cuando representa una salida (merma).
+  costo_total numeric(12, 2) not null default 0,
   comprobante text,
   fecha timestamptz not null default now()
 );
 
--- Compatibilidad: agrega las columnas comprobante/compra_id/nombre_proveedor si la tabla ya existía.
+-- Compatibilidad: agrega las columnas comprobante/compra_id/nombre_proveedor/motivo si la tabla ya existía.
 alter table public.ingresos_mercaderia add column if not exists comprobante text;
 alter table public.ingresos_mercaderia add column if not exists compra_id uuid;
 alter table public.ingresos_mercaderia add column if not exists nombre_proveedor text;
+alter table public.ingresos_mercaderia add column if not exists motivo text;
+
+-- Compatibilidad: relaja las restricciones previas (solo cantidades positivas y
+-- costos >= 0) para permitir salidas de stock con cantidad/costo negativos.
+alter table public.ingresos_mercaderia drop constraint if exists ingresos_mercaderia_cantidad_ingresada_check;
+alter table public.ingresos_mercaderia drop constraint if exists ingresos_mercaderia_costo_total_check;
+alter table public.ingresos_mercaderia add constraint ingresos_mercaderia_cantidad_ingresada_check check (cantidad_ingresada <> 0);
 
 create index ingresos_mercaderia_proveedor_id_idx on public.ingresos_mercaderia (proveedor_id);
 create index ingresos_mercaderia_producto_id_idx on public.ingresos_mercaderia (producto_id);
@@ -102,6 +111,87 @@ end;
 $$;
 
 grant execute on function public.registrar_ingreso(uuid, uuid, text, uuid, integer, numeric, text) to anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Función transaccional: ajuste manual de stock con trazabilidad total.
+-- Calcula el delta (nuevo - actual), actualiza el stock y deja la huella en
+-- ingresos_mercaderia con el signo correspondiente:
+--   delta > 0  -> 'Ajuste Manual de Inventario' (sobrante) con costo
+--                 delta * costo, o 0 si es regalo/bonificación (p_es_regalo).
+--   delta < 0  -> 'Ajuste Manual de Inventario' (merma): cantidad y costo
+--                 negativos, costo = delta * costo.
+-- La dirección (sobrante/merma) queda codificada en el signo de la cantidad
+-- y del costo; el concepto visible es siempre el mismo y el motivo se guarda
+-- en la columna motivo para mostrarlo en el Historial.
+-- Atómica: si algo falla, se revierte por completo.
+-- ---------------------------------------------------------------------------
+drop function if exists public.registrar_ajuste_manual(uuid, integer, boolean);
+drop function if exists public.registrar_ajuste_manual(uuid, integer, boolean, text);
+
+create or replace function public.registrar_ajuste_manual(
+  p_producto_id uuid,
+  p_nuevo_stock integer,
+  p_es_regalo boolean,
+  p_motivo text default 'Corrección de inventario'
+)
+returns json
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_stock_actual integer;
+  v_costo numeric(12, 2);
+  v_delta integer;
+  v_ingreso_id uuid;
+  v_nombre_proveedor text;
+  v_costo_total numeric(12, 2);
+  v_motivo text;
+begin
+  if p_nuevo_stock < 0 then
+    raise exception 'El stock no puede ser negativo';
+  end if;
+
+  v_motivo := coalesce(nullif(trim(p_motivo), ''), 'Corrección de inventario');
+
+  select stock_actual, costo
+    into v_stock_actual, v_costo
+  from public.productos
+  where id = p_producto_id
+  for update;
+
+  if not found then
+    raise exception 'El producto % no existe', p_producto_id;
+  end if;
+
+  v_delta := p_nuevo_stock - v_stock_actual;
+
+  if v_delta = 0 then
+    return json_build_object('ingreso_id', null, 'stock_actual', v_stock_actual, 'delta', 0);
+  end if;
+
+  update public.productos
+  set stock_actual = p_nuevo_stock
+  where id = p_producto_id
+  returning stock_actual into v_stock_actual;
+
+  v_nombre_proveedor := 'Ajuste Manual de Inventario';
+
+  if v_delta > 0 then
+    v_costo_total := case when coalesce(p_es_regalo, false) then 0 else round(v_costo * v_delta, 2) end;
+  else
+    v_costo_total := round(v_costo * v_delta, 2);
+  end if;
+
+  insert into public.ingresos_mercaderia (compra_id, proveedor_id, nombre_proveedor, producto_id, cantidad_ingresada, costo_total, comprobante, motivo)
+  values (null, null, v_nombre_proveedor, p_producto_id, v_delta, v_costo_total, null, v_motivo)
+  returning id into v_ingreso_id;
+
+  return json_build_object('ingreso_id', v_ingreso_id, 'stock_actual', v_stock_actual, 'delta', v_delta);
+end;
+$$;
+
+grant execute on function public.registrar_ajuste_manual(uuid, integer, boolean, text) to anon, authenticated;
 
 -- Limpieza de datos de prueba. Ejecutar una vez en el SQL Editor:
 --   delete from public.proveedores

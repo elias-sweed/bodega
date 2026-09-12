@@ -65,12 +65,12 @@ export function InventoryPage() {
       costo: product.costo,
       stock_minimo: product.stock_minimo,
     }
-    if (stockDelta !== 0) {
-      updates.stock_actual = nuevoStock
-    }
 
     try {
       await updateProduct(editingProduct.id, updates)
+      if (stockDelta !== 0) {
+        await ajustarStock(editingProduct.id, nuevoStock)
+      }
       setEditingProduct(null)
       showNotice('success', `Producto "${product.nombre}" actualizado`)
       refresh(true)
@@ -90,7 +90,12 @@ export function InventoryPage() {
       return
     }
     try {
-      const updated = await ajustarStock(adjustingProduct.id, nuevoStock)
+      const updated = await ajustarStock(
+        adjustingProduct.id,
+        nuevoStock,
+        payload.esRegalo,
+        payload.motivo,
+      )
       setAdjustingProduct(null)
       showNotice(
         'success',

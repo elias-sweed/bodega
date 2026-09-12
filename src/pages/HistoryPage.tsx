@@ -1,15 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
+import { AjustesTab } from '../components/history/AjustesTab'
 import { ComprasTab } from '../components/history/ComprasTab'
 import type { HistoryFilter } from '../components/history/types'
 import { VentasTab } from '../components/history/VentasTab'
 
-type TabId = 'ventas' | 'compras'
+type TabId = 'ventas' | 'compras' | 'ajustes'
 type RangeId = 'todo' | 'hoy' | 'semana' | 'mes'
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'ventas', label: 'Ventas' },
   { id: 'compras', label: 'Compras' },
+  { id: 'ajustes', label: 'Ajustes' },
 ]
 
 const RANGES: { id: RangeId; label: string }[] = [
@@ -64,7 +66,7 @@ export function HistoryPage() {
       <header>
         <h1 className="text-2xl font-black text-slate-900">Historial</h1>
         <p className="text-sm text-slate-500">
-          Consulta las ventas y compras registradas en tu bodega.
+          Consulta las ventas, compras y ajustes registrados en tu bodega.
         </p>
       </header>
 
@@ -120,7 +122,9 @@ export function HistoryPage() {
               placeholder={
                 tab === 'ventas'
                   ? 'Buscar por Nº de ticket…'
-                  : 'Buscar por proveedor, comprobante…'
+                  : tab === 'compras'
+                    ? 'Buscar por proveedor, comprobante…'
+                    : 'Buscar por producto o motivo…'
               }
             />
           </div>
@@ -129,8 +133,10 @@ export function HistoryPage() {
 
       {tab === 'ventas' ? (
         <VentasTab filter={filter} />
-      ) : (
+      ) : tab === 'compras' ? (
         <ComprasTab filter={filter} />
+      ) : (
+        <AjustesTab filter={filter} />
       )}
     </div>
   )

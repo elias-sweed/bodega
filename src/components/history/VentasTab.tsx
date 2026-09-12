@@ -5,7 +5,7 @@ import {
   fetchProductNames,
 } from '../../services/history'
 import type { DetalleVentasRow, VentasRow } from '../../types/database.types'
-import { formatDateTime, formatMoney, shortId } from '../../utils/format'
+import { formatDateTime, formatMoney, shortId, fechaEnRango } from '../../utils/format'
 import { Toast } from '../common/Toast'
 import type { HistoryFilter } from './types'
 
@@ -26,11 +26,7 @@ const METODO_BADGES: Record<string, string> = {
 }
 
 function matchesFilter(venta: VentasRow, filter: HistoryFilter): boolean {
-  if (filter.from || filter.to) {
-    const fecha = new Date(venta.fecha).getTime()
-    if (filter.from && fecha < filter.from.getTime()) return false
-    if (filter.to && fecha > filter.to.getTime()) return false
-  }
+  if (!fechaEnRango(venta.fecha, filter.from, filter.to)) return false
   const query = filter.query.trim().toLowerCase()
   if (query === '') return true
   return (

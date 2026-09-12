@@ -65,6 +65,7 @@ export type IngresosMercaderiaRow = {
   cantidad_ingresada: number
   costo_total: number
   comprobante: string | null
+  motivo: string | null
   fecha: string
 }
 
@@ -83,6 +84,19 @@ export type RegistrarIngresoArgs = {
 export type RegistrarIngresoResult = {
   ingreso_id: string
   stock_actual: number
+}
+
+export type RegistrarAjusteManualArgs = {
+  p_producto_id: string
+  p_nuevo_stock: number
+  p_es_regalo: boolean
+  p_motivo: string
+}
+
+export type RegistrarAjusteManualResult = {
+  ingreso_id: string | null
+  stock_actual: number
+  delta: number
 }
 
 export type AjustesStockRow = {
@@ -176,6 +190,10 @@ export type Database = {
       registrar_ingreso: {
         Args: RegistrarIngresoArgs
         Returns: RegistrarIngresoResult
+      }
+      registrar_ajuste_manual: {
+        Args: RegistrarAjusteManualArgs
+        Returns: RegistrarAjusteManualResult
       }
       registrar_ajuste_stock: {
         Args: RegistrarAjusteStockArgs

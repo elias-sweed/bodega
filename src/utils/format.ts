@@ -9,6 +9,23 @@ export function toTitleCase(value: string): string {
     .join(' ')
 }
 
+/**
+ * Compara una fecha ISO con los límites del filtro usando instantes absolutos
+ * (epoch en milisegundos), para que nunca importe la zona horaria del servidor
+ * (NOW() viaja en UTC) ni la del navegador: solo importa el instante real.
+ */
+export function fechaEnRango(
+  iso: string,
+  from: Date | null,
+  to: Date | null,
+): boolean {
+  const instante = new Date(iso).getTime()
+  if (!Number.isFinite(instante)) return true
+  if (from && instante < from.getTime()) return false
+  if (to && instante > to.getTime()) return false
+  return true
+}
+
 export function formatMoney(value: number): string {
   return new Intl.NumberFormat('es-PE', {
     style: 'currency',

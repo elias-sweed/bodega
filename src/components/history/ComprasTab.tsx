@@ -1,76 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useIngresosHistory } from '../../hooks/useHistory'
-import type { IngresosMercaderiaRow } from '../../types/database.types'
 import { formatDateTime, formatMoney, shortId } from '../../utils/format'
+import {
+  esAjusteIngreso,
+  groupByCompra,
+  matchesCompraFilter,
+  proveedorDeCompra,
+} from './ingresos'
 import type { HistoryFilter } from './types'
-
-interface CompraGroup {
-  key: string
-  proveedorId: string | null
-  nombreProveedor: string | null
-  comprobante: string | null
-  fecha: string
-  total: number
-  items: IngresosMercaderiaRow[]
-}
-
-function proveedorDeCompra(
-  compra: CompraGroup,
-  proveedorMap: Record<string, string>,
-): string {
-  if (compra.nombreProveedor) return compra.nombreProveedor
-  const delCatalogo = proveedorMap[compra.proveedorId ?? '']
-  if (delCatalogo) return delCatalogo
-  return compra.proveedorId === null
-    ? 'Proveedor Varios / Sin Comprobante'
-    : 'Proveedor eliminado'
-}
-
-function groupByCompra(ingresos: IngresosMercaderiaRow[]): CompraGroup[] {
-  const groups = new Map<string, IngresosMercaderiaRow[]>()
-  for (const ingreso of ingresos) {
-    const key = ingreso.compra_id ?? ingreso.id
-    const current = groups.get(key)
-    if (current) {
-      current.push(ingreso)
-    } else {
-      groups.set(key, [ingreso])
-    }
-  }
-
-  const compras: CompraGroup[] = []
-  for (const [key, items] of groups) {
-    items.sort((a, b) => a.fecha.localeCompare(b.fecha))
-    compras.push({
-      key,
-      proveedorId: items.find((item) => item.proveedor_id)?.proveedor_id ?? null,
-      nombreProveedor:
-        items.find((item) => item.nombre_proveedor)?.nombre_proveedor ?? null,
-      comprobante: items.find((item) => item.comprobante)?.comprobante ?? null,
-      fecha: items[0].fecha,
-      total: items.reduce((sum, item) => sum + item.costo_total, 0),
-      items,
-    })
-  }
-
-  return compras.sort((a, b) => b.fecha.localeCompare(a.fecha))
-}
-
-function matchesFilter(compra: CompraGroup, proveedorMap: Record<string, string>, filter: HistoryFilter): boolean {
-  if (filter.from || filter.to) {
-    const fecha = new Date(compra.fecha).getTime()
-    if (filter.from && fecha < filter.from.getTime()) return false
-    if (filter.to && fecha > filter.to.getTime()) return false
-  }
-  const query = filter.query.trim().toLowerCase()
-  if (query === '') return true
-  const proveedor = proveedorDeCompra(compra, proveedorMap)
-  return (
-    proveedor.toLowerCase().includes(query) ||
-    (compra.comprobante ?? '').toLowerCase().includes(query) ||
-    shortId(compra.key).includes(query)
-  )
-}
 
 export function ComprasTab({ filter }: { filter: HistoryFilter }) {
   const { ingresos, proveedorMap, productoMap, loading, error, refresh } =
@@ -78,13 +15,21 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
 
   const compras = useMemo(
-    () => groupByCompra(ingresos),
+    () =>
+      groupByCompra(
+        ingresos.filter((ingreso) => !esAjusteIngreso(ingreso)),
+      ),
     [ingresos],
   )
 
   const filteredCompras = useMemo(
-    () => compras.filter((compra) => matchesFilter(compra, proveedorMap, filter)),
+    () => compras.filter((compra) => matchesCompraFilter(compra, proveedorMap, filter)),
     [compras, proveedorMap, filter],
+  )
+
+  const totalComprado = useMemo(
+    () => filteredCompras.reduce((sum, compra) => sum + compra.total, 0),
+    [filteredCompras],
   )
 
   if (loading) {
@@ -128,6 +73,13 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-900 px-5 py-4 text-white">
+        <span className="text-sm font-semibold text-slate-300">
+          Total mercadería comprada
+        </span>
+        <span className="text-lg font-black">{formatMoney(totalComprado)}</span>
+      </div>
+
       <ul className="flex flex-col gap-2">
         {filteredCompras.map((compra) => {
           const expanded = expandedKey === compra.key
@@ -143,11 +95,11 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
               >
                 <div className="flex min-w-0 flex-wrap items-center gap-3">
                   <span className="font-mono text-xs font-bold text-slate-400">
-                    {compra.comprobante ? `#${compra.comprobante}` : `#${shortId(compra.key)}`}
+                    {compra.comprobante
+                      ? `#${compra.comprobante}`
+                      : `#${shortId(compra.key)}`}
                   </span>
-                  <span className="text-slate-800">
-                    {formatDateTime(compra.fecha)}
-                  </span>
+                  <span className="text-slate-800">{formatDateTime(compra.fecha)}</span>
                   <span className="truncate text-sm font-semibold text-slate-600">
                     {proveedor}
                   </span>
@@ -174,7 +126,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
                       {compra.items.map((item) => {
                         const cantidad = item.cantidad_ingresada
                         const costoUnitario =
-                          cantidad > 0 ? item.costo_total / cantidad : 0
+                          cantidad !== 0 ? item.costo_total / cantidad : 0
                         return (
                           <li
                             key={item.id}
@@ -199,9 +151,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
                       })}
                     </ul>
                     <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm">
-                      <span className="text-slate-600">
-                        Total pagado
-                      </span>
+                      <span className="text-slate-600">Total pagado</span>
                       <span className="text-base font-black text-slate-900">
                         {formatMoney(compra.total)}
                       </span>

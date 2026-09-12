@@ -2,6 +2,7 @@ import type {
   ProductosInsert,
   ProductosRow,
   ProductosUpdate,
+  RegistrarAjusteManualResult,
 } from '../types/database.types'
 import { supabase } from './supabase'
 
@@ -111,13 +112,20 @@ export async function deleteProduct(id: string): Promise<void> {
   }
 }
 
-export async function ajustarStock(id: string, nuevoStock: number): Promise<ProductosRow> {
-  const { data, error } = await supabase
-    .from('productos')
-    .update({ stock_actual: Math.max(0, Math.round(nuevoStock)) })
-    .eq('id', id)
-    .select()
-    .maybeSingle()
+export async function ajustarStock(
+  id: string,
+  nuevoStock: number,
+  esRegalo = false,
+  motivo = 'Corrección de inventario',
+): Promise<RegistrarAjusteManualResult> {
+  const stock = Math.max(0, Math.round(nuevoStock))
+
+  const { data, error } = await supabase.rpc('registrar_ajuste_manual', {
+    p_producto_id: id,
+    p_nuevo_stock: stock,
+    p_es_regalo: esRegalo,
+    p_motivo: motivo,
+  })
 
   if (error) {
     throw new Error(error.message)
