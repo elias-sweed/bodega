@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Search, Tags, TrendingUp } from 'lucide-react'
+import { PackagePlus, Pencil, Search, Tags, Trash2, TrendingUp } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
-import { formatMoney } from '../../utils/format'
+import { formatMoney, toTitleCase } from '../../utils/format'
 import { StockBadge } from './StockBadge'
 
 interface ProductTableProps {
@@ -35,9 +35,13 @@ export function ProductTable({
 
   const categories = useMemo(
     () =>
-      Array.from(new Set(products.map((product) => product.categoria))).sort((a, b) =>
-        a.localeCompare(b, 'es'),
-      ),
+      Array.from(
+        new Set(
+          products
+            .map((product) => product.categoria.trim())
+            .filter((name) => name.length > 0),
+        ),
+      ).sort((a, b) => a.localeCompare(b, 'es')),
     [products],
   )
 
@@ -85,7 +89,7 @@ export function ProductTable({
             <option value="todas">Todas las categorías</option>
             {categories.map((name) => (
               <option key={name} value={name}>
-                {name}
+                {toTitleCase(name)}
               </option>
             ))}
           </select>
@@ -112,9 +116,7 @@ export function ProductTable({
                 <th className="px-5 py-3 text-right font-semibold">Stock actual</th>
                 <th className="px-5 py-3 text-right font-semibold">Stock mín.</th>
                 <th className="px-5 py-3 text-right font-semibold">Estado</th>
-                {isAdmin && (
-                  <th className="px-5 py-3 text-right font-semibold">Acciones</th>
-                )}
+                <th className="px-5 py-3 text-right font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -129,12 +131,16 @@ export function ProductTable({
                     }`}
                   >
                     <td className="px-5 py-3 font-semibold text-slate-800">
-                      {product.nombre}
+                      {toTitleCase(product.nombre)}
                     </td>
                     <td className="px-5 py-3 font-mono text-xs text-slate-500">
                       {product.codigo_barras ?? '—'}
                     </td>
-                    <td className="px-5 py-3 text-slate-600">{product.categoria}</td>
+                    <td className="px-5 py-3 text-slate-600">
+                      {product.categoria.trim() === ''
+                        ? '—'
+                        : toTitleCase(product.categoria)}
+                    </td>
                     <td className="px-5 py-3 text-right font-medium text-slate-800">
                       {formatMoney(product.precio_venta)}
                     </td>
@@ -176,33 +182,37 @@ export function ProductTable({
                         stockMinimo={product.stock_minimo}
                       />
                     </td>
-                    {isAdmin && (
-                      <td className="px-5 py-3 text-right">
+                    <td className="px-5 py-3 text-right">
                         <div className="flex justify-end gap-2">
                           <button
                             type="button"
                             onClick={() => onEdit?.(product)}
-                            className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200"
+                            title="Editar producto"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-sky-100 px-3 py-1.5 text-xs font-bold text-sky-700 transition-colors hover:bg-sky-200"
                           >
+                            <Pencil size={14} strokeWidth={2.5} aria-hidden="true" />
                             Editar
                           </button>
                           <button
                             type="button"
                             onClick={() => onAdjustStock?.(product)}
-                            className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-200"
+                            title="Ajustar stock"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-200"
                           >
+                            <PackagePlus size={14} strokeWidth={2.5} aria-hidden="true" />
                             Stock
                           </button>
                           <button
                             type="button"
                             onClick={() => onDelete?.(product)}
-                            className="rounded-lg bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-200"
+                            title="Eliminar producto"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 transition-colors hover:bg-rose-200"
                           >
+                            <Trash2 size={14} strokeWidth={2.5} aria-hidden="true" />
                             Eliminar
                           </button>
                         </div>
                       </td>
-                    )}
                   </tr>
                 )
               })}

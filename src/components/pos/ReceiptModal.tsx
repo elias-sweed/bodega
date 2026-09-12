@@ -7,6 +7,7 @@ export type LastSale = {
   total: number
   fecha: string
   items: CartItem[]
+  metodo_pago: string
 }
 
 function shortId(ventaId: string): string {
@@ -52,6 +53,7 @@ function printReceipt(sale: LastSale): void {
   </div>
   <hr />
   <p class="muted">Recibo: ${shortId(sale.venta_id)}</p>
+  <p class="muted">Pago: ${sale.metodo_pago}</p>
   <p class="muted">Fecha: ${time}</p>
   <hr />
   <table>
@@ -77,6 +79,7 @@ function whatsappMessage(sale: LastSale): string {
   const lines = [
     '\u{1F6D2} BODEGA POS',
     `Recibo: ${shortId(sale.venta_id)}`,
+    `Pago: ${sale.metodo_pago}`,
     `Fecha: ${new Date(sale.fecha).toLocaleString('es-PE')}`,
     '---------------------------',
     ...sale.items.map(
@@ -129,6 +132,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           </p>
           <p className="text-xs text-slate-500">
             Recibo <strong>{shortId(sale.venta_id)}</strong> ·{' '}
+            {sale.metodo_pago} ·{' '}
             {new Date(sale.fecha).toLocaleDateString('es-PE')}{' '}
             {new Date(sale.fecha).toLocaleTimeString('es-PE', {
               hour: '2-digit',

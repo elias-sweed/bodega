@@ -1,3 +1,14 @@
+export function toTitleCase(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) =>
+      /^\d+[a-z]+$/.test(word) ? word : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join(' ')
+}
+
 export function formatMoney(value: number): string {
   return new Intl.NumberFormat('es-PE', {
     style: 'currency',

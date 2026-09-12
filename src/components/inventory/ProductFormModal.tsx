@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Calculator, TrendingUp } from 'lucide-react'
+import { Calculator, Check, ChevronDown, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
-import { formatMoney } from '../../utils/format'
+import { formatMoney, toTitleCase } from '../../utils/format'
 
 interface ProductFormModalProps {
   onClose: () => void
@@ -32,11 +32,18 @@ const EMPTY_VALUES: FormValues = {
   stock_minimo: '',
 }
 
-const CATEGORIA_NUEVA = '__nueva__'
 const STOCK_MINIMO_DEFAULT = 5
+const DEFAULT_CATEGORIES = [
+  'General',
+  'Bebidas',
+  'Abarrotes',
+  'Snacks',
+  'Lácteos',
+  'Limpieza',
+]
 
 const ERROR_BARCODE_DUPLICADO =
-  '⚠️ Este código de barras ya está registrado en otro producto. Por favor, usa uno diferente o déjalo en blanco.'
+  '⚠️ Este código de barras ya está asignado a otro producto.'
 
 function isDuplicateBarcodeError(cause: unknown): boolean {
   const message = (
@@ -49,17 +56,6 @@ function isDuplicateBarcodeError(cause: unknown): boolean {
   )
 }
 
-function toTitleCase(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .map((word) =>
-      /^\d+[a-z]+$/.test(word) ? word : word.charAt(0).toUpperCase() + word.slice(1),
-    )
-    .join(' ')
-}
-
 export function ProductFormModal({
   onClose,
   onSubmit,
@@ -67,25 +63,21 @@ export function ProductFormModal({
   isFromPurchase = false,
 }: ProductFormModalProps) {
   const [values, setValues] = useState<FormValues>(() => {
-    if (isFromPurchase) {
+    if (isFromPurchase || !initial) {
       return { ...EMPTY_VALUES, stock_actual: '0' }
     }
-    return initial
-      ? {
-          nombre: initial.nombre,
-          categoria: initial.categoria,
-          codigo_barras: initial.codigo_barras ?? '',
-          precio_venta: String(initial.precio_venta),
-          costo: String(initial.costo),
-          stock_actual: String(initial.stock_actual),
-          stock_minimo: String(initial.stock_minimo),
-        }
-      : EMPTY_VALUES
+    return {
+      nombre: initial.nombre,
+      categoria: initial.categoria,
+      codigo_barras: initial.codigo_barras ?? '',
+      precio_venta: String(initial.precio_venta),
+      costo: String(initial.costo),
+      stock_actual: String(initial.stock_actual),
+      stock_minimo: String(initial.stock_minimo),
+    }
   })
   const [categories, setCategories] = useState<string[]>([])
-  const [categoriesLoading, setCategoriesLoading] = useState(true)
-  const [showNewCategory, setShowNewCategory] = useState(false)
-  const [newCategory, setNewCategory] = useState('')
+  const [categoriaOpen, setCategoriaOpen] = useState(false)
   const [paqueteOpen, setPaqueteOpen] = useState(false)
   const [paquetePrecio, setPaquetePrecio] = useState('')
   const [paqueteUnidades, setPaqueteUnidades] = useState('')
@@ -97,11 +89,9 @@ export function ProductFormModal({
     const loadCategories = async (): Promise<void> => {
       try {
         const list = await fetchProductCategories()
-        if (active) setCategories(list)
+        if (active) setCategories(list.length > 0 ? list : DEFAULT_CATEGORIES)
       } catch {
-        if (active) setCategories([])
-      } finally {
-        if (active) setCategoriesLoading(false)
+        if (active) setCategories(DEFAULT_CATEGORIES)
       }
     }
     void loadCategories()
@@ -119,18 +109,18 @@ export function ProductFormModal({
     return Array.from(unique).sort((a, b) => a.localeCompare(b, 'es'))
   }, [categories, initial])
 
+  const filteredCategories = useMemo(() => {
+    const query = values.categoria.trim().toLowerCase()
+    if (query === '') return allCategories
+    return allCategories.filter((name) => name.toLowerCase().includes(query))
+  }, [allCategories, values.categoria])
+
+  const isExistingCategory = allCategories.some(
+    (name) => name.toLowerCase() === values.categoria.trim().toLowerCase(),
+  )
+
   const setField = (field: keyof FormValues, value: string): void => {
     setValues((current) => ({ ...current, [field]: value }))
-  }
-
-  const handleCategoriaChange = (value: string): void => {
-    if (value === CATEGORIA_NUEVA) {
-      setShowNewCategory(true)
-      setField('categoria', '')
-      return
-    }
-    setShowNewCategory(false)
-    setField('categoria', value)
   }
 
   const precioNum = values.precio_venta === '' ? Number.NaN : Number(values.precio_venta)
@@ -166,6 +156,8 @@ export function ProductFormModal({
     }
   }
 
+  const showStockField = !isFromPurchase && Boolean(initial)
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     setError(null)
@@ -175,13 +167,9 @@ export function ProductFormModal({
       return
     }
 
-    const categoria = showNewCategory ? newCategory.trim() : values.categoria.trim()
+    const categoria = toTitleCase(values.categoria.trim())
     if (!categoria) {
-      setError(
-        showNewCategory
-          ? 'Por favor, escribe el nombre de la nueva categoría.'
-          : 'Por favor, selecciona una categoría.',
-      )
+      setError('Por favor, escribe el nombre de la categoría.')
       return
     }
 
@@ -197,6 +185,9 @@ export function ProductFormModal({
         setError('Por favor, ingresa el costo del producto (o usa "Calcular por paquete/caja").')
         return
       }
+    }
+
+    if (showStockField) {
       const stockActual = Number(values.stock_actual)
       if (values.stock_actual.trim() === '' || !Number.isFinite(stockActual) || stockActual < 0) {
         setError('Por favor, ingresa un stock actual válido.')
@@ -215,17 +206,20 @@ export function ProductFormModal({
         return
       }
 
+      const stockMinimoInput = Number(values.stock_minimo)
+      const stockMinimo =
+        values.stock_minimo.trim() === '' || stockMinimoInput === 0
+          ? STOCK_MINIMO_DEFAULT
+          : stockMinimoInput
+
       const product: ProductosInsert = {
         nombre,
         categoria,
         codigo_barras: values.codigo_barras.trim() || null,
         precio_venta: precioVenta,
         costo: isFromPurchase ? 0 : Number(values.costo),
-        stock_actual: isFromPurchase ? 0 : Number(values.stock_actual),
-        stock_minimo:
-          values.stock_minimo.trim() === ''
-            ? STOCK_MINIMO_DEFAULT
-            : Number(values.stock_minimo),
+        stock_actual: isFromPurchase || !showStockField ? 0 : Number(values.stock_actual),
+        stock_minimo: stockMinimo,
       }
       await onSubmit(product)
     } catch (cause) {
@@ -243,8 +237,6 @@ export function ProductFormModal({
 
   const inputClass =
     'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-  const selectClass =
-    'h-12 w-full cursor-pointer rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors focus:border-sky-400'
   const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
 
   return (
@@ -252,7 +244,7 @@ export function ProductFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="nuevo-producto-title"
-      className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -272,9 +264,10 @@ export function ProductFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="h-10 w-10 rounded-xl bg-slate-100 text-xl font-bold text-slate-500 transition-colors hover:bg-slate-200"
+            aria-label="Cerrar"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
           >
-            ✕
+            <X size={18} strokeWidth={2.5} />
           </button>
         </div>
 
@@ -286,8 +279,8 @@ export function ProductFormModal({
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
             <label htmlFor="nombre" className={labelClass}>
               Nombre
             </label>
@@ -302,26 +295,73 @@ export function ProductFormModal({
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="categoria" className={labelClass}>
               Categoría
             </label>
-            <select
+            <input
               id="categoria"
-              value={showNewCategory ? CATEGORIA_NUEVA : values.categoria}
-              onChange={(e) => handleCategoriaChange(e.target.value)}
-              className={selectClass}
+              autoComplete="off"
+              value={values.categoria}
+              onChange={(e) => {
+                setField('categoria', e.target.value)
+                setCategoriaOpen(true)
+              }}
+              onFocus={() => setCategoriaOpen(true)}
+              onBlur={() => setCategoriaOpen(false)}
+              className={`${inputClass} pr-10`}
+              placeholder="Elige una categoría o escribe una nueva…"
+            />
+            <button
+              type="button"
+              aria-label="Mostrar categorías existentes"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setCategoriaOpen((open) => !open)}
+              className="absolute right-2 top-8 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
             >
-              <option value="" disabled>
-                {categoriesLoading ? 'Cargando categorías…' : 'Selecciona una categoría…'}
-              </option>
-              {allCategories.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-              <option value={CATEGORIA_NUEVA}>+ Nueva categoría…</option>
-            </select>
+              <ChevronDown
+                size={18}
+                strokeWidth={2.5}
+                className={`transition-transform ${categoriaOpen ? 'rotate-180' : ''}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            {categoriaOpen && (
+              <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border-2 border-slate-200 bg-white py-1 shadow-lg">
+                {filteredCategories.length === 0 ? (
+                  <li className="px-3 py-2 text-sm text-slate-400">
+                    Sin coincidencias. El texto se guardará como nueva categoría.
+                  </li>
+                ) : (
+                  filteredCategories.map((name) => (
+                    <li key={name}>
+                      <button
+                        type="button"
+                        onMouseDown={(event) => {
+                          event.preventDefault()
+                          setField('categoria', name)
+                          setCategoriaOpen(false)
+                        }}
+                        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50"
+                      >
+                        <span>{toTitleCase(name)}</span>
+                        {isExistingCategory &&
+                          name.toLowerCase() === values.categoria.trim().toLowerCase() && (
+                            <Check size={14} className="shrink-0 text-sky-600" aria-hidden="true" />
+                          )}
+                      </button>
+                    </li>
+                  ))
+                )}
+              </ul>
+            )}
+
+            <p className="mt-2 text-xs font-semibold text-slate-400">
+              {isExistingCategory
+                ? `Categoría existente: ${toTitleCase(values.categoria.trim())}`
+                : `Se creará la nueva categoría: ${toTitleCase(values.categoria.trim()) || '…'}`}
+            </p>
           </div>
 
           <div>
@@ -335,23 +375,10 @@ export function ProductFormModal({
               className={inputClass}
               placeholder="Opcional"
             />
+            <p className="mt-2 text-xs font-semibold text-slate-400">
+              Si lo dejas en blanco, el producto se guardará sin código de barras.
+            </p>
           </div>
-
-          {showNewCategory && (
-            <div className="sm:col-span-2">
-              <label htmlFor="nueva-categoria" className={labelClass}>
-                Nombre de la nueva categoría
-              </label>
-              <input
-                id="nueva-categoria"
-                autoFocus
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className={inputClass}
-                placeholder="Ej. Fiambres"
-              />
-            </div>
-          )}
 
           <div>
             <label htmlFor="precio_venta" className={labelClass}>
@@ -368,7 +395,7 @@ export function ProductFormModal({
               className={inputClass}
               placeholder="0.00"
             />
-            {!isFromPurchase && margin !== null && (
+            {margin !== null && (
               <p
                 className={`mt-2 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold ${marginClass}`}
               >
@@ -378,108 +405,128 @@ export function ProductFormModal({
             )}
           </div>
 
-          {!isFromPurchase && (
-            <div>
-              <div className="flex items-baseline justify-between gap-2">
-                <label htmlFor="costo" className="mb-1 block text-sm font-semibold text-slate-600">
-                  Costo
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setPaqueteOpen((open) => !open)}
-                  aria-expanded={paqueteOpen}
-                  aria-controls="calculadora-paquete"
-                  className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition-colors ${
-                    paqueteOpen
-                      ? 'bg-sky-100 text-sky-700'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  <Calculator size={14} strokeWidth={2.5} aria-hidden="true" />
-                  Calcular por paquete/caja
-                </button>
-              </div>
-              <input
-                id="costo"
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                value={values.costo}
-                onChange={(e) => setField('costo', e.target.value)}
-                className={inputClass}
-                placeholder="0.00"
-              />
-              <p className="mt-2 text-xs font-semibold text-slate-400">
-                Ingresa el costo por <strong>UNIDAD individual</strong>.
-              </p>
-
-              {paqueteOpen && (
-                <div
-                  id="calculadora-paquete"
-                  className="mt-4 space-y-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
-                >
-                  <div>
-                    <label htmlFor="paquete-precio" className="mb-1 block text-xs font-semibold text-slate-600">
-                      Precio del paquete/caja (S/)
-                    </label>
-                    <input
-                      id="paquete-precio"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputMode="decimal"
-                      value={paquetePrecio}
-                      onChange={(e) => {
-                        setPaquetePrecio(e.target.value)
-                        applyCalculatedCost(e.target.value, paqueteUnidades)
-                      }}
-                      className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-semibold text-slate-600">
-                      Unidades por paquete
-                    </label>
-                    <input
-                      id="paquete-unidades"
-                      type="number"
-                      min="1"
-                      step="1"
-                      inputMode="numeric"
-                      value={paqueteUnidades}
-                      onChange={(e) => {
-                        setPaqueteUnidades(e.target.value)
-                        applyCalculatedCost(paquetePrecio, e.target.value)
-                      }}
-                      className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                      placeholder="Ej. 24"
-                    />
-                  </div>
-                  {costoCalc !== null && (
-                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-100 px-3 py-2">
-                      <p className="text-sm font-bold text-emerald-700">
-                        ≈ {formatMoney(costoCalc)} por unidad
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setField('costo', costoCalc.toFixed(2))
-                          setPaqueteOpen(false)
-                        }}
-                        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 active:scale-[0.98]"
-                      >
-                        [ Insertar costo ]
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="costo" className={labelClass}>
+                Costo Unitario
+              </label>
+              <button
+                type="button"
+                onClick={() => setPaqueteOpen((open) => !open)}
+                aria-expanded={paqueteOpen}
+                aria-controls="calculadora-paquete"
+                className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition-colors ${
+                  paqueteOpen
+                    ? 'bg-sky-100 text-sky-700'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                <Calculator size={14} strokeWidth={2.5} aria-hidden="true" />
+                Calcular por paquete/caja
+              </button>
             </div>
-          )}
+            <input
+              id="costo"
+              type="number"
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={values.costo}
+              onChange={(e) => setField('costo', e.target.value)}
+              className={inputClass}
+              placeholder="0.00"
+            />
+            <p className="mt-2 text-xs font-semibold text-slate-400">
+              Ingresa el costo por <strong>UNIDAD individual</strong>.
+            </p>
 
-          {!isFromPurchase && (
+            {paqueteOpen && (
+              <div
+                id="calculadora-paquete"
+                className="mt-4 space-y-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
+              >
+                <div>
+                  <label htmlFor="paquete-precio" className="mb-1 block text-xs font-semibold text-slate-600">
+                    Precio del paquete/caja (S/)
+                  </label>
+                  <input
+                    id="paquete-precio"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    value={paquetePrecio}
+                    onChange={(e) => {
+                      setPaquetePrecio(e.target.value)
+                      applyCalculatedCost(e.target.value, paqueteUnidades)
+                    }}
+                    className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-semibold text-slate-600">
+                    Unidades por paquete
+                  </label>
+                  <input
+                    id="paquete-unidades"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={paqueteUnidades}
+                    onChange={(e) => {
+                      setPaqueteUnidades(e.target.value)
+                      applyCalculatedCost(paquetePrecio, e.target.value)
+                    }}
+                    className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                    placeholder="Ej. 24"
+                  />
+                </div>
+                {costoCalc !== null && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-100 px-3 py-2">
+                    <p className="text-sm font-bold text-emerald-700">
+                      ≈ {formatMoney(costoCalc)} por unidad
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setField('costo', costoCalc.toFixed(2))
+                        setPaqueteOpen(false)
+                      }}
+                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 active:scale-[0.98]"
+                    >
+                      [ Insertar costo ]
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="stock_minimo" className={labelClass}>
+              Stock mínimo
+            </label>
+            <input
+              id="stock_minimo"
+              type="number"
+              min="0"
+              step="1"
+              inputMode="numeric"
+              value={values.stock_minimo}
+              onChange={(e) => setField('stock_minimo', e.target.value)}
+              className={inputClass}
+              placeholder="En blanco = 5"
+            />
+            {(values.stock_minimo.trim() === '' || Number(values.stock_minimo) === 0) && (
+              <p className="mt-2 text-xs font-semibold text-slate-400">
+                Se usará <strong>5</strong> por defecto.
+              </p>
+            )}
+          </div>
+
+          {showStockField && (
             <div>
               <label htmlFor="stock_actual" className={labelClass}>
                 Stock actual
@@ -497,28 +544,6 @@ export function ProductFormModal({
               />
             </div>
           )}
-
-          <div>
-            <label htmlFor="stock_minimo" className={labelClass}>
-              Stock mínimo
-            </label>
-            <input
-              id="stock_minimo"
-              type="number"
-              min="0"
-              step="1"
-              inputMode="numeric"
-              value={values.stock_minimo}
-              onChange={(e) => setField('stock_minimo', e.target.value)}
-              className={inputClass}
-              placeholder="En blanco = 5"
-            />
-            {values.stock_minimo.trim() === '' && (
-              <p className="mt-2 text-xs font-semibold text-slate-400">
-                Se usará <strong>5</strong> por defecto.
-              </p>
-            )}
-          </div>
         </div>
 
         {error && (
@@ -530,20 +555,20 @@ export function ProductFormModal({
           </p>
         )}
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="h-14 flex-1 rounded-2xl bg-slate-100 text-lg font-bold text-slate-600 transition-colors hover:bg-slate-200"
+            className="h-12 rounded-2xl border-2 border-slate-200 px-6 text-base font-bold text-slate-600 transition-colors hover:bg-slate-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="h-14 flex-[2] rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="h-12 rounded-2xl bg-sky-500 px-8 text-base font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
           >
-            {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Guardar producto'}
+            {submitting ? 'Guardando…' : 'Guardar producto'}
           </button>
         </div>
       </form>

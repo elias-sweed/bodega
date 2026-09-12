@@ -5,8 +5,12 @@
 create table public.ventas (
   id uuid primary key default gen_random_uuid(),
   fecha timestamptz not null default now(),
-  total numeric(12, 2) not null default 0 check (total >= 0)
+  total numeric(12, 2) not null default 0 check (total >= 0),
+  metodo_pago text not null default 'Efectivo' check (metodo_pago in ('Efectivo', 'Yape', 'Plin'))
 );
+
+-- Compatibilidad: agrega el método de pago si la tabla ya existía.
+alter table public.ventas add column if not exists metodo_pago text not null default 'Efectivo';
 
 -- Líneas de la venta
 create table public.detalle_ventas (
@@ -35,7 +39,9 @@ create policy "detalle_ventas_select" on public.detalle_ventas
 -- Función transaccional: inserta la venta, el detalle y descuenta stock.
 -- Toda la operación es atómica: si algo falla, se revierte por completo.
 -- ---------------------------------------------------------------------------
-create or replace function public.registrar_venta(p_articulos json)
+drop function if exists public.registrar_venta(json);
+
+create or replace function public.registrar_venta(p_articulos json, p_metodo_pago text default 'Efectivo')
 returns json
 language plpgsql
 security definer
@@ -51,8 +57,8 @@ declare
   v_total numeric(12, 2) := 0;
   v_stock_actual integer;
 begin
-  insert into public.ventas (total)
-  values (0)
+  insert into public.ventas (total, metodo_pago)
+  values (0, coalesce(p_metodo_pago, 'Efectivo'))
   returning id into v_venta_id;
 
   for v_item in select * from json_array_elements(p_articulos)
@@ -93,7 +99,7 @@ begin
 end;
 $$;
 
-grant execute on function public.registrar_venta(json) to anon, authenticated;
+grant execute on function public.registrar_venta(json, text) to anon, authenticated;
 
 -- Datos de ejemplo (opcional)
 -- insert into public.productos (nombre, categoria, precio_venta, costo, stock_actual, stock_minimo, codigo_barras) values

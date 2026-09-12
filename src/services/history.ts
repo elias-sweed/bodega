@@ -36,14 +36,14 @@ export async function fetchDetalleVenta(
 
 export async function fetchProductNames(
   ids: string[],
-): Promise<Pick<ProductosRow, 'id' | 'nombre'>[]> {
+): Promise<Pick<ProductosRow, 'id' | 'nombre' | 'costo'>[]> {
   if (ids.length === 0) {
     return []
   }
 
   const { data, error } = await supabase
     .from('productos')
-    .select('id, nombre')
+    .select('id, nombre, costo')
     .in('id', ids)
 
   if (error) {

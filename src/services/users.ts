@@ -25,10 +25,14 @@ export async function addUsuarioAutorizado(
     .from('usuarios_autorizados')
     .insert({ email: email.trim().toLowerCase(), rol })
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  if (!data) {
+    throw new Error('No se pudo agregar al usuario autorizado. Verifica tus permisos e inténtalo de nuevo.')
   }
 
   return data
@@ -43,10 +47,14 @@ export async function updateUsuarioRol(
     .update({ rol })
     .eq('email', email)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  if (!data) {
+    throw new Error('No se encontró al usuario autorizado o no tienes permisos para editarlo.')
   }
 
   return data

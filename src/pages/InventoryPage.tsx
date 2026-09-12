@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
 import {
@@ -7,8 +8,15 @@ import {
 } from '../components/inventory/StockAdjustModal'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
-import { registrarAjusteStock } from '../services/products'
-import type { ProductosInsert, ProductosRow } from '../types/database.types'
+import { ajustarStock } from '../services/products'
+import type { ProductosInsert, ProductosRow, ProductosUpdate } from '../types/database.types'
+
+function isForeignKeyError(cause: unknown): boolean {
+  const message = (
+    cause instanceof Error ? cause.message : String(cause)
+  ).toLowerCase()
+  return message.includes('violates foreign key constraint')
+}
 
 export function InventoryPage() {
   const { rol } = useAuth()
@@ -18,6 +26,7 @@ export function InventoryPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
+  const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   const lowStockCount = products.filter(
@@ -41,25 +50,51 @@ export function InventoryPage() {
 
   const handleEditProduct = async (product: ProductosInsert): Promise<void> => {
     if (!editingProduct) return
-    await updateProduct(editingProduct.id, product)
-    setEditingProduct(null)
-    showNotice('success', `Producto "${product.nombre}" actualizado`)
+    const stockDelta = product.stock_actual - editingProduct.stock_actual
+    const nuevoStock = editingProduct.stock_actual + stockDelta
+    if (nuevoStock < 0) {
+      showNotice('error', 'El stock no puede ser negativo.')
+      return
+    }
+
+    const updates: ProductosUpdate = {
+      nombre: product.nombre,
+      categoria: product.categoria,
+      codigo_barras: product.codigo_barras,
+      precio_venta: product.precio_venta,
+      costo: product.costo,
+      stock_minimo: product.stock_minimo,
+    }
+    if (stockDelta !== 0) {
+      updates.stock_actual = nuevoStock
+    }
+
+    try {
+      await updateProduct(editingProduct.id, updates)
+      setEditingProduct(null)
+      showNotice('success', `Producto "${product.nombre}" actualizado`)
+      refresh(true)
+    } catch (cause) {
+      showNotice(
+        'error',
+        cause instanceof Error ? cause.message : 'No se pudo actualizar el producto',
+      )
+    }
   }
 
   const handleAdjustStock = async (payload: StockAdjustPayload): Promise<void> => {
     if (!adjustingProduct) return
-    const delta = payload.stock - adjustingProduct.stock_actual
+    const nuevoStock = payload.stock
+    if (nuevoStock < 0) {
+      showNotice('error', 'El stock no puede ser negativo.')
+      return
+    }
     try {
-      const result = await registrarAjusteStock({
-        p_producto_id: adjustingProduct.id,
-        p_tipo: delta > 0 ? 'entrada' : 'salida',
-        p_cantidad: Math.abs(delta),
-        p_motivo: payload.motivo,
-      })
+      const updated = await ajustarStock(adjustingProduct.id, nuevoStock)
       setAdjustingProduct(null)
       showNotice(
         'success',
-        `Stock de "${adjustingProduct.nombre}" ajustado a ${result.stock_resultante} (${payload.motivo})`,
+        `Stock de "${adjustingProduct.nombre}" ajustado a ${updated.stock_actual} (${payload.motivo})`,
       )
       refresh(true)
     } catch (cause) {
@@ -70,18 +105,24 @@ export function InventoryPage() {
     }
   }
 
-  const handleDelete = async (product: ProductosRow): Promise<void> => {
-    const ok = window.confirm(
-      `¿Seguro que quieres eliminar "${product.nombre}"?\nSe quitará del catálogo y de fututas ventas.`,
-    )
-    if (!ok) return
+  const handleDeleteRequest = (product: ProductosRow): void => {
+    setDeletingProduct(product)
+  }
+
+  const confirmDelete = async (): Promise<void> => {
+    if (!deletingProduct) return
+    const product = deletingProduct
     try {
       await deleteProduct(product.id)
+      setDeletingProduct(null)
       showNotice('success', `Producto "${product.nombre}" eliminado`)
     } catch (cause) {
-      showNotice(
-        'error',
-        cause instanceof Error ? cause.message : 'No se pudo eliminar el producto',
+      throw new Error(
+        isForeignKeyError(cause)
+          ? 'No se puede eliminar porque tiene historial de ventas asociadas'
+          : cause instanceof Error
+            ? cause.message
+            : 'No se pudo eliminar el producto',
       )
     }
   }
@@ -136,7 +177,7 @@ export function InventoryPage() {
           isAdmin={isAdmin}
           onEdit={(product) => setEditingProduct(product)}
           onAdjustStock={(product) => setAdjustingProduct(product)}
-          onDelete={(product) => void handleDelete(product)}
+          onDelete={(product) => handleDeleteRequest(product)}
         />
       )}
 
@@ -160,6 +201,14 @@ export function InventoryPage() {
           product={adjustingProduct}
           onClose={() => setAdjustingProduct(null)}
           onSubmit={handleAdjustStock}
+        />
+      )}
+
+      {deletingProduct && (
+        <ConfirmDeleteModal
+          product={deletingProduct}
+          onCancel={() => setDeletingProduct(null)}
+          onConfirm={confirmDelete}
         />
       )}
 

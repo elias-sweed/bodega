@@ -26,6 +26,7 @@ export type VentasRow = {
   id: string
   fecha: string
   total: number
+  metodo_pago: string
 }
 
 export type VentasInsert = Omit<VentasRow, 'id' | 'fecha'>
@@ -57,20 +58,26 @@ export type ProveedoresInsert = Omit<ProveedoresRow, 'id' | 'created_at'>
 
 export type IngresosMercaderiaRow = {
   id: string
+  compra_id: string | null
   proveedor_id: string | null
+  nombre_proveedor: string | null
   producto_id: string | null
   cantidad_ingresada: number
   costo_total: number
+  comprobante: string | null
   fecha: string
 }
 
 export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
 
 export type RegistrarIngresoArgs = {
+  p_compra_id: string
   p_proveedor_id: string | null
+  p_nombre_proveedor: string | null
   p_producto_id: string
   p_cantidad: number
   p_costo_total: number
+  p_comprobante: string | null
 }
 
 export type RegistrarIngresoResult = {
@@ -163,7 +170,7 @@ export type Database = {
     }
     Functions: {
       registrar_venta: {
-        Args: { p_articulos: Json[] }
+        Args: { p_articulos: Json[]; p_metodo_pago: string }
         Returns: RegistrarVentaResult
       }
       registrar_ingreso: {

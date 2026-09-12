@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Toast } from '../components/common/Toast'
 import { Cart } from '../components/pos/Cart'
+import { METODO_PAGO_DEFAULT, type MetodoPago } from '../components/pos/metodosPago'
 import { CategoryGrid } from '../components/pos/CategoryGrid'
 import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
@@ -49,6 +50,7 @@ export function PosPage() {
     readSuspendedSale(),
   )
   const [lastSale, setLastSale] = useState<LastSale | null>(null)
+  const [metodoPago, setMetodoPago] = useState<MetodoPago>(METODO_PAGO_DEFAULT)
   const noticeTimer = useRef<number | undefined>(undefined)
 
   const showNotice = useCallback((type: Notice['type'], message: string): void => {
@@ -143,12 +145,13 @@ export function PosPage() {
     if (cart.length === 0 || charging) return
     setCharging(true)
     try {
-      const result = await registrarVenta(cart)
+      const result = await registrarVenta(cart, metodoPago)
       setLastSale({
         venta_id: result.venta_id,
         total: result.total,
         fecha: new Date().toISOString(),
         items: cart,
+        metodo_pago: metodoPago,
       })
       setCart([])
       setSearch('')
@@ -300,6 +303,8 @@ export function PosPage() {
           <Cart
             items={cart}
             charging={charging}
+            metodoPago={metodoPago}
+            onMetodoPagoChange={setMetodoPago}
             onIncrease={increaseQuantity}
             onDecrease={decreaseQuantity}
             onCharge={() => void handleCharge()}

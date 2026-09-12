@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 
 export async function registrarVenta(
   items: CartItem[],
+  metodoPago: string,
 ): Promise<RegistrarVentaResult> {
   const articulos = items.map((item) => ({
     producto_id: item.product.id,
@@ -13,6 +14,7 @@ export async function registrarVenta(
 
   const { data, error } = await supabase.rpc('registrar_venta', {
     p_articulos: articulos,
+    p_metodo_pago: metodoPago,
   })
 
   if (error) {

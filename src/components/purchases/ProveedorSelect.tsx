@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { ProveedoresRow } from '../../types/database.types'
+import { toTitleCase } from '../../utils/format'
 
-export const PROVEEDOR_OTROS = '__otros__'
+export const PROVEEDOR_GENERICO = '__varios__'
 
 interface ProveedorSelectProps {
   proveedores: ProveedoresRow[]
@@ -28,11 +29,16 @@ export function ProveedorSelect({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
-    if (saving || !nombre.trim()) return
+    const nombreLimpio = toTitleCase(nombre.trim())
+    const empresaLimpia = toTitleCase(empresa.trim())
+    if (saving || !nombreLimpio) return
     setSaving(true)
     setError(null)
     try {
-      const created = await onAddProveedor(nombre.trim(), empresa.trim() || undefined)
+      const created = await onAddProveedor(
+        nombreLimpio,
+        empresaLimpia || undefined,
+      )
       onChange(created.id)
       setShowForm(false)
       setNombre('')
@@ -49,7 +55,7 @@ export function ProveedorSelect({
   return (
     <div>
       <label htmlFor="proveedor" className="mb-2 block text-lg font-bold text-slate-800">
-        1. ¿Quién trajo la mercadería?
+        ¿Quién trajo la mercadería?
       </label>
       <select
         id="proveedor"
@@ -57,11 +63,8 @@ export function ProveedorSelect({
         onChange={(e) => onChange(e.target.value)}
         className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 shadow-sm outline-none transition-colors focus:border-sky-400"
       >
-        <option value="" disabled>
-          Elige un proveedor…
-        </option>
-        <option value={PROVEEDOR_OTROS}>
-          Otro / no lo recuerdo
+        <option value={PROVEEDOR_GENERICO}>
+          Proveedor Varios / Sin Comprobante
         </option>
         {proveedores.map((proveedor) => (
           <option key={proveedor.id} value={proveedor.id}>
@@ -93,6 +96,7 @@ export function ProveedorSelect({
               required
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
+              onBlur={() => setNombre((value) => toTitleCase(value.trim()))}
               className={inputClass}
               placeholder="Ej. José Ramírez"
             />
@@ -105,6 +109,7 @@ export function ProveedorSelect({
               id="nuevo-proveedor-empresa"
               value={empresa}
               onChange={(e) => setEmpresa(e.target.value)}
+              onBlur={() => setEmpresa((value) => toTitleCase(value.trim()))}
               className={inputClass}
               placeholder="Ej. Distribuidora El Sol"
             />

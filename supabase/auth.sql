@@ -80,11 +80,11 @@ create policy "ingresos_mercaderia_select_authenticated"
 --     * no puede leer ninguna tabla (el único rol sin políticas es anon),
 --     * no puede invocar registrar_venta ni registrar_ingreso.
 -- ---------------------------------------------------------------------------
-revoke execute on function public.registrar_venta(json) from anon;
-revoke execute on function public.registrar_ingreso(uuid, uuid, integer, numeric) from anon;
+revoke execute on function public.registrar_venta(json, text) from anon;
+revoke execute on function public.registrar_ingreso(uuid, uuid, text, uuid, integer, numeric, text) from anon;
 
-grant execute on function public.registrar_venta(json) to authenticated;
-grant execute on function public.registrar_ingreso(uuid, uuid, integer, numeric) to authenticated;
+grant execute on function public.registrar_venta(json, text) to authenticated;
+grant execute on function public.registrar_ingreso(uuid, uuid, text, uuid, integer, numeric, text) to authenticated;
 
 -- VALIDACIÓN RÁPIDA (lectura): antes de aplicar, la app debía crear estos datos.
 -- Nota: al habilitar estas políticas, el rol anon deja de poder leer/insertar.

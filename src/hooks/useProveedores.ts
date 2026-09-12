@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { createProveedor, fetchProveedores } from '../services/purchases'
+import {
+  createProveedor,
+  deleteProveedor as deleteProveedorService,
+  fetchProveedores,
+} from '../services/purchases'
 import type { ProveedoresInsert, ProveedoresRow } from '../types/database.types'
 
 function sortByName(proveedores: ProveedoresRow[]): ProveedoresRow[] {
@@ -58,5 +62,10 @@ export function useProveedores() {
     [],
   )
 
-  return { proveedores, loading, error, refresh, addProveedor }
+  const removeProveedor = useCallback(async (id: string): Promise<void> => {
+    await deleteProveedorService(id)
+    setProveedores((current) => current.filter((proveedor) => proveedor.id !== id))
+  }, [])
+
+  return { proveedores, loading, error, refresh, addProveedor, removeProveedor }
 }

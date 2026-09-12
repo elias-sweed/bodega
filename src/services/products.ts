@@ -2,8 +2,6 @@ import type {
   ProductosInsert,
   ProductosRow,
   ProductosUpdate,
-  RegistrarAjusteStockArgs,
-  RegistrarAjusteStockResult,
 } from '../types/database.types'
 import { supabase } from './supabase'
 
@@ -68,10 +66,14 @@ export async function insertProduct(
     .from('productos')
     .insert(product)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  if (!data) {
+    throw new Error('No se pudo crear el producto. Verifica tus permisos e inténtalo de nuevo.')
   }
 
   return data
@@ -86,10 +88,16 @@ export async function updateProduct(
     .update(updates)
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  if (!data) {
+    throw new Error(
+      'No se pudo actualizar el producto: no existe o tu cuenta no tiene permisos de edición (solo admin).',
+    )
   }
 
   return data
@@ -103,13 +111,22 @@ export async function deleteProduct(id: string): Promise<void> {
   }
 }
 
-export async function registrarAjusteStock(
-  input: RegistrarAjusteStockArgs,
-): Promise<RegistrarAjusteStockResult> {
-  const { data, error } = await supabase.rpc('registrar_ajuste_stock', input)
+export async function ajustarStock(id: string, nuevoStock: number): Promise<ProductosRow> {
+  const { data, error } = await supabase
+    .from('productos')
+    .update({ stock_actual: Math.max(0, Math.round(nuevoStock)) })
+    .eq('id', id)
+    .select()
+    .maybeSingle()
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  if (!data) {
+    throw new Error(
+      'No se pudo ajustar el stock: el producto no existe o tu cuenta no tiene permisos (solo admin).',
+    )
   }
 
   return data

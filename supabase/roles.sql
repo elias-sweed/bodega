@@ -25,7 +25,8 @@ create policy "usuarios_autorizados_select_own"
 
 -- Admin principal.
 insert into public.usuarios_autorizados (email, rol) values
-  ('pedro@gmail.com', 'admin')
+  ('pedro@gmail.com', 'admin'),
+  ('slunal@ucvvirtual.edu.pe', 'admin')
 on conflict (email) do nothing;
 
 -- Agrega aquí los otros dos correos (descomentar y reemplazar):
