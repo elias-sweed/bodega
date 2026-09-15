@@ -101,6 +101,8 @@ export function UsersPage() {
     )
   }
 
+  const adminCount = usuarios.filter((usuario) => usuario.rol === 'admin').length
+
   const handleAdd = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     if (saving) return
@@ -131,6 +133,10 @@ export function UsersPage() {
 
   const handleChangeRol = async (usuario: UsuariosAutorizadosRow): Promise<void> => {
     const nuevo: UsuarioRol = usuario.rol === 'admin' ? 'cajero' : 'admin'
+    if (usuario.rol === 'admin' && adminCount <= 1) {
+      showNotice('error', 'No puedes cambiar el rol del último administrador.')
+      return
+    }
     try {
       await updateUsuarioRol(usuario.email, nuevo)
       await loadList()
@@ -149,6 +155,10 @@ export function UsersPage() {
   const handleRemove = async (usuario: UsuariosAutorizadosRow): Promise<void> => {
     if (usuario.email === user?.email) {
       showNotice('error', 'No puedes quitarte el acceso a ti mismo.')
+      return
+    }
+    if (usuario.rol === 'admin' && adminCount <= 1) {
+      showNotice('error', 'No puedes quitar el acceso del último administrador.')
       return
     }
     const ok = window.confirm(
@@ -188,6 +198,13 @@ export function UsersPage() {
           es visible para administradores.
         </p>
       </header>
+
+      <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+        <strong>Importante:</strong> para darle acceso a alguien, primero crea su
+        cuenta en Supabase (Authentication) con el correo que quieras usar y, si
+        quieres, verifícala con el email de invitación. Aquí solo se define quién
+        puede entrar y con qué rol.
+      </div>
 
       <section className="rounded-3xl bg-white p-5 shadow-sm">
         <form onSubmit={handleAdd} className="flex flex-col gap-4">

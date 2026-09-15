@@ -1,7 +1,7 @@
 import type {
+  ActualizarProductoResult,
   ProductosInsert,
   ProductosRow,
-  ProductosUpdate,
   RegistrarAjusteManualResult,
 } from '../types/database.types'
 import { supabase } from './supabase'
@@ -80,27 +80,26 @@ export async function insertProduct(
   return data
 }
 
-export async function updateProduct(
-  id: string,
-  updates: ProductosUpdate,
-): Promise<ProductosRow> {
-  const { data, error } = await supabase
-    .from('productos')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .maybeSingle()
-
+export async function actualizarProducto(input: {
+  p_id: string
+  p_nombre: string
+  p_categoria: string
+  p_codigo_barras: string | null
+  p_precio_venta: number
+  p_costo: number
+  p_stock_minimo: number
+  p_nuevo_stock: number | null
+  p_motivo: string
+}): Promise<ActualizarProductoResult> {
+  const { data, error } = await supabase.rpc('actualizar_producto', input)
   if (error) {
     throw new Error(error.message)
   }
-
   if (!data) {
     throw new Error(
-      'No se pudo actualizar el producto: no existe o tu cuenta no tiene permisos de edición (solo admin).',
+      'No se pudo guardar el producto: el producto no existe o tu cuenta no tiene permisos (solo administrador).',
     )
   }
-
   return data
 }
 

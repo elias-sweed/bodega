@@ -142,7 +142,8 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
           const costoTotal = detail
             ? detail.items.reduce((total, item) => {
                 const producto = detail.products[item.producto_id ?? '']
-                return total + (producto ? producto.costo * item.cantidad : 0)
+                const costoUnitario = item.costo_unitario ?? producto?.costo ?? 0
+                return total + costoUnitario * item.cantidad
               }, 0)
             : 0
           const ganancia = venta.total - costoTotal

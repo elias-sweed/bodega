@@ -1,9 +1,10 @@
 import type {
   ProveedoresInsert,
   ProveedoresRow,
-  RegistrarIngresoArgs,
-  RegistrarIngresoResult,
+  RegistrarCompraItem,
+  RegistrarCompraResult,
 } from '../types/database.types'
+import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
 
 export async function fetchProveedores(): Promise<ProveedoresRow[]> {
@@ -47,29 +48,29 @@ export async function deleteProveedor(id: string): Promise<void> {
   }
 }
 
-export async function registrarIngresoMercaderia(input: {
-  compraId: string
+/**
+ * Registra una compra atómica: todos los productos se suman al inventario en
+ * UNA transacción y el compra_id lo genera el servidor.
+ */
+export async function registrarCompra(input: {
   proveedorId: string | null
   nombreProveedor: string | null
   comprobante: string | null
-  productoId: string
-  cantidad: number
-  costoTotal: number
-}): Promise<RegistrarIngresoResult> {
-  const rpcArgs: RegistrarIngresoArgs = {
-    p_compra_id: input.compraId,
+  items: RegistrarCompraItem[]
+}): Promise<RegistrarCompraResult> {
+  const { data, error } = await supabase.rpc('registrar_compra', {
     p_proveedor_id: input.proveedorId,
     p_nombre_proveedor: input.nombreProveedor,
-    p_producto_id: input.productoId,
-    p_cantidad: input.cantidad,
-    p_costo_total: input.costoTotal,
-    p_comprobante: input.comprobante?.trim() || null,
-  }
-
-  const { data, error } = await supabase.rpc('registrar_ingreso', rpcArgs)
+    p_comprobante: input.comprobante,
+    p_items: input.items,
+  })
 
   if (error) {
-    throw new Error(error.message)
+    throw new Error(getFriendlyError(error, 'No se pudo registrar la compra. Inténtalo de nuevo.'))
+  }
+
+  if (!data) {
+    throw new Error('No se pudo registrar la compra. Verifica tus permisos e inténtalo de nuevo.')
   }
 
   return data

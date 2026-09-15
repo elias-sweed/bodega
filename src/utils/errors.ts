@@ -1,3 +1,58 @@
+/**
+ * Traduce errores de la base de datos / RPC (mensajes crudos de Postgres o
+ * Supabase) a mensajes legibles. Usarlo en TODOS los toasts, no solo en auth.
+ */
+export function getFriendlyError(
+  error: unknown,
+  fallback = 'Ocurrió un error inesperado. Inténtalo de nuevo.',
+): string {
+  const message = error instanceof Error ? error.message : String(error ?? '')
+  const lower = message.toLowerCase()
+
+  if (!message || message === 'Error: ' ) return fallback
+
+  if (message.includes('No autorizado')) {
+    return 'Tu cuenta no tiene permisos para esta acción. Contacta al administrador.'
+  }
+  if (message.includes('Solo el administrador puede editar productos')) {
+    return 'Solo el administrador puede editar productos. Contacta al administrador.'
+  }
+
+  const stockMatch = message.match(/disponible[:]?\s*(\d+)/i)
+  if (lower.includes('stock insuficiente')) {
+    return stockMatch
+      ? `No hay stock suficiente para vender esa cantidad (disponible: ${stockMatch[1]}). Ajusta la cantidad o registra una compra.`
+      : 'No hay stock suficiente para vender esa cantidad. Ajusta la cantidad o registra una compra.'
+  }
+  if (lower.includes('la cantidad debe ser mayor a 0')) {
+    return 'La cantidad debe ser mayor a 0.'
+  }
+  if (lower.includes('stock no puede ser negativo')) {
+    return 'El stock no puede ser negativo.'
+  }
+  if (lower.includes('violates foreign key constraint')) {
+    return 'No se puede eliminar: hay ventas o compras que lo usan. Mejor ocúltalo o ajústale el stock.'
+  }
+  if (
+    lower.includes('duplicate key') ||
+    lower.includes('23505') ||
+    lower.includes('unique constraint')
+  ) {
+    return 'Ya existe un registro con ese mismo dato (nombre o código de barras).'
+  }
+  if (lower.includes('permission denied') || lower.includes('permission denied for table')) {
+    return 'No tienes permisos para esta acción. Contacta al administrador.'
+  }
+  if (lower.includes('el producto no existe')) {
+    return 'El producto ya no existe. Refresca la lista e inténtalo de nuevo.'
+  }
+  if (lower.includes('no route matches') || lower.includes('pgrst')) {
+    return fallback
+  }
+
+  return fallback
+}
+
 export function getAuthErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : ''
 

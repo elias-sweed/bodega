@@ -1,28 +1,19 @@
-import type { ProductosRow } from '../types/database.types'
+import type {
+  DashboardResumenResult,
+  ProductosRow,
+} from '../types/database.types'
+import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
 
-function todayRange(): { start: string; end: string } {
-  const start = new Date()
-  start.setHours(0, 0, 0, 0)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 1)
-  return { start: start.toISOString(), end: end.toISOString() }
-}
-
-export async function fetchVentasDeHoy(): Promise<number> {
-  const { start, end } = todayRange()
-
-  const { data, error } = await supabase
-    .from('ventas')
-    .select('total')
-    .gte('fecha', start)
-    .lt('fecha', end)
-
+export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
+  const { data, error } = await supabase.rpc('dashboard_resumen')
   if (error) {
-    throw new Error(error.message)
+    throw new Error(getFriendlyError(error, 'No se pudo cargar el resumen del día.'))
   }
-
-  return (data ?? []).reduce((sum, row) => sum + row.total, 0)
+  if (!data) {
+    throw new Error('No se pudo cargar el resumen del día. Verifica tus permisos.')
+  }
+  return data
 }
 
 export async function fetchProductosBajoStock(): Promise<ProductosRow[]> {

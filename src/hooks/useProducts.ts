@@ -1,85 +1,94 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   deleteProduct as removeProduct,
-  fetchProducts,
   insertProduct,
-  updateProduct as editProduct,
+  actualizarProducto,
 } from '../services/products'
+import {
+  ensureProductsLoaded,
+  getProductsCache,
+  refreshProductsCache,
+  subscribeToProducts,
+} from '../services/productsCache'
 import type {
   ProductosInsert,
   ProductosRow,
-  ProductosUpdate,
 } from '../types/database.types'
 
-function sortByName(products: ProductosRow[]): ProductosRow[] {
-  return [...products].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-}
-
 export function useProducts() {
-  const [products, setProducts] = useState<ProductosRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [reloadToken, setReloadToken] = useState(0)
+  const [products, setProducts] = useState<ProductosRow[]>(() => {
+    const cached = getProductsCache()
+    return cached.products ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cached = getProductsCache()
+    return cached.products === null
+  })
+  const [error, setError] = useState<string | null>(() => {
+    const cached = getProductsCache()
+    return cached.error
+  })
 
   useEffect(() => {
-    let cancelled = false
-
-    void (async () => {
-      try {
-        const data = await fetchProducts()
-        if (!cancelled) {
-          setProducts(sortByName(data))
-        }
-      } catch (cause) {
-        if (!cancelled) {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : 'Error al cargar los productos',
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
+    const update = (): void => {
+      const cached = getProductsCache()
+      setProducts(cached.products ?? [])
+      setError(cached.error)
+      if (cached.products !== null) {
+        setLoading(false)
       }
-    })()
-
-    return () => {
-      cancelled = true
     }
-  }, [reloadToken])
+    const unsubscribe = subscribeToProducts(update)
+    ensureProductsLoaded()
+    return unsubscribe
+  }, [])
 
   const refresh = useCallback((silent = false): void => {
     if (!silent) {
       setLoading(true)
     }
-    setError(null)
-    setReloadToken((token) => token + 1)
+    refreshProductsCache(true)
   }, [])
 
   const addProduct = useCallback(
     async (input: ProductosInsert): Promise<ProductosRow> => {
       const created = await insertProduct(input)
-      setProducts((current) => sortByName([...current, created]))
+      refreshProductsCache(true)
       return created
     },
     [],
   )
 
   const updateProduct = useCallback(
-    async (id: string, updates: ProductosUpdate): Promise<void> => {
-      const updated = await editProduct(id, updates)
-      setProducts((current) =>
-        sortByName(current.map((product) => (product.id === id ? updated : product))),
-      )
+    async (id: string, input: {
+      nombre: string
+      categoria: string
+      codigo_barras: string | null
+      precio_venta: number
+      costo: number
+      stock_minimo: number
+      nuevoStock: number
+      motivo: string
+    }): Promise<void> => {
+      await actualizarProducto({
+        p_id: id,
+        p_nombre: input.nombre,
+        p_categoria: input.categoria,
+        p_codigo_barras: input.codigo_barras,
+        p_precio_venta: input.precio_venta,
+        p_costo: input.costo,
+        p_stock_minimo: input.stock_minimo,
+        p_nuevo_stock: input.nuevoStock,
+        p_motivo: input.motivo,
+      })
+      refreshProductsCache(true)
     },
     [],
   )
 
   const deleteProduct = useCallback(async (id: string): Promise<void> => {
     await removeProduct(id)
-    setProducts((current) => current.filter((product) => product.id !== id))
+    refreshProductsCache(true)
   }, [])
 
   return { products, loading, error, refresh, addProduct, updateProduct, deleteProduct }

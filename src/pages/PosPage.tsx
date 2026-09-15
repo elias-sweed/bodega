@@ -3,14 +3,16 @@ import { Toast } from '../components/common/Toast'
 import { Cart } from '../components/pos/Cart'
 import { METODO_PAGO_DEFAULT, type MetodoPago } from '../components/pos/metodosPago'
 import { CategoryGrid } from '../components/pos/CategoryGrid'
+import { PaymentModal } from '../components/pos/PaymentModal'
 import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { SearchBar } from '../components/pos/SearchBar'
 import { useProducts } from '../hooks/useProducts'
-import { registrarVenta } from '../services/sales'
+import { getStockShortIds, registrarVenta } from '../services/sales'
 import type { CartItem, Category } from '../types'
 import type { ProductosRow } from '../types/database.types'
 import { deriveCategories } from '../utils/categories'
+import { getFriendlyError } from '../utils/errors'
 import { formatMoney } from '../utils/format'
 
 type Notice = {
@@ -18,25 +20,84 @@ type Notice = {
   message: string
 }
 
-const SUSPENDED_SALE_KEY = 'pos_venta_suspendida'
+const SUSPENDED_SALE_KEY = 'pos_venta_suspendida_v2'
 
-function readSuspendedSale(): CartItem[] | null {
+interface SuspendedSale {
+  items: { id: string; cantidad: number }[]
+  metodoPago: MetodoPago | null
+  total: number
+  count: number
+}
+
+function isLegacySuspendedSale(value: unknown): value is CartItem[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        item !== null &&
+        typeof item === 'object' &&
+        'product' in item &&
+        'quantity' in item,
+    )
+  )
+}
+
+function readSuspendedSale(): SuspendedSale | null {
   try {
     const raw = window.localStorage.getItem(SUSPENDED_SALE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as CartItem[]
-    return Array.isArray(parsed) ? parsed : null
+    const parsed: unknown = JSON.parse(raw)
+
+    if (isLegacySuspendedSale(parsed)) {
+      return {
+        items: parsed.map((item) => ({
+          id: item.product.id,
+          cantidad: item.quantity,
+        })),
+        metodoPago: null,
+        total: parsed.reduce(
+          (sum, item) => sum + item.product.precio_venta * item.quantity,
+          0,
+        ),
+        count: parsed.reduce((sum, item) => sum + item.quantity, 0),
+      }
+    }
+
+    if (
+      parsed !== null &&
+      typeof parsed === 'object' &&
+      'items' in parsed &&
+      Array.isArray((parsed as SuspendedSale).items) &&
+      (parsed as SuspendedSale).items.every(
+        (item) =>
+          item !== null &&
+          typeof item === 'object' &&
+          typeof (item as { id?: unknown }).id === 'string' &&
+          typeof (item as { cantidad?: unknown }).cantidad === 'number',
+      )
+    ) {
+      return parsed as SuspendedSale
+    }
+
+    return null
   } catch {
     return null
   }
 }
 
-function writeSuspendedSale(items: CartItem[]): void {
-  window.localStorage.setItem(SUSPENDED_SALE_KEY, JSON.stringify(items))
+function writeSuspendedSale(sale: SuspendedSale): void {
+  window.localStorage.setItem(SUSPENDED_SALE_KEY, JSON.stringify(sale))
 }
 
 function clearSuspendedSale(): void {
   window.localStorage.removeItem(SUSPENDED_SALE_KEY)
+}
+
+function normalizeText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
 export function PosPage() {
@@ -45,8 +106,9 @@ export function PosPage() {
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [charging, setCharging] = useState(false)
+  const [paymentOpen, setPaymentOpen] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
-  const [suspendedSale, setSuspendedSale] = useState<CartItem[] | null>(() =>
+  const [suspendedSale, setSuspendedSale] = useState<SuspendedSale | null>(() =>
     readSuspendedSale(),
   )
   const [lastSale, setLastSale] = useState<LastSale | null>(null)
@@ -65,21 +127,22 @@ export function PosPage() {
 
   const categories = useMemo(() => deriveCategories(products), [products])
 
-  const query = search.trim().toLowerCase()
+  const query = normalizeText(search)
   const isSearching = query.length > 0
 
   const filteredProducts = useMemo((): ProductosRow[] => {
+    const disponibles = products.filter((product) => product.stock_actual > 0)
     const source = isSearching
-      ? products
+      ? disponibles
       : selectedCategory
-        ? products.filter(
+        ? disponibles.filter(
             (product) => product.categoria === selectedCategory.id,
           )
         : []
 
     return source.filter((product) => {
-      const name = product.nombre.toLowerCase()
-      const barcode = product.codigo_barras?.toLowerCase() ?? ''
+      const name = normalizeText(product.nombre)
+      const barcode = normalizeText(product.codigo_barras ?? '')
       return name.includes(query) || barcode.includes(query)
     })
   }, [products, query, isSearching, selectedCategory])
@@ -132,8 +195,8 @@ export function PosPage() {
     if (!query) return
     const match = products.find(
       (product) =>
-        product.codigo_barras?.toLowerCase() === query ||
-        product.nombre.toLowerCase() === query,
+        normalizeText(product.codigo_barras ?? '') === query ||
+        normalizeText(product.nombre) === query,
     )
     if (match) {
       addProduct(match)
@@ -141,7 +204,12 @@ export function PosPage() {
     }
   }
 
-  const handleCharge = async (): Promise<void> => {
+  const openPayment = (): void => {
+    if (cart.length === 0 || charging) return
+    setPaymentOpen(true)
+  }
+
+  const confirmPayment = async (): Promise<void> => {
     if (cart.length === 0 || charging) return
     setCharging(true)
     try {
@@ -154,16 +222,26 @@ export function PosPage() {
         metodo_pago: metodoPago,
       })
       setCart([])
+      setPaymentOpen(false)
       setSearch('')
       showNotice('success', `Venta por ${formatMoney(result.total)} registrada`)
       refresh(true)
     } catch (cause) {
-      showNotice(
-        'error',
-        cause instanceof Error
-          ? cause.message
-          : 'No se pudo registrar la venta',
-      )
+      const stockShortIds = getStockShortIds(cause)
+      if (stockShortIds.length > 0) {
+        const names = cart
+          .filter((item) => stockShortIds.includes(item.product.id))
+          .map((item) => item.product.nombre)
+        showNotice(
+          'error',
+          `No se completó la venta: sin stock suficiente para «${names.join(', ')}». Ajusta la cantidad en el carrito e inténtalo de nuevo (tu carrito se mantiene).`,
+        )
+      } else {
+        showNotice(
+          'error',
+          getFriendlyError(cause, 'No se pudo registrar la venta. Inténtalo de nuevo.'),
+        )
+      }
     } finally {
       setCharging(false)
     }
@@ -171,21 +249,71 @@ export function PosPage() {
 
   const handleSuspend = (): void => {
     if (cart.length === 0) return
-    const saved = [...cart]
-    writeSuspendedSale(saved)
-    setSuspendedSale(saved)
+    const sale: SuspendedSale = {
+      items: cart.map((item) => ({
+        id: item.product.id,
+        cantidad: item.quantity,
+      })),
+      metodoPago,
+      total: cart.reduce(
+        (sum, item) => sum + item.product.precio_venta * item.quantity,
+        0,
+      ),
+      count: cart.reduce((sum, item) => sum + item.quantity, 0),
+    }
+    writeSuspendedSale(sale)
+    setSuspendedSale(sale)
     setCart([])
-    showNotice('success', `Venta suspendida (${saved.length} ${
-      saved.length === 1 ? 'artículo' : 'artículos'
+    showNotice('success', `Venta suspendida (${sale.count} ${
+      sale.count === 1 ? 'artículo' : 'artículos'
     })`)
   }
 
   const handleResume = (): void => {
     if (!suspendedSale) return
-    setCart(suspendedSale)
+    const productsById = new Map(products.map((product) => [product.id, product]))
+    const cartRestored: CartItem[] = []
+    let skipped = 0
+    let clamped = 0
+    for (const { id, cantidad } of suspendedSale.items) {
+      const product = productsById.get(id)
+      if (!product) {
+        skipped += 1
+        continue
+      }
+      const quantity = Math.min(cantidad, product.stock_actual)
+      if (quantity <= 0) {
+        skipped += 1
+        continue
+      }
+      if (quantity < cantidad) {
+        clamped += 1
+      }
+      cartRestored.push({ product, quantity })
+    }
     clearSuspendedSale()
     setSuspendedSale(null)
-    showNotice('success', 'Venta retomada')
+
+    if (cartRestored.length === 0) {
+      showNotice(
+        'error',
+        'No se pudo retomar la venta: sus productos ya no existen o no tienen stock.',
+      )
+      return
+    }
+
+    if (suspendedSale.metodoPago) {
+      setMetodoPago(suspendedSale.metodoPago)
+    }
+    setCart(cartRestored)
+    showNotice(
+      'success',
+      clamped > 0 || skipped > 0
+        ? `Venta retomada con precios y stock actuales (${
+            clamped > 0 ? 'se ajustó alguna cantidad' : 'se omitieron productos sin stock'
+          })`
+        : 'Venta retomada con precios actuales',
+    )
   }
 
   const handleDiscardSuspended = (): void => {
@@ -259,14 +387,8 @@ export function PosPage() {
             <div>
               <p className="font-bold text-amber-800">Hay una venta suspendida</p>
               <p className="text-sm text-amber-700">
-                {suspendedSale.length} {suspendedSale.length === 1 ? 'artículo' : 'artículos'} ·{' '}
-                {formatMoney(
-                  suspendedSale.reduce(
-                    (sum, item) =>
-                      sum + item.product.precio_venta * item.quantity,
-                    0,
-                  ),
-                )}
+                {suspendedSale.count} {suspendedSale.count === 1 ? 'artículo' : 'artículos'} ·{' '}
+                {formatMoney(suspendedSale.total)}
               </p>
             </div>
           </div>
@@ -303,15 +425,31 @@ export function PosPage() {
           <Cart
             items={cart}
             charging={charging}
-            metodoPago={metodoPago}
-            onMetodoPagoChange={setMetodoPago}
             onIncrease={increaseQuantity}
             onDecrease={decreaseQuantity}
-            onCharge={() => void handleCharge()}
+            onCharge={openPayment}
             onSuspend={handleSuspend}
           />
         </div>
       </div>
+
+      {paymentOpen && (
+        <PaymentModal
+          total={cart.reduce(
+            (sum, item) => sum + item.product.precio_venta * item.quantity,
+            0,
+          )}
+          metodoPago={metodoPago}
+          charging={charging}
+          onMetodoPagoChange={setMetodoPago}
+          onConfirm={() => void confirmPayment()}
+          onCancel={() => {
+            if (!charging) {
+              setPaymentOpen(false)
+            }
+          }}
+        />
+      )}
 
       {lastSale && (
         <ReceiptModal sale={lastSale} onClose={() => setLastSale(null)} />

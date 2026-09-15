@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
@@ -9,14 +9,8 @@ import {
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
 import { ajustarStock } from '../services/products'
-import type { ProductosInsert, ProductosRow, ProductosUpdate } from '../types/database.types'
-
-function isForeignKeyError(cause: unknown): boolean {
-  const message = (
-    cause instanceof Error ? cause.message : String(cause)
-  ).toLowerCase()
-  return message.includes('violates foreign key constraint')
-}
+import type { ProductosInsert, ProductosRow } from '../types/database.types'
+import { getFriendlyError } from '../utils/errors'
 
 export function InventoryPage() {
   const { rol } = useAuth()
@@ -28,16 +22,29 @@ export function InventoryPage() {
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const noticeTimer = useRef<number | null>(null)
 
   const lowStockCount = products.filter(
     (product) => product.stock_actual <= product.stock_minimo,
   ).length
   const totalProducts = products.length
 
+  useEffect(
+    () => () => {
+      if (noticeTimer.current !== null) {
+        window.clearTimeout(noticeTimer.current)
+      }
+    },
+    [],
+  )
+
   const showNotice = useCallback(
     (type: 'success' | 'error', message: string): void => {
       setNotice({ type, message })
-      window.setTimeout(() => setNotice(null), 4000)
+      if (noticeTimer.current !== null) {
+        window.clearTimeout(noticeTimer.current)
+      }
+      noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
     },
     [],
   )
@@ -50,34 +57,24 @@ export function InventoryPage() {
 
   const handleEditProduct = async (product: ProductosInsert): Promise<void> => {
     if (!editingProduct) return
-    const stockDelta = product.stock_actual - editingProduct.stock_actual
-    const nuevoStock = editingProduct.stock_actual + stockDelta
-    if (nuevoStock < 0) {
-      showNotice('error', 'El stock no puede ser negativo.')
-      return
-    }
-
-    const updates: ProductosUpdate = {
-      nombre: product.nombre,
-      categoria: product.categoria,
-      codigo_barras: product.codigo_barras,
-      precio_venta: product.precio_venta,
-      costo: product.costo,
-      stock_minimo: product.stock_minimo,
-    }
 
     try {
-      await updateProduct(editingProduct.id, updates)
-      if (stockDelta !== 0) {
-        await ajustarStock(editingProduct.id, nuevoStock)
-      }
+      await updateProduct(editingProduct.id, {
+        nombre: product.nombre,
+        categoria: product.categoria,
+        codigo_barras: product.codigo_barras,
+        precio_venta: product.precio_venta,
+        costo: product.costo,
+        stock_minimo: product.stock_minimo,
+        nuevoStock: product.stock_actual,
+        motivo: 'Edición de producto desde Inventario',
+      })
       setEditingProduct(null)
       showNotice('success', `Producto "${product.nombre}" actualizado`)
-      refresh(true)
     } catch (cause) {
       showNotice(
         'error',
-        cause instanceof Error ? cause.message : 'No se pudo actualizar el producto',
+        getFriendlyError(cause, 'No se pudo actualizar el producto. Inténtalo de nuevo.'),
       )
     }
   }
@@ -105,7 +102,7 @@ export function InventoryPage() {
     } catch (cause) {
       showNotice(
         'error',
-        cause instanceof Error ? cause.message : 'No se pudo ajustar el stock',
+        getFriendlyError(cause, 'No se pudo ajustar el stock. Inténtalo de nuevo.'),
       )
     }
   }
@@ -123,11 +120,7 @@ export function InventoryPage() {
       showNotice('success', `Producto "${product.nombre}" eliminado`)
     } catch (cause) {
       throw new Error(
-        isForeignKeyError(cause)
-          ? 'No se puede eliminar porque tiene historial de ventas asociadas'
-          : cause instanceof Error
-            ? cause.message
-            : 'No se pudo eliminar el producto',
+        getFriendlyError(cause, 'No se pudo eliminar el producto. Inténtalo de nuevo.'),
       )
     }
   }

@@ -9,7 +9,6 @@ export interface AuthContextValue {
   rol: UsuarioRol | null
   roleLoading: boolean
   isPasswordRecovery: boolean
-  signInWithGoogle: (redirect?: string | null) => Promise<void>
   signInWithPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>

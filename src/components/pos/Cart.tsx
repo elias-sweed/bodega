@@ -1,13 +1,10 @@
 import type { CartItem } from '../../types'
 import { formatMoney } from '../../utils/format'
 import { CartItemRow } from './CartItemRow'
-import { METODOS_PAGO, type MetodoPago } from './metodosPago'
 
 interface CartProps {
   items: CartItem[]
   charging: boolean
-  metodoPago: MetodoPago
-  onMetodoPagoChange: (metodo: MetodoPago) => void
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
   onCharge: () => void
@@ -17,8 +14,6 @@ interface CartProps {
 export function Cart({
   items,
   charging,
-  metodoPago,
-  onMetodoPagoChange,
   onIncrease,
   onDecrease,
   onCharge,
@@ -66,29 +61,6 @@ export function Cart({
       )}
 
       <footer className="shrink-0 space-y-3 border-t border-slate-100 p-5 pt-4">
-        <div>
-          <span className="mb-1 block text-sm font-semibold text-slate-600">
-            Método de pago
-          </span>
-          <div className="grid grid-cols-3 gap-2">
-            {METODOS_PAGO.map((metodo) => (
-              <button
-                key={metodo}
-                type="button"
-                onClick={() => onMetodoPagoChange(metodo)}
-                aria-pressed={metodoPago === metodo}
-                className={`h-10 rounded-xl text-sm font-bold transition-colors ${
-                  metodoPago === metodo
-                    ? 'bg-emerald-500 text-white shadow'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {metodo}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="flex items-end justify-between gap-4">
           <span className="text-lg font-semibold text-slate-600">Total</span>
           <span className="text-4xl font-black tracking-tight text-slate-900">
@@ -102,7 +74,7 @@ export function Cart({
           onClick={onCharge}
           className="h-16 w-full rounded-2xl bg-emerald-500 text-2xl font-black tracking-widest text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
         >
-          {charging ? 'PROCESANDO…' : 'COBRAR'}
+          COBRAR
         </button>
 
         <button

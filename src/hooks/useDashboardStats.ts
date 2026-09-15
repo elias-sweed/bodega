@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
+  fetchDashboardResumen,
   fetchProductosBajoStock,
-  fetchVentasDeHoy,
 } from '../services/dashboard'
-import type { ProductosRow } from '../types/database.types'
+import type {
+  DashboardResumenResult,
+  ProductosRow,
+} from '../types/database.types'
 
 export function useDashboardStats() {
-  const [ventasHoy, setVentasHoy] = useState(0)
+  const [resumen, setResumen] = useState<DashboardResumenResult | null>(null)
   const [lowStock, setLowStock] = useState<ProductosRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -17,12 +20,12 @@ export function useDashboardStats() {
 
     void (async () => {
       try {
-        const [total, productosBajoStock] = await Promise.all([
-          fetchVentasDeHoy(),
+        const [resumenData, productosBajoStock] = await Promise.all([
+          fetchDashboardResumen(),
           fetchProductosBajoStock(),
         ])
         if (!cancelled) {
-          setVentasHoy(total)
+          setResumen(resumenData)
           setLowStock(productosBajoStock)
         }
       } catch (cause) {
@@ -53,5 +56,5 @@ export function useDashboardStats() {
     setReloadToken((token) => token + 1)
   }, [])
 
-  return { ventasHoy, lowStock, loading, error, refresh }
+  return { resumen, lowStock, loading, error, refresh }
 }

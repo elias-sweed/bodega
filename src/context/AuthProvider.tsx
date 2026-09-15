@@ -111,23 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user?.email, roleRetry])
 
-  const signInWithGoogle = useCallback(
-    async (redirect?: string | null): Promise<void> => {
-      const suffix =
-        redirect && redirect.startsWith('/')
-          ? `/login?redirect=${encodeURIComponent(redirect)}`
-          : ''
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: `${getAppUrl()}${suffix}` },
-      })
-      if (error) {
-        throw new Error(error.message)
-      }
-    },
-    [],
-  )
-
   const signInWithPassword = useCallback(
     async (email: string, password: string): Promise<void> => {
       const { error } = await supabase.auth.signInWithPassword({
@@ -178,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rol,
       roleLoading,
       isPasswordRecovery,
-      signInWithGoogle,
       signInWithPassword,
       signOut,
       resetPassword,
@@ -191,7 +173,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rol,
       roleLoading,
       isPasswordRecovery,
-      signInWithGoogle,
       signInWithPassword,
       signOut,
       resetPassword,

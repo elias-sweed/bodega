@@ -1,10 +1,12 @@
 import { useCallback } from 'react'
+import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
 import { SalesTodayCard } from '../components/dashboard/SalesTodayCard'
+import { StockResumenCard } from '../components/dashboard/StockResumenCard'
 import { useDashboardStats } from '../hooks/useDashboardStats'
 
 export function DashboardPage() {
-  const { ventasHoy, lowStock, loading, error, refresh } = useDashboardStats()
+  const { resumen, lowStock, loading, error, refresh } = useDashboardStats()
   const retry = useCallback((): void => refresh(), [refresh])
 
   return (
@@ -42,9 +44,22 @@ export function DashboardPage() {
             Reintentar
           </button>
         </div>
+      ) : resumen === null ? (
+        <p className="py-10 text-center text-lg text-slate-400">
+          Cargando resumen…
+        </p>
       ) : (
         <>
-          <SalesTodayCard total={ventasHoy} />
+          <SalesTodayCard resumen={resumen} />
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <GastoMesCard total={resumen.gasto_compras_mes} />
+            <StockResumenCard
+              total={resumen.total_productos}
+              bajos={resumen.bajos_stock}
+              agotados={resumen.agotados}
+            />
+          </div>
 
           <section>
             <h2 className="text-xl font-black text-slate-900">

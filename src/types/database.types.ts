@@ -38,6 +38,7 @@ export type DetalleVentasRow = {
   cantidad: number
   precio_unitario: number
   subtotal: number
+  costo_unitario: number | null
 }
 
 export type DetalleVentasInsert = Omit<DetalleVentasRow, 'id'>
@@ -86,6 +87,49 @@ export type RegistrarIngresoResult = {
   stock_actual: number
 }
 
+export type RegistrarCompraItem = {
+  producto_id: string
+  cantidad: number
+  costo_total: number
+}
+
+export type RegistrarCompraResult = {
+  compra_id: string
+  total: number
+  items: number
+}
+
+export type ActualizarProductoArgs = {
+  p_id: string
+  p_nombre: string
+  p_categoria: string
+  p_codigo_barras: string | null
+  p_precio_venta: number
+  p_costo: number
+  p_stock_minimo: number
+  p_nuevo_stock: number | null
+  p_motivo: string
+}
+
+export type ActualizarProductoResult = {
+  producto_id: string
+  stock_actual: number | null
+  delta: number
+}
+
+export type DashboardResumenResult = {
+  ventas_hoy_total: number
+  ventas_hoy_count: number
+  efectivo_hoy: number
+  yape_hoy: number
+  plin_hoy: number
+  gasto_compras_mes: number
+  ganancia_estimada_hoy: number
+  total_productos: number
+  bajos_stock: number
+  agotados: number
+}
+
 export type RegistrarAjusteManualArgs = {
   p_producto_id: string
   p_nuevo_stock: number
@@ -97,30 +141,6 @@ export type RegistrarAjusteManualResult = {
   ingreso_id: string | null
   stock_actual: number
   delta: number
-}
-
-export type AjustesStockRow = {
-  id: string
-  producto_id: string | null
-  tipo: 'entrada' | 'salida'
-  cantidad: number
-  motivo: string
-  stock_resultante: number
-  fecha: string
-}
-
-export type AjustesStockInsert = Omit<AjustesStockRow, 'id' | 'fecha'>
-
-export type RegistrarAjusteStockArgs = {
-  p_producto_id: string
-  p_tipo: 'entrada' | 'salida'
-  p_cantidad: number
-  p_motivo: string
-}
-
-export type RegistrarAjusteStockResult = {
-  ajuste_id: string
-  stock_resultante: number
 }
 
 export type UsuarioRol = 'admin' | 'cajero'
@@ -166,12 +186,6 @@ export type Database = {
         Update: Partial<IngresosMercaderiaInsert>
         Relationships: []
       }
-      ajustes_stock: {
-        Row: AjustesStockRow
-        Insert: AjustesStockInsert
-        Update: Partial<AjustesStockInsert>
-        Relationships: []
-      }
       usuarios_autorizados: {
         Row: UsuariosAutorizadosRow
         Insert: UsuariosAutorizadosInsert
@@ -195,9 +209,17 @@ export type Database = {
         Args: RegistrarAjusteManualArgs
         Returns: RegistrarAjusteManualResult
       }
-      registrar_ajuste_stock: {
-        Args: RegistrarAjusteStockArgs
-        Returns: RegistrarAjusteStockResult
+      registrar_compra: {
+        Args: { p_proveedor_id: string | null; p_nombre_proveedor: string | null; p_comprobante: string | null; p_items: Json[] }
+        Returns: RegistrarCompraResult
+      }
+      actualizar_producto: {
+        Args: ActualizarProductoArgs
+        Returns: ActualizarProductoResult
+      }
+      dashboard_resumen: {
+        Args: Record<PropertyKey, never>
+        Returns: DashboardResumenResult
       }
     }
     Enums: {

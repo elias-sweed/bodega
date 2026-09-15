@@ -11,7 +11,7 @@ import {
 } from '../components/purchases/ProveedorSelect'
 import { useProveedores } from '../hooks/useProveedores'
 import { useProducts } from '../hooks/useProducts'
-import { registrarIngresoMercaderia } from '../services/purchases'
+import { registrarCompra } from '../services/purchases'
 import type { ProductosRow } from '../types/database.types'
 import { formatMoney } from '../utils/format'
 
@@ -57,10 +57,10 @@ export function PurchasesPage() {
   )
 
   const suggestedProducts = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const query = search.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     const list = query === '' ? products : products.filter(
       (producto) =>
-        producto.nombre.toLowerCase().includes(query) ||
+        producto.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(query) ||
         (producto.codigo_barras ?? '').toLowerCase().includes(query),
     )
     return list.filter((producto) => !addedProductIds.has(producto.id)).slice(0, 8)
@@ -122,24 +122,19 @@ export function PurchasesPage() {
   const handleSave = async (): Promise<void> => {
     if (!isValid || saving) return
     setSaving(true)
-    const compraId =
-      window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
     const proveedorReal = proveedores.find((proveedor) => proveedor.id === proveedorId)
     const nombreProveedor = proveedorReal ? proveedorReal.nombre : null
     try {
-      for (const item of items) {
-        const cantidad = Number(item.cantidad)
-        const costoTotal = Number(item.costoTotal)
-        await registrarIngresoMercaderia({
-          compraId,
-          proveedorId: proveedorId === PROVEEDOR_GENERICO ? null : proveedorId,
-          nombreProveedor,
-          comprobante: comprobante.trim() || null,
-          productoId: item.producto.id,
-          cantidad,
-          costoTotal,
-        })
-      }
+      await registrarCompra({
+        proveedorId: proveedorId === PROVEEDOR_GENERICO ? null : proveedorId,
+        nombreProveedor,
+        comprobante: comprobante.trim() || null,
+        items: items.map((item) => ({
+          producto_id: item.producto.id,
+          cantidad: Number(item.cantidad),
+          costo_total: Number(item.costoTotal),
+        })),
+      })
       showNotice(
         'success',
         `Compra registrada: ${items.length} ${items.length === 1 ? 'producto recibido y sumado al inventario' : 'productos recibidos y sumados al inventario'}`,
