@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Calculator, Check, ChevronDown, TrendingUp, X } from 'lucide-react'
+import { Check, Minus, PackageSearch, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
+import { CategoryChips } from './CategoryChips'
 
 interface ProductFormModalProps {
   onClose: () => void
   onSubmit: (product: ProductosInsert) => Promise<void>
   initial?: ProductosRow | null
-  isFromPurchase?: boolean
   initialPrefill?: { nombre: string; categoria: string } | null
 }
 
@@ -35,12 +35,12 @@ const EMPTY_VALUES: FormValues = {
 
 const STOCK_MINIMO_DEFAULT = 5
 const DEFAULT_CATEGORIES = [
-  'General',
   'Bebidas',
   'Abarrotes',
   'Snacks',
   'Lácteos',
   'Limpieza',
+  'General',
 ]
 
 const ERROR_BARCODE_DUPLICADO =
@@ -57,36 +57,148 @@ function isDuplicateBarcodeError(cause: unknown): boolean {
   )
 }
 
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
+/**
+ * Palabras clave por categoría: se usan para ordenar las tarjetas de categorías
+ * según el nombre del producto. Si no hay coincidencias, el orden queda igual.
+ */
+const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
+  Bebidas: [
+    'gaseosa',
+    'agua',
+    'coca',
+    'inca',
+    'pepsi',
+    'jugo',
+    'limonada',
+    'energetica',
+    'chicha',
+    'cerveza',
+    'cafe',
+    'te',
+    'bebida',
+  ],
+  Snacks: [
+    'canchita',
+    'papas',
+    'doritos',
+    'cheezz',
+    'chizito',
+    'snack',
+    'galleta',
+    'chifle',
+    'mani',
+    'cacahuate',
+  ],
+  'Lácteos': [
+    'leche',
+    'yogur',
+    'yogurt',
+    'queso',
+    'mantequilla',
+    'margarina',
+    'pan',
+    'huevo',
+  ],
+  Limpieza: [
+    'lejia',
+    'detergente',
+    'suavizante',
+    'limpia',
+    'esponja',
+    'blanqueador',
+    'jabon',
+  ],
+  Abarrotes: [
+    'arroz',
+    'fideo',
+    'aceite',
+    'azucar',
+    'atun',
+    'lenteja',
+    'frejol',
+    'garbanzo',
+    'menestra',
+    'conserva',
+    'salsa',
+    'vinagre',
+    'sal',
+  ],
+  Golosinas: ['chocolate', 'caramelo', 'chupete', 'goma', 'menta', 'turron'],
+}
+
+function scoreCategory(nombre: string, categoria: string): number {
+  const nombreNorm = normalize(nombre)
+  const categoriaNorm = normalize(categoria)
+  if (!nombreNorm || nombreNorm.length < 2 || categoriaNorm === 'general') {
+    return 0
+  }
+  let score = 0
+  if (nombreNorm.includes(categoriaNorm)) {
+    score += 5
+  }
+  for (const keyword of KEYWORDS_POR_CATEGORIA[categoria] ?? []) {
+    if (keyword.length >= 3 && nombreNorm.includes(keyword)) {
+      score += 2
+    }
+  }
+  return score
+}
+
+interface CategoriaSugerida {
+  nombre: string
+  score: number
+}
+
+const moneyInputClass =
+  'h-14 w-full rounded-2xl border-2 border-slate-200 bg-white pl-10 pr-4 text-xl text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+
+const plainInputClass =
+  'h-14 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <p className="mb-2 text-sm font-black uppercase tracking-wide text-slate-500">
+      {children}
+    </p>
+  )
+}
+
 export function ProductFormModal({
   onClose,
   onSubmit,
   initial,
-  isFromPurchase = false,
   initialPrefill = null,
 }: ProductFormModalProps) {
   const [values, setValues] = useState<FormValues>(() => {
-    if (isFromPurchase || !initial) {
+    if (initial) {
       return {
-        ...EMPTY_VALUES,
-        stock_actual: '0',
-        ...(initialPrefill
-          ? { nombre: initialPrefill.nombre, categoria: initialPrefill.categoria }
-          : {}),
+        nombre: initial.nombre,
+        categoria: initial.categoria,
+        codigo_barras: initial.codigo_barras ?? '',
+        precio_venta: String(initial.precio_venta),
+        costo: String(initial.costo),
+        stock_actual: String(initial.stock_actual),
+        stock_minimo: String(initial.stock_minimo),
       }
     }
     return {
-      nombre: initial.nombre,
-      categoria: initial.categoria,
-      codigo_barras: initial.codigo_barras ?? '',
-      precio_venta: String(initial.precio_venta),
-      costo: String(initial.costo),
-      stock_actual: String(initial.stock_actual),
-      stock_minimo: String(initial.stock_minimo),
+      ...EMPTY_VALUES,
+      stock_actual: '0',
+      ...(initialPrefill
+        ? { nombre: initialPrefill.nombre, categoria: initialPrefill.categoria }
+        : {}),
     }
   })
   const [categories, setCategories] = useState<string[]>([])
-  const [categoriaOpen, setCategoriaOpen] = useState(false)
   const [paqueteOpen, setPaqueteOpen] = useState(false)
+  const [opcionesOpen, setOpcionesOpen] = useState(false)
   const [paquetePrecio, setPaquetePrecio] = useState('')
   const [paqueteUnidades, setPaqueteUnidades] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -114,18 +226,41 @@ export function ProductFormModal({
     for (const name of categories) {
       if (name.trim()) unique.add(name.trim())
     }
-    return Array.from(unique).sort((a, b) => a.localeCompare(b, 'es'))
+    return Array.from(unique)
   }, [categories, initial])
 
-  const filteredCategories = useMemo(() => {
-    const query = values.categoria.trim().toLowerCase()
-    if (query === '') return allCategories
-    return allCategories.filter((name) => name.toLowerCase().includes(query))
-  }, [allCategories, values.categoria])
+  const chippedCategories = useMemo(() => {
+    const sugeridas = new Set(DEFAULT_CATEGORIES.map((name) => name.toLowerCase()))
+    const resultado: { nombre: string }[] = DEFAULT_CATEGORIES.map((nombre) => ({
+      nombre,
+    }))
+    for (const nombre of allCategories) {
+      if (!sugeridas.has(nombre.toLowerCase())) {
+        resultado.push({ nombre })
+      }
+    }
+    return resultado
+  }, [allCategories])
 
-  const isExistingCategory = allCategories.some(
-    (name) => name.toLowerCase() === values.categoria.trim().toLowerCase(),
-  )
+  const categoriasOrdenadas = useMemo((): {
+    categorias: CategoriaSugerida[]
+    sugerida: string | null
+  } => {
+    const scored = chippedCategories.map((categoria) => ({
+      nombre: categoria.nombre,
+      score: scoreCategory(values.nombre, categoria.nombre),
+    }))
+    scored.sort((a, b) => b.score - a.score)
+    const sugerida = scored.length > 0 && scored[0].score > 0 ? scored[0].nombre : null
+    return { categorias: scored, sugerida }
+  }, [chippedCategories, values.nombre])
+
+  const isCustomCategory =
+    values.categoria.trim() !== '' &&
+    !chippedCategories.some(
+      (categoria) =>
+        categoria.nombre.toLowerCase() === values.categoria.trim().toLowerCase(),
+    )
 
   const setField = (field: keyof FormValues, value: string): void => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -133,21 +268,20 @@ export function ProductFormModal({
 
   const precioNum = values.precio_venta === '' ? Number.NaN : Number(values.precio_venta)
   const costNum = values.costo === '' ? Number.NaN : Number(values.costo)
-  const margin =
-    Number.isFinite(precioNum) && precioNum > 0 && Number.isFinite(costNum)
-      ? ((precioNum - costNum) / precioNum) * 100
+  const gananciaInfo =
+    Number.isFinite(precioNum) &&
+    precioNum > 0 &&
+    Number.isFinite(costNum) &&
+    costNum > 0
+      ? {
+          ganancia: precioNum - costNum,
+          margen: ((precioNum - costNum) / precioNum) * 100,
+        }
       : null
-  const marginClass =
-    margin !== null
-      ? margin < 0
-        ? 'bg-rose-100 text-rose-700'
-        : margin < 20
-          ? 'bg-amber-100 text-amber-700'
-          : 'bg-emerald-100 text-emerald-700'
-      : ''
 
   const paquetePrecioNum = paquetePrecio === '' ? Number.NaN : Number(paquetePrecio)
-  const paqueteUnidadesNum = paqueteUnidades === '' ? Number.NaN : Number(paqueteUnidades)
+  const paqueteUnidadesNum =
+    paqueteUnidades === '' ? Number.NaN : Number(paqueteUnidades)
   const costoCalc =
     Number.isFinite(paquetePrecioNum) &&
     paquetePrecioNum > 0 &&
@@ -164,41 +298,47 @@ export function ProductFormModal({
     }
   }
 
-  const showStockField = !isFromPurchase && Boolean(initial)
+  const showStockField = Boolean(initial)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     setError(null)
 
     if (!values.nombre.trim()) {
-      setError('⚠️ Ingresa el nombre del producto para continuar.')
+      setError('Escribe el nombre del producto (ej. “Inca Kola 500ml”).')
       return
     }
 
     const categoria = toTitleCase(values.categoria.trim())
     if (!categoria) {
-      setError('Por favor, escribe el nombre de la categoría.')
+      setError('Elige una categoría tocando una tarjeta o escribe una nueva.')
       return
     }
 
     const precioVenta = Number(values.precio_venta)
-    if (values.precio_venta.trim() === '' || !Number.isFinite(precioVenta) || precioVenta < 0) {
-      setError('Por favor, ingresa un precio de venta válido.')
+    if (
+      values.precio_venta.trim() === '' ||
+      !Number.isFinite(precioVenta) ||
+      precioVenta < 0
+    ) {
+      setError('Escribe a cuánto lo vendes (ej. 2.50).')
       return
     }
 
-    if (!isFromPurchase) {
-      const costo = Number(values.costo)
-      if (values.costo.trim() === '' || !Number.isFinite(costo) || costo < 0) {
-        setError('Por favor, ingresa el costo del producto (o usa "Calcular por paquete/caja").')
-        return
-      }
+    const costo = Number(values.costo)
+    if (values.costo.trim() === '' || !Number.isFinite(costo) || costo < 0) {
+      setError('Escribe cuánto te cuesta cada uno (o usa “Compras por caja”).')
+      return
     }
 
     if (showStockField) {
       const stockActual = Number(values.stock_actual)
-      if (values.stock_actual.trim() === '' || !Number.isFinite(stockActual) || stockActual < 0) {
-        setError('Por favor, ingresa un stock actual válido.')
+      if (
+        values.stock_actual.trim() === '' ||
+        !Number.isFinite(stockActual) ||
+        stockActual < 0
+      ) {
+        setError('Escribe cuántas unidades hay ahorita (ej. 30).')
         return
       }
     }
@@ -225,8 +365,8 @@ export function ProductFormModal({
         categoria,
         codigo_barras: values.codigo_barras.trim() || null,
         precio_venta: precioVenta,
-        costo: isFromPurchase ? 0 : Number(values.costo),
-        stock_actual: isFromPurchase || !showStockField ? 0 : Number(values.stock_actual),
+        costo,
+        stock_actual: showStockField ? Number(values.stock_actual) : 0,
         stock_minimo: stockMinimo,
       }
       await onSubmit(product)
@@ -243,10 +383,6 @@ export function ProductFormModal({
     }
   }
 
-  const inputClass =
-    'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-  const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
-
   return (
     <div
       role="dialog"
@@ -259,15 +395,11 @@ export function ProductFormModal({
     >
       <form
         onSubmit={handleSubmit}
-        className="max-h-full w-full max-w-xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+        className="max-h-full w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 id="nuevo-producto-title" className="text-2xl font-bold text-slate-900">
-            {initial
-              ? 'Editar producto'
-              : isFromPurchase
-                ? 'Nuevo producto (para compra)'
-                : 'Nuevo producto'}
+          <h2 id="nuevo-producto-title" className="text-2xl font-black text-slate-900">
+            {initial ? 'Editar producto' : 'Nuevo producto'}
           </h2>
           <button
             type="button"
@@ -279,277 +411,291 @@ export function ProductFormModal({
           </button>
         </div>
 
-        {isFromPurchase && (
-          <div className="mb-5 rounded-xl border-2 border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            El <strong>stock inicial</strong> y el <strong>costo unitario</strong> de este
-            producto se calcularán al registrar la compra en el Paso 3. Se creará con{' '}
-            <strong>stock 0</strong>.
-          </div>
-        )}
+        {/* Paso 1: ¿Qué es? */}
+        <div className="mb-6">
+          <SectionTitle>¿Qué es?</SectionTitle>
+          <input
+            id="nombre"
+            autoFocus
+            value={values.nombre}
+            onChange={(e) => setField('nombre', e.target.value)}
+            onBlur={() => setField('nombre', toTitleCase(values.nombre))}
+            className={plainInputClass}
+            placeholder="Ej. Inca Kola sin azúcar 500ml"
+          />
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label htmlFor="nombre" className={labelClass}>
-              Nombre
-            </label>
-            <input
-              id="nombre"
-              autoFocus
-              value={values.nombre}
-              onChange={(e) => setField('nombre', e.target.value)}
-              onBlur={() => setField('nombre', toTitleCase(values.nombre))}
-              className={inputClass}
-              placeholder="Ej. Inca Kola Sin Azúcar 500ml"
-            />
-          </div>
-
-          <div className="relative">
-            <label htmlFor="categoria" className={labelClass}>
-              Categoría
-            </label>
-            <input
-              id="categoria"
-              autoComplete="off"
-              value={values.categoria}
-              onChange={(e) => {
-                setField('categoria', e.target.value)
-                setCategoriaOpen(true)
-              }}
-              onFocus={() => setCategoriaOpen(true)}
-              onBlur={() => setCategoriaOpen(false)}
-              className={`${inputClass} pr-10`}
-              placeholder="Elige una categoría o escribe una nueva…"
-            />
-            <button
-              type="button"
-              aria-label="Mostrar categorías existentes"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => setCategoriaOpen((open) => !open)}
-              className="absolute right-2 top-8 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-            >
-              <ChevronDown
-                size={18}
-                strokeWidth={2.5}
-                className={`transition-transform ${categoriaOpen ? 'rotate-180' : ''}`}
-                aria-hidden="true"
-              />
-            </button>
-
-            {categoriaOpen && (
-              <ul className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border-2 border-slate-200 bg-white py-1 shadow-lg">
-                {filteredCategories.length === 0 ? (
-                  <li className="px-3 py-2 text-sm text-slate-400">
-                    Sin coincidencias. El texto se guardará como nueva categoría.
-                  </li>
-                ) : (
-                  filteredCategories.map((name) => (
-                    <li key={name}>
-                      <button
-                        type="button"
-                        onMouseDown={(event) => {
-                          event.preventDefault()
-                          setField('categoria', name)
-                          setCategoriaOpen(false)
-                        }}
-                        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-sky-50"
-                      >
-                        <span>{toTitleCase(name)}</span>
-                        {isExistingCategory &&
-                          name.toLowerCase() === values.categoria.trim().toLowerCase() && (
-                            <Check size={14} className="shrink-0 text-sky-600" aria-hidden="true" />
-                          )}
-                      </button>
-                    </li>
-                  ))
-                )}
-              </ul>
-            )}
-
-            <p className="mt-2 text-xs font-semibold text-slate-400">
-              {isExistingCategory
-                ? `Categoría existente: ${toTitleCase(values.categoria.trim())}`
-                : `Se creará la nueva categoría: ${toTitleCase(values.categoria.trim()) || '…'}`}
+        {/* Paso 2: Categoría */}
+        <div className="mb-6">
+          <SectionTitle>Categoría</SectionTitle>
+          <CategoryChips
+            sugerencias={categoriasOrdenadas.categorias}
+            sugerida={categoriasOrdenadas.sugerida}
+            selected={values.categoria}
+            onSelect={(nombre) => setField('categoria', nombre)}
+          />
+          <input
+            id="categoria"
+            autoComplete="off"
+            value={values.categoria}
+            onChange={(e) => setField('categoria', e.target.value)}
+            className={`${plainInputClass} mt-2`}
+            placeholder={
+              isCustomCategory
+                ? 'Escribe una categoría nueva y se creará al guardar'
+                : 'Si no encuentra la tuya, escríbela aquí'
+            }
+          />
+          {isCustomCategory && (
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-sky-600">
+              <Check size={14} strokeWidth={3} aria-hidden="true" />
+              Se creará la nueva categoría “{toTitleCase(values.categoria)}”
             </p>
-          </div>
+          )}
+        </div>
 
-          <div>
-            <label htmlFor="codigo_barras" className={labelClass}>
-              Código de barras
-            </label>
-            <input
-              id="codigo_barras"
-              value={values.codigo_barras}
-              onChange={(e) => setField('codigo_barras', e.target.value)}
-              className={inputClass}
-              placeholder="Opcional"
-            />
-            <p className="mt-2 text-xs font-semibold text-slate-400">
-              Si lo dejas en blanco, el producto se guardará sin código de barras.
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="precio_venta" className={labelClass}>
-              Precio de venta
-            </label>
-            <input
-              id="precio_venta"
-              type="number"
-              min="0"
-              step="0.01"
-              inputMode="decimal"
-              value={values.precio_venta}
-              onChange={(e) => setField('precio_venta', e.target.value)}
-              className={inputClass}
-              placeholder="0.00"
-            />
-            {margin !== null && (
-              <p
-                className={`mt-2 flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold ${marginClass}`}
-              >
-                <TrendingUp size={16} strokeWidth={2.5} aria-hidden="true" />
-                Margen de ganancia: {Math.round(margin)}%
-              </p>
-            )}
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between gap-2">
-              <label htmlFor="costo" className={labelClass}>
-                Costo Unitario
+        {/* Paso 3: Precios y ganancia */}
+        <div className="mb-6">
+          <SectionTitle>Precios (cuánto ganas)</SectionTitle>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-slate-700">
+                ¿En cuánto lo vendes?
               </label>
-              <button
-                type="button"
-                onClick={() => setPaqueteOpen((open) => !open)}
-                aria-expanded={paqueteOpen}
-                aria-controls="calculadora-paquete"
-                className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold transition-colors ${
-                  paqueteOpen
-                    ? 'bg-sky-100 text-sky-700'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                  S/
+                </span>
+                <input
+                  id="precio_venta"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={values.precio_venta}
+                  onChange={(e) => setField('precio_venta', e.target.value)}
+                  className={moneyInputClass}
+                  placeholder="2.50"
+                />
+              </div>
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                Lo que pagará el cliente.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="costo" className="mb-1 block text-sm font-bold text-slate-700">
+                ¿Cuánto te cuesta cada uno?
+              </label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                  S/
+                </span>
+                <input
+                  id="costo"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={values.costo}
+                  onChange={(e) => setField('costo', e.target.value)}
+                  className={moneyInputClass}
+                  placeholder="1.20"
+                />
+              </div>
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                Lo que pagas al comprarlo.
+              </p>
+            </div>
+          </div>
+
+          {gananciaInfo !== null && (
+            <div
+              className={`mt-3 flex flex-wrap items-center gap-2 rounded-2xl border-2 px-4 py-3 ${
+                gananciaInfo.ganancia >= 0
+                  ? 'border-emerald-200 bg-emerald-50'
+                  : 'border-rose-200 bg-rose-50'
+              }`}
+            >
+              <TrendingUp
+                size={20}
+                strokeWidth={2.5}
+                aria-hidden="true"
+                className={gananciaInfo.ganancia >= 0 ? 'text-emerald-600' : 'text-rose-600'}
+              />
+              <p
+                className={`text-lg font-black ${
+                  gananciaInfo.ganancia >= 0 ? 'text-emerald-700' : 'text-rose-700'
                 }`}
               >
-                <Calculator size={14} strokeWidth={2.5} aria-hidden="true" />
-                Calcular por paquete/caja
-              </button>
-            </div>
-            <input
-              id="costo"
-              type="number"
-              min="0"
-              step="0.01"
-              inputMode="decimal"
-              value={values.costo}
-              onChange={(e) => setField('costo', e.target.value)}
-              className={inputClass}
-              placeholder="0.00"
-            />
-            <p className="mt-2 text-xs font-semibold text-slate-400">
-              Ingresa el costo por <strong>UNIDAD individual</strong>.
-            </p>
-
-            {paqueteOpen && (
-              <div
-                id="calculadora-paquete"
-                className="mt-4 space-y-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
-              >
-                <div>
-                  <label htmlFor="paquete-precio" className="mb-1 block text-xs font-semibold text-slate-600">
-                    Precio del paquete/caja (S/)
-                  </label>
-                  <input
-                    id="paquete-precio"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={paquetePrecio}
-                    onChange={(e) => {
-                      setPaquetePrecio(e.target.value)
-                      applyCalculatedCost(e.target.value, paqueteUnidades)
-                    }}
-                    className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                    placeholder="0.00"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-semibold text-slate-600">
-                    Unidades por paquete
-                  </label>
-                  <input
-                    id="paquete-unidades"
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
-                    value={paqueteUnidades}
-                    onChange={(e) => {
-                      setPaqueteUnidades(e.target.value)
-                      applyCalculatedCost(paquetePrecio, e.target.value)
-                    }}
-                    className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                    placeholder="Ej. 24"
-                  />
-                </div>
-                {costoCalc !== null && (
-                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-100 px-3 py-2">
-                    <p className="text-sm font-bold text-emerald-700">
-                      ≈ {formatMoney(costoCalc)} por unidad
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setField('costo', costoCalc.toFixed(2))
-                        setPaqueteOpen(false)
-                      }}
-                      className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 active:scale-[0.98]"
-                    >
-                      [ Insertar costo ]
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="stock_minimo" className={labelClass}>
-              Stock mínimo
-            </label>
-            <input
-              id="stock_minimo"
-              type="number"
-              min="0"
-              step="1"
-              inputMode="numeric"
-              value={values.stock_minimo}
-              onChange={(e) => setField('stock_minimo', e.target.value)}
-              className={inputClass}
-              placeholder="En blanco = 5"
-            />
-            {(values.stock_minimo.trim() === '' || Number(values.stock_minimo) === 0) && (
-              <p className="mt-2 text-xs font-semibold text-slate-400">
-                Se usará <strong>5</strong> por defecto.
+                {gananciaInfo.ganancia >= 0 ? 'Ganas' : 'Estás vendiendo perdiendo'}{' '}
+                {formatMoney(Math.abs(gananciaInfo.ganancia))} por unidad (
+                {Math.round(gananciaInfo.margen)}%)
               </p>
-            )}
-          </div>
+              {gananciaInfo.ganancia < 0 && (
+                <span className="rounded-lg bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
+                  Revísalo
+                </span>
+              )}
+            </div>
+          )}
 
-          {showStockField && (
+          <button
+            type="button"
+            onClick={() => setPaqueteOpen((open) => !open)}
+            aria-expanded={paqueteOpen}
+            aria-controls="calculadora-paquete"
+            className={`mt-3 inline-flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-sm font-bold transition-colors ${
+              paqueteOpen
+                ? 'border-sky-300 bg-sky-50 text-sky-700'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <PackageSearch size={18} strokeWidth={2.5} aria-hidden="true" />
+            ¿Compras por caja / paquete? Sácame el costo
+          </button>
+
+          {paqueteOpen && (
+            <div
+              id="calculadora-paquete"
+              className="mt-3 space-y-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
+            >
+              <div>
+                <label htmlFor="paquete-precio" className="mb-1 block text-xs font-bold text-slate-600">
+                  La caja / paquete costó (S/)
+                </label>
+                <input
+                  id="paquete-precio"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={paquetePrecio}
+                  onChange={(e) => {
+                    setPaquetePrecio(e.target.value)
+                    applyCalculatedCost(e.target.value, paqueteUnidades)
+                  }}
+                  className="h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                  placeholder="Ej. 24.00"
+                />
+              </div>
+              <div>
+                <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-bold text-slate-600">
+                  ¿Cuántas unidades trae?
+                </label>
+                <input
+                  id="paquete-unidades"
+                  type="number"
+                  min="1"
+                  step="1"
+                  inputMode="numeric"
+                  value={paqueteUnidades}
+                  onChange={(e) => {
+                    setPaqueteUnidades(e.target.value)
+                    applyCalculatedCost(paquetePrecio, e.target.value)
+                  }}
+                  className="h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                  placeholder="Ej. 24"
+                />
+              </div>
+              {costoCalc !== null && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-100 px-3 py-2">
+                  <p className="text-sm font-black text-emerald-700">
+                    Cada unidad te cuesta ≈ {formatMoney(costoCalc)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setField('costo', costoCalc.toFixed(2))
+                      setPaqueteOpen(false)
+                    }}
+                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 active:scale-[0.98]"
+                  >
+                    Usar este costo [ S/ {formatMoney(costoCalc)} ]
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Paso 4: Alerta de stock */}
+        <div className="mb-6">
+          <SectionTitle>¿Cuándo avisarte?</SectionTitle>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="stock_actual" className={labelClass}>
-                Stock actual
+              <label htmlFor="stock_minimo" className="mb-1 block text-sm font-bold text-slate-700">
+                ¿Cuántos deben quedar para avisarte?
               </label>
               <input
-                id="stock_actual"
+                id="stock_minimo"
                 type="number"
                 min="0"
                 step="1"
                 inputMode="numeric"
-                value={values.stock_actual}
-                onChange={(e) => setField('stock_actual', e.target.value)}
-                className={inputClass}
-                placeholder="0"
+                value={values.stock_minimo}
+                onChange={(e) => setField('stock_minimo', e.target.value)}
+                className={plainInputClass}
+                placeholder="Ej. 5"
               />
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                Cuando queden menos que eso, la app te avisará. En blanco = 5.
+              </p>
+            </div>
+
+            {showStockField && (
+              <div>
+                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-slate-700">
+                  ¿Cuántas unidades hay ahorita?
+                </label>
+                <input
+                  id="stock_actual"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputMode="numeric"
+                  value={values.stock_actual}
+                  onChange={(e) => setField('stock_actual', e.target.value)}
+                  className={plainInputClass}
+                  placeholder="Ej. 30"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Opciones (avanzado): código de barras */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => setOpcionesOpen((open) => !open)}
+            aria-expanded={opcionesOpen}
+            className="flex w-full items-center justify-between rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100"
+          >
+            Opciones {opcionesOpen ? '' : '(opcional)'}
+            <span
+              className={`flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 transition-transform ${
+                opcionesOpen ? 'rotate-180' : ''
+              }`}
+            >
+              <Minus size={14} strokeWidth={3} aria-hidden="true" />
+            </span>
+          </button>
+          {opcionesOpen && (
+            <div className="mt-3">
+              <label htmlFor="codigo_barras" className="mb-1 block text-sm font-bold text-slate-700">
+                Código de barras
+              </label>
+              <input
+                id="codigo_barras"
+                value={values.codigo_barras}
+                onChange={(e) => setField('codigo_barras', e.target.value)}
+                className={plainInputClass}
+                placeholder="Ej. 7501234567890"
+              />
+              <p className="mt-1 text-xs font-semibold text-slate-400">
+                Solo si el producto tiene código. En blanco = se guarda sin código.
+              </p>
             </div>
           )}
         </div>
@@ -557,26 +703,31 @@ export function ProductFormModal({
         {error && (
           <p
             role="alert"
-            className="mt-4 rounded-xl bg-rose-100 px-4 py-2 font-semibold text-rose-700"
+            className="mb-4 rounded-xl bg-rose-100 px-4 py-2 font-semibold text-rose-700"
           >
             {error}
           </p>
         )}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="h-12 rounded-2xl border-2 border-slate-200 px-6 text-base font-bold text-slate-600 transition-colors hover:bg-slate-50"
+            className="rounded-2xl border-2 border-slate-200 px-6 py-3 text-base font-bold text-slate-600 transition-colors hover:bg-slate-50"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="h-12 rounded-2xl bg-sky-500 px-8 text-base font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-8 py-3 text-base font-black text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
           >
-            {submitting ? 'Guardando…' : 'Guardar producto'}
+            <Check size={18} strokeWidth={3} aria-hidden="true" />
+            {submitting
+              ? 'Guardando…'
+              : initial
+                ? 'Guardar cambios'
+                : 'Guardar producto'}
           </button>
         </div>
       </form>
