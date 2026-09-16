@@ -19,7 +19,8 @@ type Listener = () => void
 
 let cache: ProductosRow[] | null = null
 let errorState: string | null = null
-let inFlight: Promise<ProductosRow[]> | null = null
+let inFlight: Promise<void> | null = null
+let queuedForce = false
 let channel: RealtimeChannel | null = null
 let refreshTimer: number | null = null
 const listeners = new Set<Listener>()
@@ -34,15 +35,38 @@ function notify(): void {
   }
 }
 
+async function fetcher(): Promise<void> {
+  const data = await fetchProducts()
+  cache = sortByName(data)
+  errorState = null
+}
+
 async function load(): Promise<void> {
+  const force = queuedForce
+  queuedForce = false
+
   if (inFlight) {
-    await inFlight
-    return
+    if (!force) {
+      await inFlight
+      return
+    }
+    // Refresco forzado: aunque haya una carga en curso, encadena OTRO viaje a la
+    // base de datos para que el nuevo stock se vea al instante.
+    const current = inFlight
+    inFlight = (async () => {
+      try {
+        await current
+      } catch {
+        // se ignora: abajo se lanza el nuevo viaje
+      }
+      await fetcher()
+    })()
+  } else {
+    inFlight = fetcher()
   }
-  inFlight = fetchProducts()
+
   try {
-    const data = await inFlight
-    cache = sortByName(data)
+    await inFlight
   } catch (cause) {
     if (cache === null) {
       errorState =
@@ -96,9 +120,24 @@ export function ensureProductsLoaded(): void {
 
 export function refreshProductsCache(force = false): void {
   if (force) {
-    void load()
-    return
+    queuedForce = true
   }
-  // Refresco suave: sale disparado solo si no hay carga en curso.
   void load()
+}
+
+/**
+ * Actualiza el stock en memoria al instante (sin esperar a la red) tras una
+ * venta, para que el producto agotado desaparezca de la pantalla al momento.
+ */
+export function applyStockChanges(
+  changes: { id: string; stockActual: number }[],
+): void {
+  if (cache === null) return
+  cache = sortByName(
+    cache.map((product) => {
+      const change = changes.find((item) => item.id === product.id)
+      return change ? { ...product, stock_actual: change.stockActual } : product
+    }),
+  )
+  notify()
 }

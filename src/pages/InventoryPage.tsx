@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
@@ -17,12 +18,23 @@ export function InventoryPage() {
   const isAdmin = rol === 'admin'
   const { products, loading, error, refresh, addProduct, updateProduct, deleteProduct } =
     useProducts()
-  const [modalOpen, setModalOpen] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialNewName = searchParams.get('nuevo')
+  const [modalOpen, setModalOpen] = useState(initialNewName !== null)
+  const [prefill, setPrefill] = useState<{ nombre: string; categoria: string } | null>(
+    initialNewName ? { nombre: initialNewName, categoria: '' } : null,
+  )
   const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (initialNewName) {
+      setSearchParams({}, { replace: true })
+    }
+  }, [initialNewName, setSearchParams])
 
   const lowStockCount = products.filter(
     (product) => product.stock_actual <= product.stock_minimo,
@@ -143,7 +155,10 @@ export function InventoryPage() {
         </div>
         <button
           type="button"
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            setPrefill(null)
+            setModalOpen(true)
+          }}
           className="h-14 rounded-2xl bg-sky-500 px-6 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98]"
         >
           + Nuevo producto
@@ -181,7 +196,11 @@ export function InventoryPage() {
 
       {modalOpen && (
         <ProductFormModal
-          onClose={() => setModalOpen(false)}
+          initialPrefill={prefill}
+          onClose={() => {
+            setModalOpen(false)
+            setPrefill(null)
+          }}
           onSubmit={handleAddProduct}
         />
       )}

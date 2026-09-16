@@ -10,11 +10,13 @@ import { supabase } from './supabase'
  */
 export class VentaError extends Error {
   stockShortIds: string[]
+  raw: string | null
 
-  constructor(message: string, stockShortIds: string[] = []) {
+  constructor(message: string, stockShortIds: string[] = [], raw: string | null = null) {
     super(message)
     this.name = 'VentaError'
     this.stockShortIds = stockShortIds
+    this.raw = raw
   }
 }
 
@@ -46,12 +48,17 @@ export async function registrarVenta(
 
   if (error) {
     const raw = error.message
+    console.error('Error al registrar la venta:', raw)
     if (raw.toLowerCase().includes('stock insuficiente')) {
       const idMatch = raw.match(UUID_RE)
       const ids = idMatch ? [idMatch[0]] : []
-      throw new VentaError(getFriendlyError(error), ids)
+      throw new VentaError(getFriendlyError(error), ids, raw)
     }
-    throw new VentaError(getFriendlyError(error, 'No se pudo registrar la venta.'))
+    throw new VentaError(
+      getFriendlyError(error, 'No se pudo registrar la venta. Inténtalo de nuevo.'),
+      [],
+      raw,
+    )
   }
 
   return data

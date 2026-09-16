@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { subscribeToDataChanges } from '../services/dataEvents'
 import {
   fetchDashboardResumen,
   fetchProductosBajoStock,
@@ -55,6 +56,10 @@ export function useDashboardStats() {
     setError(null)
     setReloadToken((token) => token + 1)
   }, [])
+
+  useEffect(() => {
+    return subscribeToDataChanges(() => refresh(true))
+  }, [refresh])
 
   return { resumen, lowStock, loading, error, refresh }
 }

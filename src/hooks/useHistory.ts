@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { subscribeToDataChanges } from '../services/dataEvents'
 import { fetchIngresosHistory, fetchVentasHistory } from '../services/history'
 import { fetchProducts } from '../services/products'
 import { fetchProveedores } from '../services/purchases'
@@ -46,6 +47,10 @@ export function useVentasHistory() {
     setError(null)
     setReloadToken((token) => token + 1)
   }, [])
+
+  useEffect(() => {
+    return subscribeToDataChanges(() => refresh(true))
+  }, [refresh])
 
   return { ventas, loading, error, refresh }
 }
@@ -110,6 +115,10 @@ export function useIngresosHistory() {
     setError(null)
     setReloadToken((token) => token + 1)
   }, [])
+
+  useEffect(() => {
+    return subscribeToDataChanges(() => refresh(true))
+  }, [refresh])
 
   return { ingresos, proveedorMap, productoMap, loading, error, refresh }
 }

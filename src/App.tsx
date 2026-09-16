@@ -7,6 +7,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { LoginPage } from './pages/LoginPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
@@ -45,6 +46,7 @@ function App() {
             <Route path="/inventario" element={<InventoryPage />} />
             <Route path="/compras" element={<PurchasesPage />} />
             <Route path="/historial" element={<HistoryPage />} />
+            <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/usuarios" element={<UsersPage />} />
           </Route>
         </Route>

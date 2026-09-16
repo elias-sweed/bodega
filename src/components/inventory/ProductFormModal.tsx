@@ -10,6 +10,7 @@ interface ProductFormModalProps {
   onSubmit: (product: ProductosInsert) => Promise<void>
   initial?: ProductosRow | null
   isFromPurchase?: boolean
+  initialPrefill?: { nombre: string; categoria: string } | null
 }
 
 interface FormValues {
@@ -61,10 +62,17 @@ export function ProductFormModal({
   onSubmit,
   initial,
   isFromPurchase = false,
+  initialPrefill = null,
 }: ProductFormModalProps) {
   const [values, setValues] = useState<FormValues>(() => {
     if (isFromPurchase || !initial) {
-      return { ...EMPTY_VALUES, stock_actual: '0' }
+      return {
+        ...EMPTY_VALUES,
+        stock_actual: '0',
+        ...(initialPrefill
+          ? { nombre: initialPrefill.nombre, categoria: initialPrefill.categoria }
+          : {}),
+      }
     }
     return {
       nombre: initial.nombre,

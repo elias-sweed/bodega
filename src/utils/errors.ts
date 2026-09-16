@@ -46,6 +46,9 @@ export function getFriendlyError(
   if (lower.includes('el producto no existe')) {
     return 'El producto ya no existe. Refresca la lista e inténtalo de nuevo.'
   }
+  if (lower.includes('does not exist') || lower.includes('could not find a function')) {
+    return 'La base de datos no está al día. Ejecuta las migraciones SQL pendientes (mejoras.sql, usuarios.sql y mejoras_v2.sql, en ese orden) y vuelve a intentarlo.'
+  }
   if (lower.includes('no route matches') || lower.includes('pgrst')) {
     return fallback
   }

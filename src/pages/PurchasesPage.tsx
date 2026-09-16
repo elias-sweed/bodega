@@ -11,6 +11,7 @@ import {
 } from '../components/purchases/ProveedorSelect'
 import { useProveedores } from '../hooks/useProveedores'
 import { useProducts } from '../hooks/useProducts'
+import { emitDataChanged } from '../services/dataEvents'
 import { registrarCompra } from '../services/purchases'
 import type { ProductosRow } from '../types/database.types'
 import { formatMoney } from '../utils/format'
@@ -141,6 +142,7 @@ export function PurchasesPage() {
       )
       resetForm()
       refreshProductos(true)
+      emitDataChanged()
     } catch (cause) {
       showNotice(
         'error',

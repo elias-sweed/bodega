@@ -8,7 +8,9 @@ import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { SearchBar } from '../components/pos/SearchBar'
 import { useProducts } from '../hooks/useProducts'
-import { getStockShortIds, registrarVenta } from '../services/sales'
+import { emitDataChanged } from '../services/dataEvents'
+import { applyStockChanges } from '../services/productsCache'
+import { getStockShortIds, registrarVenta, VentaError } from '../services/sales'
 import type { CartItem, Category } from '../types'
 import type { ProductosRow } from '../types/database.types'
 import { deriveCategories } from '../utils/categories'
@@ -221,11 +223,30 @@ export function PosPage() {
         items: cart,
         metodo_pago: metodoPago,
       })
+      const soldOut = cart.filter(
+        (item) => item.quantity >= item.product.stock_actual,
+      )
       setCart([])
       setPaymentOpen(false)
       setSearch('')
-      showNotice('success', `Venta por ${formatMoney(result.total)} registrada`)
+      const soldOutText =
+        soldOut.length > 0
+          ? ` · «${soldOut.map((item) => item.product.nombre).join('», «')}» ${
+              soldOut.length === 1 ? 'quedó agotado' : 'quedaron agotados'
+            }`
+          : ''
+      showNotice(
+        'success',
+        `Venta por ${formatMoney(result.total)} registrada${soldOutText}`,
+      )
+      applyStockChanges(
+        cart.map((item) => ({
+          id: item.product.id,
+          stockActual: item.product.stock_actual - item.quantity,
+        })),
+      )
       refresh(true)
+      emitDataChanged()
     } catch (cause) {
       const stockShortIds = getStockShortIds(cause)
       if (stockShortIds.length > 0) {
@@ -239,7 +260,12 @@ export function PosPage() {
       } else {
         showNotice(
           'error',
-          getFriendlyError(cause, 'No se pudo registrar la venta. Inténtalo de nuevo.'),
+          cause instanceof VentaError
+            ? cause.message
+            : getFriendlyError(
+                cause,
+                'No se pudo registrar la venta. Inténtalo de nuevo.',
+              ),
         )
       }
     } finally {
