@@ -34,12 +34,13 @@ const EMPTY_VALUES: FormValues = {
 }
 
 const STOCK_MINIMO_DEFAULT = 5
-const DEFAULT_CATEGORIES = [
-  'Bebidas',
+const CATEGORIAS = [
   'Abarrotes',
-  'Snacks',
-  'Lácteos',
-  'Limpieza',
+  'Bebidas',
+  'Helados',
+  'Útiles',
+  'Copias e Impresiones',
+  'Accesorios Autos',
   'General',
 ]
 
@@ -209,9 +210,9 @@ export function ProductFormModal({
     const loadCategories = async (): Promise<void> => {
       try {
         const list = await fetchProductCategories()
-        if (active) setCategories(list.length > 0 ? list : DEFAULT_CATEGORIES)
+        if (active) setCategories(list.length > 0 ? list : CATEGORIAS)
       } catch {
-        if (active) setCategories(DEFAULT_CATEGORIES)
+        if (active) setCategories(CATEGORIAS)
       }
     }
     void loadCategories()
@@ -230,8 +231,8 @@ export function ProductFormModal({
   }, [categories, initial])
 
   const chippedCategories = useMemo(() => {
-    const sugeridas = new Set(DEFAULT_CATEGORIES.map((name) => name.toLowerCase()))
-    const resultado: { nombre: string }[] = DEFAULT_CATEGORIES.map((nombre) => ({
+    const sugeridas = new Set(CATEGORIAS.map((name) => name.toLowerCase()))
+    const resultado: { nombre: string }[] = CATEGORIAS.map((nombre) => ({
       nombre,
     }))
     for (const nombre of allCategories) {

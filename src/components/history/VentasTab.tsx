@@ -58,6 +58,11 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
     [ventas, filter],
   )
 
+  const totalVendido = useMemo(
+    () => filteredVentas.reduce((sum, venta) => sum + venta.total, 0),
+    [filteredVentas],
+  )
+
   const handleToggle = async (venta: VentasRow): Promise<void> => {
     if (expandedId === venta.id) {
       setExpandedId(null)
@@ -133,6 +138,13 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-900 px-5 py-4 text-white">
+        <span className="text-sm font-semibold text-slate-300">
+          Total ventas registradas
+        </span>
+        <span className="text-lg font-black">{formatMoney(totalVendido)}</span>
+      </div>
+
       <ul className="flex flex-col gap-2">
         {filteredVentas.map((venta) => {
           const expanded = expandedId === venta.id
