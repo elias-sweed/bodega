@@ -1,4 +1,4 @@
-import { Banknote, Sparkles, TrendingUp } from 'lucide-react'
+import { Banknote, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
 
 interface SalesTodayCardProps {
@@ -10,14 +10,20 @@ interface SalesTodayCardProps {
     plin_hoy: number
     ganancia_estimada_hoy: number
   }
+  ayerTotal?: number
 }
 
-export function SalesTodayCard({ resumen }: SalesTodayCardProps) {
+export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) {
   const metodos = [
     { label: 'Efectivo', total: resumen.efectivo_hoy, icon: Banknote },
     { label: 'Yape', total: resumen.yape_hoy },
     { label: 'Plin', total: resumen.plin_hoy },
   ].filter((metodo) => metodo.total > 0)
+
+  const comparativa =
+    ayerTotal > 0
+      ? Math.round(((resumen.ventas_hoy_total - ayerTotal) / ayerTotal) * 100)
+      : null
 
   return (
     <section className="fade-up relative overflow-hidden rounded-[28px] border border-white/25 bg-gradient-to-br from-white/25 via-white/10 to-white/5 p-7 shadow-[0_24px_70px_-18px_rgba(20,5,80,0.7)] backdrop-blur-2xl sm:p-8">
@@ -40,9 +46,28 @@ export function SalesTodayCard({ resumen }: SalesTodayCardProps) {
           <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
             {formatMoney(resumen.ventas_hoy_total)}
           </p>
-          <p className="mt-2 text-sm font-semibold text-white/75">
-            {resumen.ventas_hoy_count}{' '}
-            {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-white/75">
+            <span>
+              {resumen.ventas_hoy_count}{' '}
+              {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
+            </span>
+            {comparativa !== null && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
+                  comparativa >= 0
+                    ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
+                    : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
+                }`}
+                title={`Ayer: ${formatMoney(ayerTotal)}`}
+              >
+                {comparativa >= 0 ? (
+                  <TrendingUp size={13} aria-hidden="true" />
+                ) : (
+                  <TrendingDown size={13} aria-hidden="true" />
+                )}
+                {comparativa >= 0 ? '+' : ''}{comparativa}% vs ayer
+              </span>
+            )}
           </p>
         </div>
 

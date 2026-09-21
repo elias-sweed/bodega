@@ -3,9 +3,13 @@ import { AlertTriangle, PackageSearch, RefreshCw } from 'lucide-react'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
+import { MetodoDonut } from '../components/dashboard/MetodoDonut'
+import { QuickActions } from '../components/dashboard/QuickActions'
 import { SalesTodayCard } from '../components/dashboard/SalesTodayCard'
 import { StockResumenCard } from '../components/dashboard/StockResumenCard'
+import { WeeklySalesChart } from '../components/dashboard/WeeklySalesChart'
 import { useDashboardStats } from '../hooks/useDashboardStats'
+import { useWeeklySales } from '../hooks/useWeeklySales'
 
 function timeAgo(savedAt: number | null): string | null {
   if (!savedAt) return null
@@ -22,6 +26,7 @@ function timeAgo(savedAt: number | null): string | null {
 export function DashboardPage() {
   const { resumen, lowStock, loading, isRefreshing, error, updatedAt, refresh } =
     useDashboardStats()
+  const { dias, ayerTotal, loading: weeklyLoading } = useWeeklySales()
   const retry = useCallback((): void => refresh(), [refresh])
   const freshness = timeAgo(updatedAt)
 
@@ -105,7 +110,9 @@ export function DashboardPage() {
         <DashboardSkeleton />
       ) : (
         <div className="fade-in flex flex-col gap-6">
-          <SalesTodayCard resumen={resumen} />
+          <SalesTodayCard resumen={resumen} ayerTotal={ayerTotal} />
+
+          <WeeklySalesChart dias={dias} loading={weeklyLoading} />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <GastoMesCard total={resumen.gasto_compras_mes} />
@@ -114,6 +121,19 @@ export function DashboardPage() {
               bajos={resumen.bajos_stock}
               agotados={resumen.agotados}
             />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+            <div className="xl:col-span-3">
+              <MetodoDonut
+                efectivo={resumen.efectivo_hoy}
+                yape={resumen.yape_hoy}
+                plin={resumen.plin_hoy}
+              />
+            </div>
+            <div className="xl:col-span-2">
+              <QuickActions />
+            </div>
           </div>
 
           <section className="rounded-[28px] border border-white/15 bg-white/[0.07] p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
