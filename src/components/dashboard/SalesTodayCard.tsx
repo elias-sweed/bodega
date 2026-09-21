@@ -11,9 +11,10 @@ interface SalesTodayCardProps {
     ganancia_estimada_hoy: number
   }
   ayerTotal?: number
+  etiqueta?: string
 }
 
-export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) {
+export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de hoy' }: SalesTodayCardProps) {
   const metodos = [
     { label: 'Efectivo', total: resumen.efectivo_hoy },
     { label: 'Yape', total: resumen.yape_hoy },
@@ -45,7 +46,7 @@ export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) 
         <div className="min-w-0 flex-1">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/90">
             <Sparkles size={13} aria-hidden="true" />
-            Ventas de hoy
+            {etiqueta}
           </p>
           <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
             {formatMoney(cobrado)}

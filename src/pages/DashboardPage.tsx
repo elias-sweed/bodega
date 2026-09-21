@@ -1,5 +1,6 @@
-import { useCallback } from 'react'
-import { AlertTriangle, PackageSearch, RefreshCw } from 'lucide-react'
+import { useCallback, useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, RefreshCw, X } from 'lucide-react'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
@@ -26,12 +27,108 @@ function timeAgo(savedAt: number | null): string | null {
 }
 
 export function DashboardPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  // Vista de un día pasado (llega desde Historial). Vive solo en la
+  // navegación: cambiar de sección o usar el menú vuelve al día de hoy;
+  // recargar conserva el día porque el navegador guarda el estado.
+  const fechaVista = (location.state as { fechaVista?: string } | null)?.fechaVista ?? null
+
+  const rangoDia = useMemo(() => {
+    if (!fechaVista) return undefined
+    const [y, m, d] = fechaVista.split('-').map(Number)
+    if (!y || !m || !d) return undefined
+    const desde = new Date(y, m - 1, d)
+    const hasta = new Date(y, m - 1, d + 1)
+    return { desde, hasta, clave: fechaVista }
+  }, [fechaVista])
+
   const { resumen, lowStock, loading, isRefreshing, error, updatedAt, refresh } =
     useDashboardStats()
   const { dias, ayerTotal, loading: weeklyLoading } = useWeeklySales()
   const { productos: productosHoy, loading: productosLoading } = useTodayProducts()
+  const dia = useTodayProducts(rangoDia, rangoDia ? `dia-${rangoDia.clave}` : 'hoy', !!rangoDia)
   const retry = useCallback((): void => refresh(), [refresh])
   const freshness = timeAgo(updatedAt)
+
+  const cerrarVista = useCallback((): void => {
+    navigate('/', { replace: true, state: {} })
+  }, [navigate])
+
+  const volverHistorial = useCallback((): void => {
+    navigate('/historial')
+  }, [navigate])
+
+  // ---- MODO VISTA DE DÍA (desde Historial) ----
+  if (rangoDia) {
+    const etiqueta = rangoDia.desde.toLocaleDateString('es-PE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    const resumenDia = {
+      ventas_hoy_total: dia.total,
+      ventas_hoy_count: dia.count,
+      efectivo_hoy: dia.efectivo,
+      yape_hoy: dia.yape,
+      plin_hoy: dia.plin,
+      ganancia_estimada_hoy: dia.ganancia,
+    }
+    return (
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
+        <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
+              <CalendarDays size={18} aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-base font-black tracking-tight capitalize">
+                Resumen del {etiqueta}
+              </span>
+              <span className="block text-xs font-semibold text-white/60">
+                Vista de ese día (no es hoy)
+              </span>
+            </span>
+          </p>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={volverHistorial}
+              className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-white/25 bg-white/10 px-4 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-95"
+            >
+              <ArrowLeft size={15} aria-hidden="true" />
+              Volver al Historial
+            </button>
+            <button
+              type="button"
+              onClick={cerrarVista}
+              aria-label="Cerrar vista y ver hoy"
+              title="Cerrar y ver hoy"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-95"
+            >
+              <X size={17} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        {dia.loading && dia.total === 0 && dia.productos.length === 0 ? (
+          <DashboardSkeleton />
+        ) : (
+          <div className="fade-in flex flex-col gap-6">
+            <SalesTodayCard resumen={resumenDia} etiqueta="Ventas de ese día" />
+            <MetodoDonut efectivo={dia.efectivo} yape={dia.yape} plin={dia.plin} titulo="Ese día por método de pago" />
+            <TodayProducts
+              productos={dia.productos}
+              loading={dia.loading}
+              titulo="Ese día por producto"
+              subtitulo="Lo cobrado y lo ganado de cada producto ese día."
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
 
   // Primera vez (sin caché): skeletons premium
   if (loading && resumen === null) {

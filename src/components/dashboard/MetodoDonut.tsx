@@ -5,6 +5,7 @@ interface MetodoDonutProps {
   efectivo: number
   yape: number
   plin: number
+  titulo?: string
 }
 
 const SEGMENTOS = [
@@ -13,7 +14,7 @@ const SEGMENTOS = [
   { clave: 'plin', etiqueta: 'Plin', color: '#c084fc' },
 ] as const
 
-export function MetodoDonut({ efectivo, yape, plin }: MetodoDonutProps) {
+export function MetodoDonut({ efectivo, yape, plin, titulo = 'Hoy por método de pago' }: MetodoDonutProps) {
   const valores = { efectivo, yape, plin }
   const total = efectivo + yape + plin
   const RADIO = 52
@@ -31,7 +32,7 @@ export function MetodoDonut({ efectivo, yape, plin }: MetodoDonutProps) {
     <section className="fade-up flex h-full flex-col rounded-[28px] border border-white/20 bg-white/10 p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
         <PieChart size={16} aria-hidden="true" className="text-white/80" />
-        Hoy por método de pago
+        {titulo}
       </p>
 
       {total <= 0 ? (

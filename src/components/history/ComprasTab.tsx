@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, RotateCcw, SearchX, ShoppingBag, TriangleAlert } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { BarChart3, ChevronDown, RotateCcw, SearchX, ShoppingBag, TriangleAlert } from 'lucide-react'
 import { useIngresosHistory } from '../../hooks/useHistory'
-import { formatFechaCorta, formatHora, formatMoney } from '../../utils/format'
+import { claveDia, formatFechaCorta, formatHora, formatMoney } from '../../utils/format'
 import {
   esAjusteIngreso,
   groupByCompra,
@@ -13,6 +14,7 @@ import type { HistoryFilter } from './types'
 import { describeFilter } from './types'
 
 export function ComprasTab({ filter }: { filter: HistoryFilter }) {
+  const navigate = useNavigate()
   const { ingresos, proveedorMap, productoMap, loading, error, refresh } =
     useIngresosHistory()
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
@@ -201,6 +203,14 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
                         </span>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/', { state: { fechaVista: claveDia(compra.fecha) } })}
+                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
+                    >
+                      <BarChart3 size={16} aria-hidden="true" />
+                      Ver resumen de este día
+                    </button>
                   </div>
                 </div>
               )}

@@ -6,9 +6,16 @@ import type { ProductoHoy } from '../../hooks/useTodayProducts'
 interface TodayProductsProps {
   productos: ProductoHoy[]
   loading: boolean
+  titulo?: string
+  subtitulo?: string
 }
 
-export function TodayProducts({ productos, loading }: TodayProductsProps) {
+export function TodayProducts({
+  productos,
+  loading,
+  titulo = 'Hoy por producto',
+  subtitulo = 'Lo cobrado y lo ganado de cada producto. Toca uno para ver el detalle.',
+}: TodayProductsProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const maxCobrado = Math.max(1, ...productos.map((p) => p.cobrado))
 
@@ -18,10 +25,10 @@ export function TodayProducts({ productos, loading }: TodayProductsProps) {
         <div>
           <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-white">
             <PackageSearch size={20} aria-hidden="true" className="text-white/80" />
-            Hoy por producto
+            {titulo}
           </h2>
           <p className="mt-1 text-sm font-medium text-white/60">
-            Lo cobrado y lo ganado de cada producto. Toca uno para ver el detalle.
+            {subtitulo}
           </p>
         </div>
         <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80">

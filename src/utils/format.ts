@@ -64,6 +64,13 @@ export function formatHora(value: string): string {
 
 export type FranjaId = 'todo' | 'manana' | 'tarde' | 'noche'
 
+/** Clave local YYYY-MM-DD para agrupar por día */
+export function claveDia(value: string): string {
+  const d = new Date(value)
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
 /** Mañana 06–12, tarde 12–19, noche 19–06 (hora local) */
 export function enFranja(fechaISO: string, franja: FranjaId): boolean {
   if (franja === 'todo') return true
