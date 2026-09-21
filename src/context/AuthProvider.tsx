@@ -18,8 +18,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [rol, setRol] = useState<UsuarioRol | null>(null)
   const [roleLoading, setRoleLoading] = useState(true)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
+  const [sessionExpired, setSessionExpired] = useState(false)
   const [roleRetry, setRoleRetry] = useState(0)
   const lastUserEmail = useRef<string | null>(null)
+  const hadSession = useRef(false)
+  const manualSignOut = useRef(false)
 
   const isRecoveryContext = (): boolean =>
     window.location.hash.includes('type=recovery')
@@ -47,6 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, nextSession) => {
         if (!active) return
         const nextUser = nextSession?.user ?? null
+        if (nextUser) {
+          hadSession.current = true
+        } else if (event === 'SIGNED_OUT' && hadSession.current && !manualSignOut.current) {
+          // Se cerró sola (vencimiento o fallo de renovación): avisar con modal
+          setSessionExpired(true)
+        }
+        if (event === 'SIGNED_OUT') {
+          hadSession.current = false
+        }
+        manualSignOut.current = false
         setSession(nextSession)
         setUser(nextUser)
         setLoading(false)
@@ -125,10 +138,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const signOut = useCallback(async (): Promise<void> => {
+    manualSignOut.current = true
     const { error } = await supabase.auth.signOut()
     if (error) {
+      manualSignOut.current = false
       throw new Error(error.message)
     }
+  }, [])
+
+  const acknowledgeExpired = useCallback((): void => {
+    setSessionExpired(false)
   }, [])
 
   // Cierre automático por inactividad (PC compartida): 30 min sin tocar
@@ -189,6 +208,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rol,
       roleLoading,
       isPasswordRecovery,
+      sessionExpired,
+      acknowledgeExpired,
       signInWithPassword,
       signOut,
       resetPassword,
@@ -201,6 +222,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       rol,
       roleLoading,
       isPasswordRecovery,
+      sessionExpired,
+      acknowledgeExpired,
       signInWithPassword,
       signOut,
       resetPassword,

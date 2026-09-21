@@ -9,6 +9,9 @@ export interface AuthContextValue {
   rol: UsuarioRol | null
   roleLoading: boolean
   isPasswordRecovery: boolean
+  /** true cuando la sesión se cerró sola (vencimiento/fallo) y hay que avisar */
+  sessionExpired: boolean
+  acknowledgeExpired: () => void
   signInWithPassword: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>

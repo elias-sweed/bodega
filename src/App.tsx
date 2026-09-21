@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { SessionExpiredModal } from './components/auth/SessionExpiredModal'
 import { AuthLayout } from './layouts/AuthLayout'
 import { PosLayout } from './layouts/PosLayout'
 import { DashboardPage } from './pages/DashboardPage'
@@ -28,10 +29,17 @@ function RecoveryRedirect() {
   return null
 }
 
+function SessionExpiredGate() {
+  const { sessionExpired, acknowledgeExpired } = useAuth()
+  if (!sessionExpired) return null
+  return <SessionExpiredModal onAccept={acknowledgeExpired} />
+}
+
 function App() {
   return (
     <BrowserRouter>
       <RecoveryRedirect />
+      <SessionExpiredGate />
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
