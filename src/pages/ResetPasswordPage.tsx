@@ -10,6 +10,7 @@ import {
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import { getAuthErrorMessage } from '../utils/errors'
+import { validarClaveNueva } from '../utils/password'
 
 type Notice = {
   type: 'success' | 'error'
@@ -40,8 +41,9 @@ export function ResetPasswordPage() {
     event.preventDefault()
     if (submitting) return
 
-    if (newPassword.length < 6) {
-      showToast('error', 'La contraseña debe tener al menos 6 caracteres.')
+    const errorClave = validarClaveNueva(newPassword)
+    if (errorClave) {
+      showToast('error', errorClave)
       return
     }
     if (newPassword !== confirmPassword) {
@@ -93,11 +95,11 @@ export function ResetPasswordPage() {
                 required
                 type="password"
                 autoComplete="new-password"
-                minLength={6}
+                minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className={authInputClass}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres, nada de 123456"
               />
             </div>
 
@@ -110,7 +112,7 @@ export function ResetPasswordPage() {
                 required
                 type="password"
                 autoComplete="new-password"
-                minLength={6}
+                minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className={authInputClass}
