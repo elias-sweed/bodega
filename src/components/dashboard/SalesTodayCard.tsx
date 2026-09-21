@@ -1,4 +1,4 @@
-import { Banknote, Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
+import { Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
 
 interface SalesTodayCardProps {
@@ -15,7 +15,7 @@ interface SalesTodayCardProps {
 
 export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) {
   const metodos = [
-    { label: 'Efectivo', total: resumen.efectivo_hoy, icon: Banknote },
+    { label: 'Efectivo', total: resumen.efectivo_hoy },
     { label: 'Yape', total: resumen.yape_hoy },
     { label: 'Plin', total: resumen.plin_hoy },
   ].filter((metodo) => metodo.total > 0)
@@ -37,49 +37,37 @@ export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) 
         className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-indigo-400/30 blur-3xl"
       />
 
-      <div className="relative flex flex-wrap items-end justify-between gap-6">
-        <div className="min-w-0">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/90">
-            <Sparkles size={13} aria-hidden="true" />
-            Ventas de hoy
-          </p>
-          <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
-            {formatMoney(resumen.ventas_hoy_total)}
-          </p>
-          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-white/75">
-            <span>
-              {resumen.ventas_hoy_count}{' '}
-              {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
+      <div className="relative">
+        <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/90">
+          <Sparkles size={13} aria-hidden="true" />
+          Ventas de hoy
+        </p>
+        <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
+          {formatMoney(resumen.ventas_hoy_total)}
+        </p>
+        <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-white/75">
+          <span>
+            {resumen.ventas_hoy_count}{' '}
+            {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
+          </span>
+          {comparativa !== null && (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
+                comparativa >= 0
+                  ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
+                  : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
+              }`}
+              title={`Ayer: ${formatMoney(ayerTotal)}`}
+            >
+              {comparativa >= 0 ? (
+                <TrendingUp size={13} aria-hidden="true" />
+              ) : (
+                <TrendingDown size={13} aria-hidden="true" />
+              )}
+              {comparativa >= 0 ? '+' : ''}{comparativa}% vs ayer
             </span>
-            {comparativa !== null && (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
-                  comparativa >= 0
-                    ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
-                    : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
-                }`}
-                title={`Ayer: ${formatMoney(ayerTotal)}`}
-              >
-                {comparativa >= 0 ? (
-                  <TrendingUp size={13} aria-hidden="true" />
-                ) : (
-                  <TrendingDown size={13} aria-hidden="true" />
-                )}
-                {comparativa >= 0 ? '+' : ''}{comparativa}% vs ayer
-              </span>
-            )}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-white/25 bg-white/15 px-5 py-4 shadow-inner backdrop-blur-xl">
-          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/70">
-            <TrendingUp size={14} aria-hidden="true" />
-            Ganancia estimada
-          </p>
-          <p className="mt-1 text-2xl font-black tracking-tight text-white">
-            {formatMoney(resumen.ganancia_estimada_hoy)}
-          </p>
-        </div>
+          )}
+        </p>
       </div>
 
       {metodos.length > 0 && (

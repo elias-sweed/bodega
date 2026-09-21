@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { AlertTriangle, PackageSearch, RefreshCw } from 'lucide-react'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
+import { GananciaCard } from '../components/dashboard/GananciaCard'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
 import { MetodoDonut } from '../components/dashboard/MetodoDonut'
@@ -33,7 +34,7 @@ export function DashboardPage() {
   // Primera vez (sin caché): skeletons premium
   if (loading && resumen === null) {
     return (
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
         <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
@@ -53,7 +54,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6">
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
@@ -123,6 +124,8 @@ export function DashboardPage() {
             />
           </div>
 
+          <QuickActions />
+
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
             <div className="xl:col-span-3">
               <MetodoDonut
@@ -132,7 +135,10 @@ export function DashboardPage() {
               />
             </div>
             <div className="xl:col-span-2">
-              <QuickActions />
+              <GananciaCard
+                ganancia={resumen.ganancia_estimada_hoy}
+                totalVendido={resumen.ventas_hoy_total}
+              />
             </div>
           </div>
 
