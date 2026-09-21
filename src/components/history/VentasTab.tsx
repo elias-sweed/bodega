@@ -25,18 +25,28 @@ type Notice = {
 
 const SUMMARIES_CACHE_KEY = 'bodega:ventas-summaries-cache:v1'
 
-function readSummariesCache(): Record<string, string> {
+interface VentaSummary {
+  texto: string
+  ganancia: number
+}
+
+function readSummariesCache(): Record<string, VentaSummary> {
   try {
     const raw = localStorage.getItem(SUMMARIES_CACHE_KEY)
     if (!raw) return {}
-    const parsed = JSON.parse(raw) as { summaries?: Record<string, string> }
-    return parsed?.summaries ?? {}
+    const parsed = JSON.parse(raw) as { summaries?: Record<string, VentaSummary | string> }
+    const out: Record<string, VentaSummary> = {}
+    for (const [id, value] of Object.entries(parsed?.summaries ?? {})) {
+      // Migración: antes solo se guardaba el texto
+      out[id] = typeof value === 'string' ? { texto: value, ganancia: 0 } : value
+    }
+    return out
   } catch {
     return {}
   }
 }
 
-function writeSummariesCache(summaries: Record<string, string>): void {
+function writeSummariesCache(summaries: Record<string, VentaSummary>): void {
   try {
     // Se guardan los últimos 500 para no llenar el almacenamiento
     const entries = Object.entries(summaries).slice(-500)
@@ -73,7 +83,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [details, setDetails] = useState<Record<string, VentaDetail>>({})
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null)
-  const [summaries, setSummaries] = useState<Record<string, string>>(() =>
+  const [summaries, setSummaries] = useState<Record<string, VentaSummary>>(() =>
     readSummariesCache(),
   )
   const [notice, setNotice] = useState<Notice | null>(null)
@@ -99,19 +109,26 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
         const ids = [...new Set(items.map((i) => i.producto_id).filter((id): id is string => id !== null))]
         const rows = await fetchProductNames(ids)
         const names = new Map(rows.map((r) => [r.id, r.nombre] as const))
+        const costos = new Map(rows.map((r) => [r.id, r.costo] as const))
         const byVenta = new Map<string, DetalleVentasRow[]>()
         for (const item of items) {
           const list = byVenta.get(item.venta_id) ?? []
           list.push(item)
           byVenta.set(item.venta_id, list)
         }
-        const result: Record<string, string> = {}
+        const result: Record<string, VentaSummary> = {}
         for (const [ventaId, list] of byVenta) {
           const parts = list.map(
             (item) => `${names.get(item.producto_id ?? '') ?? 'Producto eliminado'} × ${item.cantidad}`,
           )
-          result[ventaId] =
-            parts.slice(0, 2).join(', ') + (parts.length > 2 ? ` +${parts.length - 2} más` : '')
+          const ganancia = list.reduce((sum, item) => {
+            const costo = item.costo_unitario ?? costos.get(item.producto_id ?? '') ?? 0
+            return sum + (item.subtotal - costo * item.cantidad)
+          }, 0)
+          result[ventaId] = {
+            texto: parts.slice(0, 2).join(', ') + (parts.length > 2 ? ` +${parts.length - 2} más` : ''),
+            ganancia,
+          }
         }
         if (!cancelled) {
           setSummaries(result)
@@ -272,7 +289,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                       N.º {numeroById.get(venta.id) ?? '—'}
                     </span>
                     <span className="truncate text-base font-extrabold tracking-tight text-white">
-                      {summaries[venta.id] ?? '···'}
+                      {summaries[venta.id]?.texto ?? '···'}
                     </span>
                   </span>
                   <span className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-0.5 text-xs font-semibold text-white/55">
@@ -289,8 +306,22 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                   </span>
                 </div>
                 <span className="flex shrink-0 items-center gap-3">
-                  <span className="text-xl font-black tracking-tighter text-white">
-                    {formatMoney(venta.total)}
+                  <span className="flex flex-col items-end gap-1">
+                    <span className="text-xl font-black tracking-tighter tabular-nums text-white">
+                      {formatMoney(venta.total)}
+                    </span>
+                    {summaries[venta.id] !== undefined && (
+                      <span
+                        className={`rounded-full border px-2 py-px text-[11px] font-black tabular-nums ${
+                          summaries[venta.id].ganancia >= 0
+                            ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
+                            : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
+                        }`}
+                        title="Lo que ganaste en esta venta"
+                      >
+                        +{formatMoney(summaries[venta.id].ganancia)}
+                      </span>
+                    )}
                   </span>
                   <span
                     className={`text-white/50 transition-transform duration-300 ${

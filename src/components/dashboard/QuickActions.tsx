@@ -28,14 +28,14 @@ const ACCIONES = [
   },
 ]
 
-export function QuickActions() {
+export function QuickActions({ layout = 'grid' }: { layout?: 'grid' | 'stack' }) {
   return (
-    <section className="fade-up rounded-[28px] border border-white/20 bg-white/10 p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+    <section className="fade-up h-full rounded-[28px] border border-white/20 bg-white/10 p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
         <Zap size={15} aria-hidden="true" className="text-amber-200" />
         Accesos rápidos
       </p>
-      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+      <div className={layout === 'stack' ? 'mt-3 flex flex-col gap-2.5' : 'mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3'}>
         {ACCIONES.map((accion) => (
           <Link
             key={accion.to}
@@ -48,10 +48,10 @@ export function QuickActions() {
               <accion.Icon size={20} aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-sm font-black tracking-tight text-white">
+              <span className="block text-sm font-black tracking-tight text-white">
                 {accion.etiqueta}
               </span>
-              <span className="block truncate text-xs font-medium text-white/55">
+              <span className="block text-xs font-medium text-white/55">
                 {accion.detalle}
               </span>
             </span>

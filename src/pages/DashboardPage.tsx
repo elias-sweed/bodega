@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { AlertTriangle, PackageSearch, RefreshCw } from 'lucide-react'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
-import { GananciaCard } from '../components/dashboard/GananciaCard'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
 import { MetodoDonut } from '../components/dashboard/MetodoDonut'
@@ -124,8 +123,6 @@ export function DashboardPage() {
             />
           </div>
 
-          <QuickActions />
-
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
             <div className="xl:col-span-3">
               <MetodoDonut
@@ -135,10 +132,7 @@ export function DashboardPage() {
               />
             </div>
             <div className="xl:col-span-2">
-              <GananciaCard
-                ganancia={resumen.ganancia_estimada_hoy}
-                totalVendido={resumen.ventas_hoy_total}
-              />
+              <QuickActions layout="stack" />
             </div>
           </div>
 

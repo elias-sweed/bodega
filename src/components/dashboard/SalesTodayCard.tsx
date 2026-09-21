@@ -25,6 +25,10 @@ export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) 
       ? Math.round(((resumen.ventas_hoy_total - ayerTotal) / ayerTotal) * 100)
       : null
 
+  const cobrado = resumen.ventas_hoy_total
+  const ganado = resumen.ganancia_estimada_hoy
+  const maximo = Math.max(1, cobrado, ganado)
+
   return (
     <section className="fade-up relative overflow-hidden rounded-[28px] border border-white/25 bg-gradient-to-br from-white/25 via-white/10 to-white/5 p-7 shadow-[0_24px_70px_-18px_rgba(20,5,80,0.7)] backdrop-blur-2xl sm:p-8">
       {/* brillos decorativos */}
@@ -37,37 +41,79 @@ export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) 
         className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-indigo-400/30 blur-3xl"
       />
 
-      <div className="relative">
-        <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/90">
-          <Sparkles size={13} aria-hidden="true" />
-          Ventas de hoy
-        </p>
-        <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
-          {formatMoney(resumen.ventas_hoy_total)}
-        </p>
-        <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-white/75">
-          <span>
-            {resumen.ventas_hoy_count}{' '}
-            {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
-          </span>
-          {comparativa !== null && (
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
-                comparativa >= 0
-                  ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
-                  : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
-              }`}
-              title={`Ayer: ${formatMoney(ayerTotal)}`}
-            >
-              {comparativa >= 0 ? (
-                <TrendingUp size={13} aria-hidden="true" />
-              ) : (
-                <TrendingDown size={13} aria-hidden="true" />
-              )}
-              {comparativa >= 0 ? '+' : ''}{comparativa}% vs ayer
+      <div className="relative flex flex-wrap items-center gap-6">
+        <div className="min-w-0 flex-1">
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/90">
+            <Sparkles size={13} aria-hidden="true" />
+            Ventas de hoy
+          </p>
+          <p className="mt-3 text-5xl font-black tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.35)] sm:text-6xl">
+            {formatMoney(cobrado)}
+          </p>
+          <p className="mt-2 text-lg font-black tracking-tight tabular-nums text-emerald-200">
+            De eso, ganaste {formatMoney(ganado)}
+          </p>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-white/75">
+            <span>
+              {resumen.ventas_hoy_count}{' '}
+              {resumen.ventas_hoy_count === 1 ? 'venta registrada' : 'ventas registradas'}
             </span>
-          )}
-        </p>
+            {comparativa !== null && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
+                  comparativa >= 0
+                    ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
+                    : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
+                }`}
+                title={`Ayer: ${formatMoney(ayerTotal)}`}
+              >
+                {comparativa >= 0 ? (
+                  <TrendingUp size={13} aria-hidden="true" />
+                ) : (
+                  <TrendingDown size={13} aria-hidden="true" />
+                )}
+                {comparativa >= 0 ? '+' : ''}{comparativa}% vs ayer
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 px-5 py-4 backdrop-blur-xl sm:max-w-[15rem]">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/70">
+            Cobrado vs ganado
+          </p>
+          <div className="mt-3 flex h-28 items-end justify-center gap-4">
+            <div className="flex h-full flex-col items-center justify-end gap-1.5">
+              <span className="text-xs font-black tabular-nums text-white">
+                {formatMoney(cobrado)}
+              </span>
+              <div
+                className="w-12 rounded-t-xl border border-white/30 bg-gradient-to-t from-white/25 to-white/55"
+                style={{ height: `${Math.max(cobrado > 0 ? 10 : 4, Math.round((cobrado / maximo) * 100))}%` }}
+              />
+              <span className="flex items-center gap-1 text-[11px] font-bold text-white/70">
+                <span className="h-2 w-2 rounded-full bg-white/60" aria-hidden="true" />
+                Cobrado
+              </span>
+            </div>
+            <div className="flex h-full flex-col items-center justify-end gap-1.5">
+              <span className="text-xs font-black tabular-nums text-emerald-200">
+                {formatMoney(ganado)}
+              </span>
+              <div
+                className="w-12 rounded-t-xl border border-emerald-200/50 bg-gradient-to-t from-emerald-500/90 to-emerald-300 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)]"
+                style={{ height: `${Math.max(ganado > 0 ? 10 : 4, Math.round((ganado / maximo) * 100))}%` }}
+              />
+              <span className="flex items-center gap-1 text-[11px] font-bold text-white/70">
+                <span className="h-2 w-2 rounded-full bg-emerald-300" aria-hidden="true" />
+                Ganado
+              </span>
+            </div>
+          </div>
+          <p className="mt-2 text-center text-[11px] font-medium text-white/50">
+            Lo verde es lo que te queda libre.
+          </p>
+        </div>
       </div>
 
       {metodos.length > 0 && (

@@ -32,6 +32,7 @@ export async function fetchProductosBajoStock(): Promise<ProductosRow[]> {
 }
 
 export interface VentaDiaria {
+  id: string
   fecha: string
   total: number
 }
@@ -43,7 +44,7 @@ export async function fetchVentasUltimos7Dias(): Promise<VentaDiaria[]> {
   desde.setHours(0, 0, 0, 0)
   const { data, error } = await supabase
     .from('ventas')
-    .select('fecha, total')
+    .select('id, fecha, total')
     .gte('fecha', desde.toISOString())
     .order('fecha', { ascending: true })
 
@@ -52,6 +53,7 @@ export async function fetchVentasUltimos7Dias(): Promise<VentaDiaria[]> {
   }
 
   return (data ?? []).map((v) => ({
+    id: String(v.id),
     fecha: String(v.fecha),
     total: Number(v.total) || 0,
   }))
