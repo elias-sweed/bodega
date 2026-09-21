@@ -131,6 +131,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Cierre automático por inactividad (PC compartida): 30 min sin tocar
+  // nada cierra la sesión sola para que nadie quede dentro.
+  useEffect(() => {
+    if (!user) return
+    const LIMITE_MIN = 30
+    let timer = window.setTimeout(
+      () => void signOut().catch(() => undefined),
+      LIMITE_MIN * 60_000,
+    )
+    const reiniciar = (): void => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(
+        () => void signOut().catch(() => undefined),
+        LIMITE_MIN * 60_000,
+      )
+    }
+    const eventos = ['pointerdown', 'keydown', 'touchstart', 'scroll'] as const
+    for (const evento of eventos) {
+      window.addEventListener(evento, reiniciar, { passive: true })
+    }
+    return () => {
+      window.clearTimeout(timer)
+      for (const evento of eventos) {
+        window.removeEventListener(evento, reiniciar)
+      }
+    }
+  }, [user, signOut])
+
   const resetPassword = useCallback(
     async (email: string): Promise<void> => {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {

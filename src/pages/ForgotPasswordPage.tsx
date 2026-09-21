@@ -170,7 +170,7 @@ export function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={authInputClass}
-                placeholder="tucorreo@ejemplo.com"
+                placeholder="nombre.apellido@correo.com"
               />
             </div>
 

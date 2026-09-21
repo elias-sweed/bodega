@@ -66,7 +66,8 @@ export function getAuthErrorMessage(error: unknown): string {
     return 'Correo o contraseña incorrectos.'
   }
   if (message.includes('Email not confirmed')) {
-    return 'Confirma tu correo electrónico antes de iniciar sesión.'
+    // Genérico a propósito: no revelar si el correo existe o no.
+    return 'Correo o contraseña incorrectos.'
   }
   if (message.includes('User already registered')) {
     return 'Ya existe una cuenta con ese correo electrónico.'
