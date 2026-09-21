@@ -331,6 +331,12 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
                       <div className="flex flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm backdrop-blur-xl">
                         <div className="flex items-center justify-between gap-4">
+                          <span className="font-medium text-white/65">Lo vendió</span>
+                          <span className="truncate font-bold text-white">
+                            {venta.creado_por ?? '—'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-4">
                           <span className="font-medium text-white/65">El cliente pagó en total</span>
                           <span className="font-black tabular-nums text-white">
                             {formatMoney(venta.total)}

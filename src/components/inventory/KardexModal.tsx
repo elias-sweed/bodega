@@ -182,6 +182,7 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
                       <p className="truncate text-xs font-medium text-white/50">
                         {formatDateTime(m.fecha)}
                         {m.detalle ? ` · ${m.detalle}` : ''}
+                        {m.autor ? ` · por ${m.autor}` : ''}
                         {m.monto !== null && m.monto > 0
                           ? ` · ${formatMoney(m.monto)}`
                           : ''}

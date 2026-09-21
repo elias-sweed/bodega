@@ -187,11 +187,19 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
                         )
                       })}
                     </ul>
-                    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl">
-                      <span className="font-medium text-white/65">Total pagado</span>
-                      <span className="text-base font-black tracking-tight text-white">
-                        {formatMoney(compra.total)}
-                      </span>
+                    <div className="flex flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-medium text-white/65">Lo registró</span>
+                        <span className="truncate font-bold text-white">
+                          {compra.items.find((item) => item.creado_por)?.creado_por ?? '—'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="font-medium text-white/65">Total pagado</span>
+                        <span className="text-base font-black tracking-tight tabular-nums text-white">
+                          {formatMoney(compra.total)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

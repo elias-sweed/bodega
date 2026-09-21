@@ -29,6 +29,7 @@ export type VentasRow = {
   metodo_pago: string
   origen: string
   ticket_externo: string | null
+  creado_por: string | null
 }
 
 export type VentasInsert = Omit<VentasRow, 'id' | 'fecha'>
@@ -70,6 +71,7 @@ export type IngresosMercaderiaRow = {
   comprobante: string | null
   motivo: string | null
   fecha: string
+  creado_por: string | null
 }
 
 export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>

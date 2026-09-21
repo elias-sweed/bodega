@@ -14,6 +14,7 @@ export interface KardexMovement {
   /** Positivo = entrada, negativo = salida */
   cantidad: number
   monto: number | null
+  autor: string | null
 }
 
 export interface KardexResult {
@@ -70,6 +71,7 @@ export async function fetchKardex(productoId: string): Promise<KardexResult> {
       detalle: null,
       cantidad: -d.cantidad,
       monto: d.subtotal,
+      autor: venta?.creado_por ?? null,
     })
   }
 
@@ -86,6 +88,7 @@ export async function fetchKardex(productoId: string): Promise<KardexResult> {
       detalle: esAjuste ? null : (ing.comprobante?.trim() || null),
       cantidad: ing.cantidad_ingresada,
       monto: Math.abs(ing.costo_total),
+      autor: ing.creado_por ?? null,
     })
   }
 
