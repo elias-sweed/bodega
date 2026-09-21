@@ -1,12 +1,15 @@
+import { Pause, ShoppingCart } from 'lucide-react'
 import type { CartItem } from '../../types'
 import { formatMoney } from '../../utils/format'
-import { CartItemRow } from './CartItemRow'
+import { CartEmptyState, CartItemRow } from './CartItemRow'
 
 interface CartProps {
   items: CartItem[]
   charging: boolean
+  highlightId: string | null
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
+  onRemove: (productId: string) => void
   onCharge: () => void
   onSuspend: () => void
 }
@@ -14,10 +17,12 @@ interface CartProps {
 export function Cart({
   items,
   charging,
+  highlightId,
   onIncrease,
   onDecrease,
-  onCharge,
+  onRemove,
   onSuspend,
+  onCharge,
 }: CartProps) {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
   const total = items.reduce(
@@ -28,42 +33,44 @@ export function Cart({
   const canCharge = items.length > 0 && !charging
 
   return (
-    <aside className="flex h-full min-h-0 flex-col rounded-3xl bg-white shadow-sm">
-      <header className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-        <h2 className="text-xl font-bold text-slate-800">Carrito</h2>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
+    <aside
+      className={`h-full min-h-0 flex-col rounded-[28px] border border-white/20 bg-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.65)] backdrop-blur-2xl ${
+        items.length === 0 ? 'hidden lg:flex' : 'flex'
+      }`}
+    >
+      <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+        <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-white">
+          <ShoppingCart size={19} aria-hidden="true" className="text-white/75" />
+          Carrito
+        </h2>
+        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80">
           {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}
         </span>
       </header>
 
       {items.length === 0 ? (
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-          <span className="text-4xl" aria-hidden="true">
-            🛒
-          </span>
-          <p className="text-slate-400">
-            El carrito está vacío.
-            <br />
-            Toca un producto para agregarlo.
-          </p>
-        </div>
+        <CartEmptyState />
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto px-5">
+        <ul className="fade-in min-h-0 flex-1 overflow-y-auto px-5">
           {items.map((item) => (
             <CartItemRow
               key={item.product.id}
               item={item}
+              highlight={highlightId === item.product.id}
               onIncrease={onIncrease}
               onDecrease={onDecrease}
+              onRemove={onRemove}
             />
           ))}
         </ul>
       )}
 
-      <footer className="shrink-0 space-y-3 border-t border-slate-100 p-5 pt-4">
+      <footer className="shrink-0 space-y-3 border-t border-white/10 p-5 pt-4">
         <div className="flex items-end justify-between gap-4">
-          <span className="text-lg font-semibold text-slate-600">Total</span>
-          <span className="text-4xl font-black tracking-tight text-slate-900">
+          <span className="text-sm font-bold uppercase tracking-widest text-white/60">
+            Total
+          </span>
+          <span className="text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
             {formatMoney(total)}
           </span>
         </div>
@@ -72,17 +79,18 @@ export function Cart({
           type="button"
           disabled={!canCharge}
           onClick={onCharge}
-          className="h-16 w-full rounded-2xl bg-emerald-500 text-2xl font-black tracking-widest text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-xl font-black tracking-[0.2em] text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
         >
-          COBRAR
+          {charging ? 'COBRANDO…' : 'COBRAR'}
         </button>
 
         <button
           type="button"
           disabled={items.length === 0 || charging}
           onClick={onSuspend}
-          className="h-12 w-full rounded-2xl border-2 border-slate-200 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 text-sm font-extrabold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
+          <Pause size={15} aria-hidden="true" />
           Suspender venta
         </button>
       </footer>

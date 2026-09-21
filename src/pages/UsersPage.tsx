@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Info, LogOut, RefreshCw, ShieldAlert, UserPlus, Users } from 'lucide-react'
+import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import {
-  addUsuarioAutorizado,
+  crearCuentaConAcceso,
   fetchUsuariosAutorizados,
   removeUsuarioAutorizado,
   updateUsuarioRol,
@@ -19,8 +21,9 @@ type Notice = {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-base text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100'
-const labelClass = 'mb-1.5 block text-sm font-semibold text-slate-700'
+  'h-12 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-medium text-white outline-none transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+const labelClass =
+  'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/60'
 
 export function UsersPage() {
   const { rol, user, signOut } = useAuth()
@@ -34,6 +37,9 @@ export function UsersPage() {
   const [saving, setSaving] = useState(false)
   const [noticed, setNoticed] = useState<Notice | null>(null)
   const [signingOut, setSigningOut] = useState(false)
+  const [pendingRemove, setPendingRemove] =
+    useState<UsuariosAutorizadosRow | null>(null)
+  const [removing, setRemoving] = useState(false)
   const noticeTimer = useRef<number | undefined>(undefined)
 
   const showNotice = (type: Notice['type'], message: string): void => {
@@ -73,17 +79,18 @@ export function UsersPage() {
 
   if (!isAdmin) {
     return (
-      <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm">
-          <span className="text-4xl" aria-hidden="true">
-            🛒
+      <div className="fade-in mx-auto flex h-full w-full max-w-md flex-col items-center justify-center p-4">
+        <div className="fade-up w-full rounded-[28px] border border-white/15 bg-white/10 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white">
+            <ShieldAlert size={26} aria-hidden="true" />
           </span>
-          <h1 className="mt-2 text-xl font-black text-slate-900">
+          <h1 className="mt-4 text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
             Acceso no autorizado
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm font-medium text-white/65">
             Solo un administrador puede gestionar los accesos. El correo{' '}
-            <strong>{user?.email}</strong> no tiene permiso para ver esta página.
+            <strong className="text-white">{user?.email}</strong> no tiene
+            permiso para ver esta página.
           </p>
           <button
             type="button"
@@ -92,8 +99,9 @@ export function UsersPage() {
               setSigningOut(true)
               void signOut()
             }}
-            className="mt-6 h-14 w-full rounded-2xl bg-slate-900 text-lg font-bold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/15 text-base font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
+            <LogOut size={18} aria-hidden="true" />
             {signingOut ? 'Cerrando…' : 'Cerrar sesión'}
           </button>
         </div>
@@ -117,14 +125,19 @@ export function UsersPage() {
     }
     setSaving(true)
     try {
-      await addUsuarioAutorizado(trimmed, nuevoRol)
+      const { existed } = await crearCuentaConAcceso(trimmed, nuevoRol)
       setEmail('')
       await loadList()
-      showNotice('success', `Acceso otorgado a ${trimmed}`)
+      showNotice(
+        'success',
+        existed
+          ? `${trimmed} ya tenía cuenta: se le dio acceso de ${nuevoRol === 'admin' ? 'Admin' : 'Cajero'}.`
+          : `Cuenta creada para ${trimmed} (${nuevoRol === 'admin' ? 'Admin' : 'Cajero'}). Dile que en el login use "Olvidé mi contraseña" para crear su clave.`,
+      )
     } catch (cause) {
       showNotice(
         'error',
-        cause instanceof Error ? cause.message : 'No se pudo otorgar el acceso',
+        cause instanceof Error ? cause.message : 'No se pudo crear la cuenta',
       )
     } finally {
       setSaving(false)
@@ -152,7 +165,7 @@ export function UsersPage() {
     }
   }
 
-  const handleRemove = async (usuario: UsuariosAutorizadosRow): Promise<void> => {
+  const handleRemove = (usuario: UsuariosAutorizadosRow): void => {
     if (usuario.email === user?.email) {
       showNotice('error', 'No puedes quitarte el acceso a ti mismo.')
       return
@@ -161,19 +174,25 @@ export function UsersPage() {
       showNotice('error', 'No puedes quitar el acceso del último administrador.')
       return
     }
-    const ok = window.confirm(
-      `¿Quitar el acceso a ${usuario.email}?\nEse correo ya no podrá entrar al sistema.`,
-    )
-    if (!ok) return
+    setPendingRemove(usuario)
+  }
+
+  const confirmRemove = async (): Promise<void> => {
+    if (!pendingRemove || removing) return
+    const target = pendingRemove
+    setRemoving(true)
     try {
-      await removeUsuarioAutorizado(usuario.email)
+      await removeUsuarioAutorizado(target.email)
       await loadList()
-      showNotice('success', `Se quitó el acceso a ${usuario.email}`)
+      showNotice('success', `Se quitó el acceso a ${target.email}`)
+      setPendingRemove(null)
     } catch (cause) {
       showNotice(
         'error',
         cause instanceof Error ? cause.message : 'No se pudo quitar el acceso',
       )
+    } finally {
+      setRemoving(false)
     }
   }
 
@@ -190,23 +209,36 @@ export function UsersPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-5">
-      <header className="shrink-0">
-        <h1 className="text-2xl font-black text-slate-900">Usuarios</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Controla quién puede entrar al sistema y con qué rol. Esta página solo
-          es visible para administradores.
-        </p>
+    <div className="fade-in mx-auto flex h-full w-full max-w-4xl flex-col gap-6">
+      <header className="flex shrink-0 items-center gap-4">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white backdrop-blur-xl">
+          <Users size={22} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+            Acceso
+          </p>
+          <h1 className="mt-0.5 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+            Usuarios
+          </h1>
+          <p className="mt-1 text-sm font-medium text-white/65">
+            Controla quién puede entrar al sistema y con qué rol.
+          </p>
+        </div>
       </header>
 
-      <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
-        <strong>Importante:</strong> para darle acceso a alguien, primero crea su
-        cuenta en Supabase (Authentication) con el correo que quieras usar y, si
-        quieres, verifícala con el email de invitación. Aquí solo se define quién
-        puede entrar y con qué rol.
+      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-200/30 bg-sky-400/15 px-5 py-4 backdrop-blur-2xl">
+        <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-200" />
+        <p className="text-sm font-medium leading-relaxed text-sky-100">
+          <strong className="font-extrabold">Todo se hace aquí:</strong> escribe el
+          correo, elige el rol y pulsa el botón: la cuenta se crea sola. Después
+          dile a la persona que en el login use{' '}
+          <strong className="font-extrabold text-white">"Olvidé mi contraseña"</strong>{' '}
+          para poner su propia clave (que revise spam si no le llega).
+        </p>
       </div>
 
-      <section className="rounded-3xl bg-white p-5 shadow-sm">
+      <section className="fade-up shrink-0 rounded-[28px] border border-white/15 bg-white/10 p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-6">
         <form onSubmit={handleAdd} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div>
@@ -224,7 +256,7 @@ export function UsersPage() {
                 placeholder="nuevocorreo@ejemplo.com"
               />
             </div>
-            <div>
+            <div className="sm:min-w-40">
               <label htmlFor="usuario-rol" className={labelClass}>
                 Rol
               </label>
@@ -232,7 +264,7 @@ export function UsersPage() {
                 id="usuario-rol"
                 value={nuevoRol}
                 onChange={(e) => setNuevoRol(e.target.value as UsuarioRol)}
-                className={`${inputClass} cursor-pointer`}
+                className={`${inputClass} cursor-pointer [&>option]:bg-[#2a1568] [&>option]:text-white`}
               >
                 <option value="cajero">Cajero</option>
                 <option value="admin">Admin</option>
@@ -242,58 +274,82 @@ export function UsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="h-12 w-full rounded-xl bg-indigo-600 text-base font-bold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-base font-black tracking-tight text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
           >
-            {saving ? 'Agregando…' : 'Agregar acceso'}
+            <UserPlus size={18} strokeWidth={2.5} aria-hidden="true" />
+            {saving ? 'Creando…' : 'Crear cuenta y dar acceso'}
           </button>
         </form>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-y-auto rounded-3xl bg-white shadow-sm">
+      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/15 bg-white/10 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
         {loading ? (
-          <p className="py-10 text-center text-slate-400">Cargando usuarios…</p>
+          <div className="flex flex-col gap-3 p-5" aria-label="Cargando usuarios">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="skeleton-shimmer h-16 w-full rounded-2xl"
+                aria-hidden="true"
+              />
+            ))}
+          </div>
         ) : error ? (
-          <div className="flex flex-col items-center gap-4 p-8 text-center">
-            <p className="font-semibold text-rose-600">{error}</p>
+          <div className="m-5 flex flex-col items-center gap-4 rounded-[20px] border border-rose-200/25 bg-rose-500/15 p-8 text-center backdrop-blur-xl">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+              <ShieldAlert size={22} aria-hidden="true" />
+            </span>
+            <p className="text-base font-extrabold tracking-tight text-white">
+              No se pudo cargar el listado
+            </p>
+            <p className="text-sm font-medium text-white/70">{error}</p>
             <button
               type="button"
               onClick={() => void loadList()}
-              className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
             >
+              <RefreshCw size={15} strokeWidth={2.5} aria-hidden="true" />
               Reintentar
             </button>
           </div>
         ) : usuarios.length === 0 ? (
-          <p className="py-10 text-center text-slate-400">
-            Todavía no hay usuarios con acceso.
-          </p>
+          <div className="m-5 flex flex-col items-center gap-2 rounded-[20px] border border-white/15 bg-white/10 p-10 text-center backdrop-blur-xl">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+              <Users size={22} aria-hidden="true" />
+            </span>
+            <p className="mt-2 text-base font-extrabold tracking-tight text-white">
+              Todavía no hay usuarios con acceso
+            </p>
+            <p className="text-sm font-medium text-white/65">
+              Agrega el primer correo con el formulario de arriba.
+            </p>
+          </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-white/10">
             {usuarios.map((usuario) => (
               <li
                 key={usuario.email}
-                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+                className="fade-up flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-semibold text-slate-800">
+                  <p className="truncate font-bold text-white">
                     {usuario.email}
                     {usuario.email === user?.email && (
-                      <span className="ml-2 text-xs font-bold text-indigo-500">
+                      <span className="ml-2 text-xs font-extrabold text-emerald-200">
                         (tú)
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs font-medium text-white/45">
                     Desde{' '}
                     {new Date(usuario.created_at).toLocaleDateString('es-PE')}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
+                    className={`rounded-full border px-3 py-1 text-xs font-extrabold ${
                       usuario.rol === 'admin'
-                        ? 'bg-violet-100 text-violet-700'
-                        : 'bg-slate-100 text-slate-600'
+                        ? 'border-violet-200/30 bg-violet-400/25 text-violet-100'
+                        : 'border-white/20 bg-white/10 text-white/75'
                     }`}
                   >
                     {usuario.rol === 'admin' ? 'Admin' : 'Cajero'}
@@ -301,14 +357,14 @@ export function UsersPage() {
                   <button
                     type="button"
                     onClick={() => void handleChangeRol(usuario)}
-                    className="rounded-lg border-2 border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                    className="rounded-xl border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0 active:scale-95"
                   >
                     Cambiar rol
                   </button>
                   <button
                     type="button"
-                    onClick={() => void handleRemove(usuario)}
-                    className="rounded-lg border-2 border-rose-200 px-3 py-1 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50"
+                    onClick={() => handleRemove(usuario)}
+                    className="rounded-xl border border-rose-200/30 bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-rose-100 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-400/25 active:translate-y-0 active:scale-95"
                   >
                     Quitar acceso
                   </button>
@@ -318,6 +374,22 @@ export function UsersPage() {
           </ul>
         )}
       </section>
+
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        title={
+          pendingRemove
+            ? `¿Quitar el acceso a ${pendingRemove.email}?`
+            : '¿Quitar el acceso?'
+        }
+        description="Ese correo ya no podrá entrar."
+        confirmLabel={removing ? 'Quitando…' : 'Quitar acceso'}
+        cancelLabel="Conservar"
+        onConfirm={() => void confirmRemove()}
+        onCancel={() => {
+          if (!removing) setPendingRemove(null)
+        }}
+      />
 
       {noticed && <Toast type={noticed.type} message={noticed.message} />}
     </div>

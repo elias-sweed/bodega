@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
+import { QrCode } from 'lucide-react'
 import { getPaymentNumber, type MetodoBilletera } from '../../utils/paymentConfig'
 
 interface PaymentQRProps {
@@ -33,11 +34,13 @@ export function PaymentQR({ method }: PaymentQRProps) {
   if (!number) {
     return (
       <div className="mt-5">
-        <p className="mb-1 text-sm font-semibold text-slate-600">Pago por {method}</p>
-        <div className="flex h-44 items-center justify-center rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 px-4 text-center">
-          <p className="text-sm font-semibold text-amber-700">
+        <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60">
+          Pago por {method}
+        </p>
+        <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-amber-200/30 bg-amber-400/10 px-4 text-center backdrop-blur-xl">
+          <p className="text-sm font-bold text-amber-100">
             Tu código QR de {method} aparecerá aquí.
-            <span className="mt-1 block font-normal">
+            <span className="mt-1 block text-xs font-medium text-amber-100/70">
               Falta configurar el número en las variables del proyecto
               (VITE_{method.toUpperCase()}_NUMBER).
             </span>
@@ -49,26 +52,29 @@ export function PaymentQR({ method }: PaymentQRProps) {
 
   return (
     <div className="mt-5">
-      <p className="mb-1 text-sm font-semibold text-slate-600">Pago por {method}</p>
-      <div className="flex flex-col items-center gap-2 rounded-2xl bg-slate-50 p-4">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60">
+        <QrCode size={14} aria-hidden="true" />
+        Pago por {method}
+      </p>
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl">
         {qrError ? (
-          <p className="py-10 text-sm font-semibold text-rose-600">
+          <p className="py-10 text-sm font-bold text-rose-200">
             No se pudo generar el QR. Reinicia la página.
           </p>
         ) : dataUrl ? (
           <img
             src={dataUrl}
             alt={`Código QR de ${method}`}
-            className="h-48 w-48 rounded-2xl bg-white p-2 shadow-sm"
+            className="h-48 w-48 rounded-2xl border border-white/20 bg-white p-2 shadow-lg"
           />
         ) : (
           <span
-            className="h-48 w-48 animate-pulse rounded-2xl bg-slate-200"
+            className="skeleton-shimmer h-48 w-48 rounded-2xl"
             aria-hidden="true"
           />
         )}
-        <p className="text-lg font-black tracking-wide text-slate-900">{number}</p>
-        <p className="text-xs text-slate-400">
+        <p className="text-lg font-black tracking-wide text-white">{number}</p>
+        <p className="text-xs font-medium text-white/55">
           El cliente escanea, paga y confirmas abajo.
         </p>
       </div>

@@ -1,3 +1,5 @@
+import { Check, Tag } from 'lucide-react'
+
 export interface CategoriaSugerida {
   nombre: string
   score: number
@@ -29,20 +31,24 @@ export function CategoryChips({
             type="button"
             onClick={() => onSelect(categoria.nombre)}
             aria-pressed={activo}
-            className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-all active:scale-95 ${
+            className={`flex items-center gap-2 rounded-2xl border px-3.5 py-2.5 text-sm font-extrabold tracking-tight backdrop-blur-xl transition-all duration-300 active:scale-95 ${
               activo
-                ? 'border-sky-500 bg-sky-500 text-white shadow-sm'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:bg-sky-50'
+                ? 'border-emerald-200/50 bg-gradient-to-br from-emerald-400/80 to-emerald-600/80 text-white shadow-[0_12px_30px_-12px_rgba(16,185,129,0.8)]'
+                : 'border-white/20 bg-white/10 text-white/80 hover:-translate-y-0.5 hover:bg-white/20 hover:text-white'
             }`}
           >
-            <span aria-hidden="true">🏷️</span>
+            {activo ? (
+              <Check size={15} strokeWidth={3} aria-hidden="true" />
+            ) : (
+              <Tag size={14} aria-hidden="true" className="text-white/50" />
+            )}
             {categoria.nombre}
             {esSugerida && (
               <span
-                className={`rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase ${
+                className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                   activo
-                    ? 'bg-white/20 text-white'
-                    : 'bg-amber-100 text-amber-700'
+                    ? 'bg-white/25 text-white'
+                    : 'border border-amber-200/30 bg-amber-400/20 text-amber-100'
                 }`}
               >
                 {activo ? 'Elegida' : 'Sugerida'}

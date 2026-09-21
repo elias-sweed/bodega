@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
+import Silk from '../Silk'
 import { useAuth } from '../../hooks/useAuth'
 
 export function ProtectedRoute() {
@@ -9,9 +11,20 @@ export function ProtectedRoute() {
   const [signingOut, setSigningOut] = useState(false)
 
   const loadingScreen = (
-    <div className="flex h-screen items-center justify-center bg-slate-100">
-      <div className="rounded-3xl bg-white px-10 py-8 text-center shadow-sm">
-        <p className="text-lg font-bold text-slate-700">Cargando…</p>
+    <div className="relative flex h-screen items-center justify-center overflow-hidden">
+      <div className="absolute inset-0" aria-hidden="true">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#5227FF"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
+      <div className="absolute inset-0 bg-[#150834]/40 backdrop-blur-[2px]" aria-hidden="true" />
+      <div className="fade-in relative flex flex-col items-center gap-4 rounded-[28px] border border-white/20 bg-white/10 px-12 py-10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+        <Loader2 size={44} className="animate-spin text-white" aria-hidden="true" />
+        <p className="text-lg font-black tracking-tight text-white">Cargando…</p>
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Silk from '../components/Silk'
 import { UserMenu } from '../components/auth/UserMenu'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
@@ -30,7 +31,7 @@ export function PosLayout() {
     () => new Set(agotados.map((product) => product.id)),
     [agotados],
   )
-  const prevAgotados = useRef<Set<string>>(new Set())
+  const prevStocks = useRef(new Map<string, number>())
   const firstSync = useRef(true)
   const [notifToast, setNotifToast] = useState<{
     count: number
@@ -39,12 +40,18 @@ export function PosLayout() {
   const toastTimer = useRef<number | undefined>(undefined)
 
   useEffect(() => {
+    const currentStocks = new Map(products.map((p) => [p.id, p.stock_actual]))
     if (firstSync.current) {
       firstSync.current = false
-      prevAgotados.current = agotadosIds
+      prevStocks.current = currentStocks
       return
     }
-    const nuevos = [...agotadosIds].filter((id) => !prevAgotados.current.has(id))
+    // Solo avisa si el producto TENÍA stock y se agotó (una venta lo vació).
+    // Un producto recién creado con stock 0 nunca tuvo stock: no dispara aviso.
+    const nuevos = [...agotadosIds].filter((id) => {
+      const prev = prevStocks.current.get(id)
+      return prev !== undefined && prev > 0
+    })
     if (nuevos.length > 0) {
       const ultimo = agotados.find((product) => product.id === nuevos[nuevos.length - 1])
       setNotifToast({
@@ -54,8 +61,8 @@ export function PosLayout() {
       window.clearTimeout(toastTimer.current)
       toastTimer.current = window.setTimeout(() => setNotifToast(null), 5000)
     }
-    prevAgotados.current = agotadosIds
-  }, [agotadosIds, agotados])
+    prevStocks.current = currentStocks
+  }, [agotadosIds, agotados, products])
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
@@ -130,8 +137,19 @@ export function PosLayout() {
         </NavLink>
       )}
 
-      <main className="min-h-0 flex-1 p-4 lg:p-6">
-        <Outlet />
+      <main className="relative min-h-0 flex-1 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <Silk
+            speed={5}
+            scale={1}
+            color="#5227FF"
+            noiseIntensity={0.95}
+            rotation={0}
+          />
+        </div>
+        <div className="relative z-10 h-full overflow-y-auto p-4 lg:p-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

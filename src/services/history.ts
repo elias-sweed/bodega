@@ -34,6 +34,26 @@ export async function fetchDetalleVenta(
   return data
 }
 
+/** Detalle de muchas ventas en una sola pasada (por lotes para URLs largas) */
+export async function fetchDetallesByVentas(
+  ventaIds: string[],
+): Promise<DetalleVentasRow[]> {
+  if (ventaIds.length === 0) return []
+  const all: DetalleVentasRow[] = []
+  for (let i = 0; i < ventaIds.length; i += 200) {
+    const chunk = ventaIds.slice(i, i + 200)
+    const { data, error } = await supabase
+      .from('detalle_ventas')
+      .select('*')
+      .in('venta_id', chunk)
+    if (error) {
+      throw new Error('No se pudo cargar el detalle de las ventas')
+    }
+    all.push(...(data ?? []))
+  }
+  return all
+}
+
 export async function fetchProductNames(
   ids: string[],
 ): Promise<Pick<ProductosRow, 'id' | 'nombre' | 'costo'>[]> {

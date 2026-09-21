@@ -44,8 +44,13 @@ export function useProducts() {
   }, [])
 
   const refresh = useCallback((silent = false): void => {
+    // Nunca más pantalla de "Cargando" si ya hay productos:
+    // solo revalida en segundo plano.
     if (!silent) {
-      setLoading(true)
+      const cached = getProductsCache()
+      if (cached.products === null || cached.products.length === 0) {
+        setLoading(true)
+      }
     }
     refreshProductsCache(true)
   }, [])

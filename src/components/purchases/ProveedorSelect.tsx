@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Plus } from 'lucide-react'
 import type { ProveedoresRow } from '../../types/database.types'
 import { toTitleCase } from '../../utils/format'
 
@@ -13,7 +14,7 @@ interface ProveedorSelectProps {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-base text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+  'h-12 w-full rounded-xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
 
 export function ProveedorSelect({
   proveedores,
@@ -54,14 +55,14 @@ export function ProveedorSelect({
 
   return (
     <div>
-      <label htmlFor="proveedor" className="mb-2 block text-lg font-bold text-slate-800">
+      <label htmlFor="proveedor" className="mb-2 block text-base font-extrabold tracking-tight text-white">
         ¿Quién trajo la mercadería?
       </label>
       <select
         id="proveedor"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 shadow-sm outline-none transition-colors focus:border-sky-400"
+        className="h-14 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-white/15 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
       >
         <option value={PROVEEDOR_GENERICO}>
           Proveedor Varios / Sin Comprobante
@@ -77,18 +78,19 @@ export function ProveedorSelect({
       <button
         type="button"
         onClick={() => setShowForm((open) => !open)}
-        className="mt-3 text-sm font-bold text-sky-600 hover:text-sky-700"
+        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95"
       >
-        {showForm ? '− Cerrar' : '+ Es la primera vez, registrar proveedor'}
+        <Plus size={15} strokeWidth={3} aria-hidden="true" />
+        {showForm ? 'Cerrar' : 'Registrar un proveedor nuevo'}
       </button>
 
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mt-3 flex flex-col gap-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
+          className="fade-in mt-3 flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl"
         >
           <div>
-            <label htmlFor="nuevo-proveedor-nombre" className="mb-1 block text-sm font-semibold text-slate-600">
+            <label htmlFor="nuevo-proveedor-nombre" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-white/60">
               Nombre del proveedor
             </label>
             <input
@@ -102,7 +104,7 @@ export function ProveedorSelect({
             />
           </div>
           <div>
-            <label htmlFor="nuevo-proveedor-empresa" className="mb-1 block text-sm font-semibold text-slate-600">
+            <label htmlFor="nuevo-proveedor-empresa" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-white/60">
               Empresa (opcional)
             </label>
             <input
@@ -115,14 +117,14 @@ export function ProveedorSelect({
             />
           </div>
           {error && (
-            <p className="rounded-xl bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700">
+            <p className="rounded-xl border border-rose-200/30 bg-rose-400/20 px-4 py-2 text-sm font-bold text-rose-100">
               {error}
             </p>
           )}
           <button
             type="submit"
             disabled={saving}
-            className="h-12 rounded-xl bg-sky-500 text-base font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="h-12 rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-base font-black text-white shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {saving ? 'Guardando…' : 'Guardar y usar este proveedor'}
           </button>

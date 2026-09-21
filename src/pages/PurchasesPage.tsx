@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Plus, Search, Settings2, Trash2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { AlertTriangle, Plus, RotateCcw, Search, Settings2, Trash2 } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
 import {
   GestionProveedoresModal,
@@ -9,6 +9,7 @@ import {
   PROVEEDOR_GENERICO,
   ProveedorSelect,
 } from '../components/purchases/ProveedorSelect'
+import { PurchasesSkeleton } from '../components/purchases/PurchasesSkeleton'
 import { useProveedores } from '../hooks/useProveedores'
 import { useProducts } from '../hooks/useProducts'
 import { emitDataChanged } from '../services/dataEvents'
@@ -19,6 +20,10 @@ import { formatMoney } from '../utils/format'
 type Notice = {
   type: 'success' | 'error'
   message: string
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 interface CompraItem {
@@ -32,6 +37,7 @@ export function PurchasesPage() {
     useProveedores()
   const { products, refresh: refreshProductos } = useProducts()
 
+  const navigate = useNavigate()
   const [proveedorId, setProveedorId] = useState(PROVEEDOR_GENERICO)
   const [comprobante, setComprobante] = useState('')
   const [proveedoresModalOpen, setProveedoresModalOpen] = useState(false)
@@ -42,11 +48,14 @@ export function PurchasesPage() {
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
 
-  const showNotice = useCallback((type: Notice['type'], message: string): void => {
-    window.clearTimeout(noticeTimer.current)
-    setNotice({ type, message })
-    noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
-  }, [])
+  const showNotice = useCallback(
+    (type: Notice['type'], message: string, action?: Notice['action']): void => {
+      window.clearTimeout(noticeTimer.current)
+      setNotice({ type, message, action })
+      noticeTimer.current = window.setTimeout(() => setNotice(null), 6000)
+    },
+    [],
+  )
 
   useEffect(() => {
     return () => window.clearTimeout(noticeTimer.current)
@@ -138,7 +147,14 @@ export function PurchasesPage() {
       })
       showNotice(
         'success',
-        `Compra registrada: ${items.length} ${items.length === 1 ? 'producto recibido y sumado al inventario' : 'productos recibidos y sumados al inventario'}`,
+        `Se sumó al inventario: ${items.map((item) => `${item.producto.nombre} (+${item.cantidad})`).join(', ')}.`,
+        {
+          label: 'Ver en inventario',
+          onClick: () =>
+            navigate('/inventario', {
+              state: { recentIds: items.map((item) => item.producto.id) },
+            }),
+        },
       )
       resetForm()
       refreshProductos(true)
@@ -154,50 +170,76 @@ export function PurchasesPage() {
   }
 
   const inputClass =
-    'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-base text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-  const labelClass = 'mb-1 block text-sm font-semibold text-slate-600'
+    'h-12 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  const labelClass =
+    'mb-1 block text-xs font-extrabold uppercase tracking-[0.16em] text-white/60'
+
+  const isFirstLoad = proveedoresLoading && proveedores.length === 0
 
   return (
-    <div className="flex h-full flex-col gap-5">
-      <header>
-        <h1 className="text-2xl font-black text-slate-900">Compras</h1>
-        <p className="text-sm text-slate-500">
-          Recibe mercadería: suma stock y actualiza el costo de tus productos.
-        </p>
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5">
+      <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+            Mercadería
+          </p>
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+            Compras
+          </h1>
+          <p className="mt-1 text-sm font-medium text-white/65">
+            Recibe mercadería: suma stock y actualiza el costo de tus productos.
+          </p>
+        </div>
+        {items.length > 0 && (
+          <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80 backdrop-blur-xl">
+            {items.length} {items.length === 1 ? 'ítem' : 'ítems'} · {formatMoney(totalCompra)}
+          </span>
+        )}
       </header>
 
-      {proveedoresLoading ? (
-        <p className="py-10 text-center text-lg text-slate-400">Cargando proveedores…</p>
-      ) : proveedoresError ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
-          <p className="text-lg font-semibold text-rose-700">
-            No se pudieron cargar los proveedores: {proveedoresError}
+      {isFirstLoad ? (
+        <PurchasesSkeleton />
+      ) : proveedoresError && proveedores.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+            <AlertTriangle size={22} aria-hidden="true" />
+          </span>
+          <p className="text-lg font-extrabold tracking-tight text-white">
+            No se pudieron cargar los proveedores
           </p>
+          <p className="text-sm font-medium text-white/70">{proveedoresError}</p>
           <button
             type="button"
             onClick={() => refreshProveedores()}
-            className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
           >
+            <RotateCcw size={15} aria-hidden="true" />
             Reintentar
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-5">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-slate-900">
-              Cabecera de la compra
+        <div className="fade-in flex flex-col gap-5">
+          <section className="rounded-[28px] border border-white/15 bg-white/10 p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+            <h2 className="mb-1 flex items-center gap-2 text-base font-black tracking-tight text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-black text-white">
+                1
+              </span>
+              Datos de la compra
             </h2>
+            <p className="mb-4 text-xs font-medium text-white/55">
+              ¿A quién le compraste esta mercadería?
+            </p>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <div className="mb-1 flex items-center justify-between gap-3">
-                  <label className={labelClass}>Proveedor</label>
+                  <span className={labelClass}>Proveedor</span>
                   <button
                     type="button"
                     onClick={() => setProveedoresModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-2.5 py-1.5 text-xs font-extrabold text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 hover:text-white active:scale-95"
                   >
                     <Settings2 size={14} strokeWidth={2.5} aria-hidden="true" />
-                    Gestionar proveedores
+                    Ver o borrar proveedores
                   </button>
                 </div>
                 <ProveedorSelect
@@ -211,7 +253,7 @@ export function PurchasesPage() {
               </div>
               <div>
                 <label htmlFor="comprobante" className={labelClass}>
-                  Comprobante (opcional)
+                  Boleta o factura (si tienes)
                 </label>
                 <input
                   id="comprobante"
@@ -222,9 +264,21 @@ export function PurchasesPage() {
                 />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
+          <section className="rounded-[28px] border border-white/15 bg-white/10 p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+            <h2 className="mb-1 flex items-center gap-2 text-base font-black tracking-tight text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-xs font-black text-white">
+                2
+              </span>
+              ¿Qué productos llegaron?
+            </h2>
+            <p className="mb-4 text-xs font-medium text-white/55">
+              Busca cada producto, di cuántas unidades llegaron y cuánto costó todo.
+              <span className="mt-0.5 block font-bold text-amber-200/90">
+                Cuenta uno por uno: si vino 1 caja con 24, escribe 24 (no 1).
+              </span>
+            </p>
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div className="w-full md:max-w-md">
                 <label htmlFor="buscar-producto" className={labelClass}>
@@ -233,7 +287,7 @@ export function PurchasesPage() {
                 <div className="relative">
                   <Search
                     size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/45"
                     aria-hidden="true"
                   />
                   <input
@@ -252,9 +306,9 @@ export function PurchasesPage() {
                   />
 
                   {searchOpen && (
-                    <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border-2 border-slate-200 bg-white py-1 shadow-lg">
+                    <ul className="fade-in absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-white/20 bg-[#2a1568]/95 py-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
                       {suggestedProducts.length === 0 ? (
-                        <li className="px-3 py-2 text-sm text-slate-400">
+                        <li className="px-4 py-3 text-sm font-medium text-white/50">
                           Sin coincidencias en el inventario.
                         </li>
                       ) : (
@@ -266,12 +320,12 @@ export function PurchasesPage() {
                                 event.preventDefault()
                                 addItem(producto)
                               }}
-                              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-sky-50"
+                              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/10"
                             >
-                              <span className="font-medium text-slate-800">
+                              <span className="truncate text-sm font-extrabold tracking-tight text-white">
                                 {producto.nombre}
                               </span>
-                              <span className="shrink-0 text-xs font-semibold text-slate-400">
+                              <span className="shrink-0 text-xs font-semibold tabular-nums text-white/50">
                                 {producto.codigo_barras ?? ''} · stock:{' '}
                                 {producto.stock_actual}
                               </span>
@@ -282,27 +336,44 @@ export function PurchasesPage() {
                     </ul>
                   )}
                 </div>
-                <p className="mt-2 text-xs font-semibold text-slate-400">
-                  <Link to="/inventario" className="text-sky-600 hover:text-sky-700">
-                    ¿No encuentras el producto? Créalo en Inventario.
+                <p className="mt-2 text-xs font-semibold text-white/50">
+                  ¿No sale en la lista?{' '}
+                  <Link
+                    to={search.trim() ? `/inventario?nuevo=${encodeURIComponent(search.trim())}` : '/inventario'}
+                    className="inline-flex items-center gap-1 rounded-xl border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-extrabold text-white backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95"
+                  >
+                    <Plus size={13} strokeWidth={3} aria-hidden="true" />
+                    {search.trim()
+                      ? `Crear "${search.trim().slice(0, 24)}${search.trim().length > 24 ? '…' : ''}"`
+                      : 'Crear producto nuevo'}
                   </Link>
                 </p>
               </div>
+              {items.length > 0 && (
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80 backdrop-blur-xl">
+                  {items.length} {items.length === 1 ? 'producto' : 'productos'}
+                </span>
+              )}
             </div>
 
             {items.length === 0 ? (
-              <p className="rounded-2xl border-2 border-dashed border-slate-200 px-5 py-10 text-center text-slate-400">
-                Busca y selecciona los productos que estás recibiendo.
-              </p>
+              <div className="rounded-2xl border border-dashed border-white/25 bg-white/5 px-5 py-10 text-center">
+                <p className="text-sm font-extrabold tracking-tight text-white/80">
+                  Aquí aparecerá lo que estás recibiendo
+                </p>
+                <p className="mt-1 text-xs font-medium text-white/50">
+                  Escribe arriba el nombre del producto y tócalo para agregarlo a la lista.
+                </p>
+              </div>
             ) : (
-              <div className="overflow-x-auto rounded-2xl border-2 border-slate-100">
+              <div className="overflow-x-auto rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl">
                 <table className="w-full border-collapse text-left text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                      <th className="px-4 py-3 font-semibold">Producto</th>
-                      <th className="w-28 px-4 py-3 font-semibold">Cantidad</th>
-                      <th className="w-40 px-4 py-3 font-semibold">Costo total (S/)</th>
-                      <th className="px-4 py-3 font-semibold">Costo unitario</th>
+                    <tr className="border-b border-white/15 bg-white/10 text-[11px] font-extrabold uppercase tracking-widest text-white/70">
+                      <th className="px-4 py-3.5">Producto</th>
+                      <th className="w-32 px-4 py-3.5">¿Cuántas unidades?</th>
+                      <th className="w-44 px-4 py-3.5">¿Costo total? (S/)</th>
+                      <th className="px-4 py-3.5">Cada uno sale a</th>
                       <th className="w-16 px-4 py-3" />
                     </tr>
                   </thead>
@@ -320,15 +391,24 @@ export function PurchasesPage() {
                       return (
                         <tr
                           key={item.producto.id}
-                          className="border-b border-slate-100 last:border-none"
+                          className="fade-in border-b border-white/15 transition-colors odd:bg-white/5 last:border-none hover:bg-white/10"
                         >
-                          <td className="px-4 py-3 font-semibold text-slate-800">
-                            {item.producto.nombre}
-                            <span className="block text-xs font-normal text-slate-400">
-                              stock actual: {item.producto.stock_actual}
-                            </span>
+                          <td className="px-4 py-3.5">
+                            <p className="text-base font-extrabold tracking-tight text-white">
+                              {item.producto.nombre}
+                            </p>
+                            <p className="mt-0.5 text-xs font-semibold tabular-nums text-white/50">
+                              Hay {item.producto.stock_actual}
+                              {Number.isInteger(Number(item.cantidad)) &&
+                                Number(item.cantidad) >= 1 && (
+                                  <span className="font-black text-emerald-200">
+                                    {' '}
+                                    → quedará en {item.producto.stock_actual + Number(item.cantidad)}
+                                  </span>
+                                )}
+                            </p>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3.5">
                             <input
                               type="number"
                               min="1"
@@ -338,11 +418,12 @@ export function PurchasesPage() {
                               onChange={(e) =>
                                 updateItem(item.producto.id, 'cantidad', e.target.value)
                               }
-                              className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                              placeholder="0"
+                              aria-label={`Unidades que llegaron de ${item.producto.nombre}`}
+                              className="h-11 w-full rounded-xl border-2 border-white/30 bg-white/15 px-3 text-base font-black tabular-nums text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:font-semibold placeholder:text-white/30 focus:border-emerald-300/70 focus:bg-white/20"
+                              placeholder="Ej. 24"
                             />
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3.5">
                             <input
                               type="number"
                               min="0"
@@ -352,14 +433,19 @@ export function PurchasesPage() {
                               onChange={(e) =>
                                 updateItem(item.producto.id, 'costoTotal', e.target.value)
                               }
-                              className="h-10 w-full rounded-lg border-2 border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
-                              placeholder="0.00"
+                              aria-label={`Costo total pagado por ${item.producto.nombre}`}
+                              className="h-11 w-full rounded-xl border-2 border-white/30 bg-white/15 px-3 text-base font-black tabular-nums text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:font-semibold placeholder:text-white/30 focus:border-emerald-300/70 focus:bg-white/20"
+                              placeholder="Ej. 48.00"
                             />
                           </td>
-                          <td className="px-4 py-3 font-semibold text-slate-700">
+                          <td className="px-4 py-3.5">
                             {costoUnitario === null
-                              ? '—'
-                              : formatMoney(costoUnitario)}
+                              ? <span className="text-sm font-bold text-white/35">—</span>
+                              : (
+                                <span className="inline-block rounded-full border border-emerald-200/40 bg-emerald-400/20 px-3 py-1.5 text-sm font-black tabular-nums text-emerald-100">
+                                  {formatMoney(costoUnitario)}
+                                </span>
+                              )}
                           </td>
                           <td className="px-4 py-3 text-right">
                             <button
@@ -367,7 +453,7 @@ export function PurchasesPage() {
                               onClick={() => removeItem(item.producto.id)}
                               title="Quitar de la compra"
                               aria-label={`Quitar ${item.producto.nombre} de la compra`}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-100 text-rose-600 transition-colors hover:bg-rose-200"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-100 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
                             >
                               <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
                             </button>
@@ -377,11 +463,11 @@ export function PurchasesPage() {
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-slate-200">
-                      <td colSpan={2} className="px-4 py-3 text-right font-bold text-slate-800">
+                    <tr className="border-t-2 border-emerald-200/30 bg-emerald-400/10">
+                      <td colSpan={2} className="px-4 py-4 text-right text-sm font-bold uppercase tracking-widest text-white/70">
                         Total de la compra
                       </td>
-                      <td className="px-4 py-3 font-black text-slate-900">
+                      <td className="px-4 py-4 text-xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
                         {formatMoney(totalCompra)}
                       </td>
                       <td colSpan={2} />
@@ -391,29 +477,32 @@ export function PurchasesPage() {
               </div>
             )}
 
-            <div className="mt-5 flex justify-end gap-3 border-t border-slate-100 pt-5">
+            <div className="mt-5 flex flex-wrap justify-end gap-2.5 border-t border-white/10 pt-5">
+              <p className="mr-auto self-center text-xs font-semibold text-white/50">
+                Paso 3: revisa que todo esté bien y guarda.
+              </p>
               <button
                 type="button"
                 onClick={resetForm}
-                className="h-12 rounded-2xl border-2 border-slate-200 px-6 text-base font-bold text-slate-600 transition-colors hover:bg-slate-50"
+                className="h-12 rounded-2xl border border-white/25 bg-white/10 px-6 text-base font-extrabold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
               >
-                Limpiar
+                Empezar de nuevo
               </button>
               <button
                 type="button"
                 disabled={!isValid || saving}
                 onClick={() => void handleSave()}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl bg-emerald-500 px-8 text-base font-bold text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none"
+                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-8 text-base font-black text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
               >
                 <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
-                {saving ? 'Guardando…' : 'Confirmar compra'}
+                {saving ? 'Guardando…' : 'Guardar compra'}
               </button>
             </div>
-          </div>
+          </section>
         </div>
       )}
 
-      {notice && <Toast type={notice.type} message={notice.message} />}
+      {notice && <Toast type={notice.type} message={notice.message} action={notice.action} />}
 
       {proveedoresModalOpen && (
         <GestionProveedoresModal

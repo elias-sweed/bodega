@@ -17,7 +17,32 @@ import { supabase } from './supabase'
 
 type Listener = () => void
 
-let cache: ProductosRow[] | null = null
+const PRODUCTS_CACHE_KEY = 'bodega:products-cache:v1'
+
+function readPersistedCache(): ProductosRow[] | null {
+  try {
+    const raw = localStorage.getItem(PRODUCTS_CACHE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as { products: ProductosRow[] }
+    if (!Array.isArray(parsed?.products)) return null
+    return parsed.products
+  } catch {
+    return null
+  }
+}
+
+function persistCache(products: ProductosRow[]): void {
+  try {
+    localStorage.setItem(
+      PRODUCTS_CACHE_KEY,
+      JSON.stringify({ products, savedAt: Date.now() }),
+    )
+  } catch {
+    // almacenamiento lleno o bloqueado: no es crítico
+  }
+}
+
+let cache: ProductosRow[] | null = readPersistedCache()
 let errorState: string | null = null
 let inFlight: Promise<void> | null = null
 let queuedForce = false
@@ -39,6 +64,7 @@ async function fetcher(): Promise<void> {
   const data = await fetchProducts()
   cache = sortByName(data)
   errorState = null
+  persistCache(cache)
 }
 
 async function load(): Promise<void> {
@@ -139,5 +165,6 @@ export function applyStockChanges(
       return change ? { ...product, stock_actual: change.stockActual } : product
     }),
   )
+  persistCache(cache)
   notify()
 }

@@ -63,3 +63,78 @@ export async function registrarVenta(
 
   return data
 }
+
+/**
+ * Error del importador offline (backfill). Cuando `duplicate` es true, el
+ * ticket ya había sido importado antes y debe omitirse sin alarmar.
+ */
+export class BackfillError extends Error {
+  duplicate: boolean
+  raw: string | null
+
+  constructor(message: string, duplicate = false, raw: string | null = null) {
+    super(message)
+    this.name = 'BackfillError'
+    this.duplicate = duplicate
+    this.raw = raw
+  }
+}
+
+export function isDuplicateTicketError(cause: unknown): boolean {
+  return cause instanceof BackfillError ? cause.duplicate : false
+}
+
+export type BackfillItem = {
+  producto_id: string
+  cantidad: number
+  precio_unitario: number
+}
+
+export type RegistrarVentaBackfillResult = {
+  venta_id: string
+  total: number
+  stock_negativo: boolean
+}
+
+type RpcCaller = (
+  fn: string,
+  args: Record<string, unknown>,
+) => Promise<{ data: unknown; error: { message: string } | null }>
+
+/**
+ * Registra una venta pasada (fecha explícita) con tolerancia de stock.
+ * Requiere la migración `supabase/importar_ventas_offline.sql` ejecutada.
+ */
+export async function registrarVentaBackfill(
+  items: BackfillItem[],
+  metodoPago: string,
+  fechaISO: string,
+  ticket: string,
+): Promise<RegistrarVentaBackfillResult> {
+  const rpc = supabase.rpc as unknown as RpcCaller
+  const { data, error } = await rpc('registrar_venta_backfill', {
+    p_articulos: items,
+    p_metodo_pago: metodoPago,
+    p_fecha: fechaISO,
+    p_ticket: ticket,
+  })
+
+  if (error) {
+    const raw = error.message ?? ''
+    console.error('Error al importar la venta offline:', raw)
+    if (raw.includes('VENTA_DUPLICADA')) {
+      throw new BackfillError(
+        `El ticket ${ticket} ya fue importado antes. Se omitió.`,
+        true,
+        raw,
+      )
+    }
+    throw new BackfillError(
+      getFriendlyError(error, 'No se pudo importar la venta. Inténtalo de nuevo.'),
+      false,
+      raw,
+    )
+  }
+
+  return data as RegistrarVentaBackfillResult
+}

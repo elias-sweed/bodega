@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown, ReceiptText, RotateCcw, SearchX, TriangleAlert } from 'lucide-react'
 import { useVentasHistory } from '../../hooks/useHistory'
 import {
   fetchDetalleVenta,
+  fetchDetallesByVentas,
   fetchProductNames,
 } from '../../services/history'
 import type { DetalleVentasRow, VentasRow } from '../../types/database.types'
-import { formatDateTime, formatMoney, shortId, fechaEnRango } from '../../utils/format'
+import { formatFechaCorta, formatHora, formatMoney, shortId, fechaEnRango, enFranja } from '../../utils/format'
 import { Toast } from '../common/Toast'
+import { HistorySkeleton } from './HistorySkeleton'
 import type { HistoryFilter } from './types'
+import { describeFilter } from './types'
 
 interface VentaDetail {
   items: DetalleVentasRow[]
@@ -19,19 +23,48 @@ type Notice = {
   message: string
 }
 
-const METODO_BADGES: Record<string, string> = {
-  Efectivo: 'bg-emerald-100 text-emerald-700',
-  Yape: 'bg-sky-100 text-sky-700',
-  Plin: 'bg-violet-100 text-violet-700',
+const SUMMARIES_CACHE_KEY = 'bodega:ventas-summaries-cache:v1'
+
+function readSummariesCache(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(SUMMARIES_CACHE_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as { summaries?: Record<string, string> }
+    return parsed?.summaries ?? {}
+  } catch {
+    return {}
+  }
 }
 
-function matchesFilter(venta: VentasRow, filter: HistoryFilter): boolean {
+function writeSummariesCache(summaries: Record<string, string>): void {
+  try {
+    // Se guardan los últimos 500 para no llenar el almacenamiento
+    const entries = Object.entries(summaries).slice(-500)
+    localStorage.setItem(
+      SUMMARIES_CACHE_KEY,
+      JSON.stringify({ summaries: Object.fromEntries(entries) }),
+    )
+  } catch {
+    // almacenamiento lleno o bloqueado: no es crítico
+  }
+}
+
+const METODO_BADGES: Record<string, string> = {
+  Efectivo: 'border border-emerald-200/30 bg-emerald-400/20 text-emerald-100',
+  Yape: 'border border-sky-200/30 bg-sky-400/20 text-sky-100',
+  Plin: 'border border-violet-200/30 bg-violet-400/20 text-violet-100',
+}
+
+function matchesFilter(venta: VentasRow, filter: HistoryFilter, numero: number): boolean {
   if (!fechaEnRango(venta.fecha, filter.from, filter.to)) return false
+  if (!enFranja(venta.fecha, filter.franja)) return false
   const query = filter.query.trim().toLowerCase()
   if (query === '') return true
   return (
     shortId(venta.id).includes(query) ||
-    venta.id.toLowerCase().includes(query)
+    venta.id.toLowerCase().includes(query) ||
+    formatFechaCorta(venta.fecha).includes(query) ||
+    String(numero) === query
   )
 }
 
@@ -40,6 +73,9 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [details, setDetails] = useState<Record<string, VentaDetail>>({})
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null)
+  const [summaries, setSummaries] = useState<Record<string, string>>(() =>
+    readSummariesCache(),
+  )
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
 
@@ -53,9 +89,52 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
     noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
   }
 
+  // Resumen de productos por venta (una sola consulta para todas)
+  useEffect(() => {
+    if (ventas.length === 0) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const items = await fetchDetallesByVentas(ventas.map((v) => v.id))
+        const ids = [...new Set(items.map((i) => i.producto_id).filter((id): id is string => id !== null))]
+        const rows = await fetchProductNames(ids)
+        const names = new Map(rows.map((r) => [r.id, r.nombre] as const))
+        const byVenta = new Map<string, DetalleVentasRow[]>()
+        for (const item of items) {
+          const list = byVenta.get(item.venta_id) ?? []
+          list.push(item)
+          byVenta.set(item.venta_id, list)
+        }
+        const result: Record<string, string> = {}
+        for (const [ventaId, list] of byVenta) {
+          const parts = list.map(
+            (item) => `${names.get(item.producto_id ?? '') ?? 'Producto eliminado'} × ${item.cantidad}`,
+          )
+          result[ventaId] =
+            parts.slice(0, 2).join(', ') + (parts.length > 2 ? ` +${parts.length - 2} más` : '')
+        }
+        if (!cancelled) {
+          setSummaries(result)
+          writeSummariesCache(result)
+        }
+      } catch {
+        // Sin resumen: las filas muestran la fecha como antes
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [ventas])
+
+  // Número simple y estable: la venta más reciente es la N.º 1
+  const numeroById = useMemo(
+    () => new Map(ventas.map((venta, i) => [venta.id, i + 1] as const)),
+    [ventas],
+  )
+
   const filteredVentas = useMemo(
-    () => ventas.filter((venta) => matchesFilter(venta, filter)),
-    [ventas, filter],
+    () => ventas.filter((venta) => matchesFilter(venta, filter, numeroById.get(venta.id) ?? 0)),
+    [ventas, filter, numeroById],
   )
 
   const totalVendido = useMemo(
@@ -97,19 +176,23 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
     }
   }
 
-  if (loading) {
-    return <p className="py-10 text-center text-lg text-slate-400">Cargando ventas…</p>
+  if (loading && ventas.length === 0) {
+    return <HistorySkeleton />
   }
 
-  if (error) {
+  if (error && ventas.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
-        <p className="text-lg font-semibold text-rose-700">{error}</p>
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+          <TriangleAlert size={22} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-extrabold tracking-tight text-white">{error}</p>
         <button
           type="button"
           onClick={() => refresh()}
-          className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
         >
+          <RotateCcw size={15} aria-hidden="true" />
           Reintentar
         </button>
       </div>
@@ -118,19 +201,34 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   if (ventas.length === 0) {
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-        <p className="text-lg font-semibold text-slate-500">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+          <ReceiptText size={26} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-black tracking-tight text-white">
           No hay ventas registradas todavía.
+        </p>
+        <p className="text-sm font-medium text-white/60">
+          Las ventas que registres en Caja aparecerán aquí.
         </p>
       </div>
     )
   }
 
   if (filteredVentas.length === 0) {
+    const detalle = describeFilter(filter)
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-        <p className="text-lg font-semibold text-slate-500">
-          No hay ventas que coincidan con el filtro.
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+          <SearchX size={26} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-black tracking-tight text-white">
+          {detalle
+            ? `No hay ventas ${detalle}.`
+            : 'No hay ventas que coincidan con el filtro.'}
+        </p>
+        <p className="text-sm font-medium text-white/60">
+          Prueba con otro día, horario o búsqueda.
         </p>
       </div>
     )
@@ -138,11 +236,11 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-900 px-5 py-4 text-white">
-        <span className="text-sm font-semibold text-slate-300">
+      <div className="flex items-center justify-between gap-4 rounded-[28px] border border-white/25 bg-gradient-to-br from-white/25 via-white/10 to-white/5 px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="text-sm font-bold text-white/70">
           Total ventas registradas
         </span>
-        <span className="text-lg font-black">{formatMoney(totalVendido)}</span>
+        <span className="text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)]">{formatMoney(totalVendido)}</span>
       </div>
 
       <ul className="flex flex-col gap-2">
@@ -161,47 +259,54 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
           const ganancia = venta.total - costoTotal
 
           return (
-            <li key={venta.id} className="overflow-hidden rounded-2xl bg-white shadow-sm">
+            <li key={venta.id} className="overflow-hidden rounded-[28px] border border-white/15 bg-white/10 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
               <button
                 type="button"
                 aria-expanded={expanded}
                 onClick={() => void handleToggle(venta)}
-                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50"
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-all duration-300 hover:bg-white/10"
               >
-                <div className="flex min-w-0 flex-wrap items-center gap-3">
-                  <span className="font-mono text-xs font-bold text-slate-400">
-                    #{shortId(venta.id)}
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+                    <span className="shrink-0 rounded-full border border-white/25 bg-white/15 px-2.5 py-0.5 text-xs font-black tabular-nums text-white">
+                      N.º {numeroById.get(venta.id) ?? '—'}
+                    </span>
+                    <span className="truncate text-base font-extrabold tracking-tight text-white">
+                      {summaries[venta.id] ?? '···'}
+                    </span>
                   </span>
-                  <span className="text-slate-800">
-                    {formatDateTime(venta.fecha)}
-                  </span>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      METODO_BADGES[venta.metodo_pago] ?? 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {venta.metodo_pago ?? 'Efectivo'}
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1 pl-0.5 text-xs font-semibold text-white/55">
+                    <span className="tabular-nums">
+                      {formatFechaCorta(venta.fecha)} · {formatHora(venta.fecha)}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-px text-[11px] font-bold backdrop-blur-xl ${
+                        METODO_BADGES[venta.metodo_pago] ?? 'border border-white/20 bg-white/10 text-white/70'
+                      }`}
+                    >
+                      {venta.metodo_pago ?? 'Efectivo'}
+                    </span>
                   </span>
                 </div>
                 <span className="flex shrink-0 items-center gap-3">
-                  <span className="text-lg font-bold text-slate-900">
+                  <span className="text-xl font-black tracking-tighter text-white">
                     {formatMoney(venta.total)}
                   </span>
                   <span
-                    className={`text-slate-400 transition-transform ${
+                    className={`text-white/50 transition-transform duration-300 ${
                       expanded ? 'rotate-180' : ''
                     }`}
                     aria-hidden="true"
                   >
-                    ▾
+                    <ChevronDown size={18} />
                   </span>
                 </span>
               </button>
 
               {expanded && (
-                <div className="border-t border-slate-100 px-5 py-4">
+                <div className="fade-in border-t border-white/10 px-5 py-4">
                   {loadingDetail ? (
-                    <p className="text-sm text-slate-400">Cargando detalle…</p>
+                    <p className="text-sm font-medium text-white/55">Cargando detalle…</p>
                   ) : detail ? (
                     <div className="flex flex-col gap-3">
                       <ul className="flex flex-col gap-2">
@@ -210,43 +315,42 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                             key={item.id}
                             className="flex items-center justify-between gap-4 text-sm"
                           >
-                            <span className="min-w-0 flex-1 truncate text-slate-700">
+                            <span className="min-w-0 flex-1 truncate font-bold text-white">
                               {detail.products[item.producto_id ?? '']?.nombre ??
                                 'Producto eliminado'}
-                              <span className="text-slate-400">
-                                {' '}
-                                × {item.cantidad}
+                              <span className="block truncate text-xs font-semibold text-white/55">
+                                {item.cantidad} × {formatMoney(item.precio_unitario)} cada uno
                               </span>
                             </span>
-                            <span className="shrink-0 font-semibold text-slate-800">
+                            <span className="shrink-0 font-black tabular-nums text-white">
                               {formatMoney(item.subtotal)}
                             </span>
                           </li>
                         ))}
                       </ul>
 
-                      <div className="flex flex-col gap-2 rounded-2xl bg-slate-50 p-4 text-sm">
+                      <div className="flex flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm backdrop-blur-xl">
                         <div className="flex items-center justify-between gap-4">
-                          <span className="text-slate-600">Total venta</span>
-                          <span className="font-bold text-slate-900">
+                          <span className="font-medium text-white/65">El cliente pagó en total</span>
+                          <span className="font-black tabular-nums text-white">
                             {formatMoney(venta.total)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-4">
-                          <span className="text-slate-600">
-                            Costo de compra de los ítems
+                          <span className="font-medium text-white/65">
+                            A ti te habían costado
                           </span>
-                          <span className="font-semibold text-slate-700">
+                          <span className="font-bold tabular-nums text-white/75">
                             − {formatMoney(costoTotal)}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-2">
-                          <span className="font-bold text-slate-800">
-                            Ganancia neta
+                        <div className="flex items-center justify-between gap-4 border-t border-white/15 pt-2">
+                          <span className="font-black text-white">
+                            Te quedaron (ganancia)
                           </span>
                           <span
-                            className={`text-base font-black ${
-                              ganancia >= 0 ? 'text-emerald-600' : 'text-rose-600'
+                            className={`text-base font-black tabular-nums ${
+                              ganancia >= 0 ? 'text-emerald-300' : 'text-rose-300'
                             }`}
                           >
                             {formatMoney(ganancia)}
@@ -255,7 +359,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm font-medium text-white/55">
                       No se pudo cargar el detalle.
                     </p>
                   )}

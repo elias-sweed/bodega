@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, ArrowLeft, PauseCircle, RotateCcw } from 'lucide-react'
+import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { Toast } from '../components/common/Toast'
 import { Cart } from '../components/pos/Cart'
 import { METODO_PAGO_DEFAULT, type MetodoPago } from '../components/pos/metodosPago'
 import { CategoryGrid } from '../components/pos/CategoryGrid'
 import { PaymentModal } from '../components/pos/PaymentModal'
+import { PosSkeleton } from '../components/pos/PosSkeleton'
 import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { SearchBar } from '../components/pos/SearchBar'
@@ -115,7 +118,16 @@ export function PosPage() {
   )
   const [lastSale, setLastSale] = useState<LastSale | null>(null)
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(METODO_PAGO_DEFAULT)
+  const [discardOpen, setDiscardOpen] = useState(false)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
+  const highlightTimer = useRef<number | undefined>(undefined)
+
+  const flashHighlight = useCallback((productId: string): void => {
+    setHighlightId(productId)
+    window.clearTimeout(highlightTimer.current)
+    highlightTimer.current = window.setTimeout(() => setHighlightId(null), 1200)
+  }, [])
 
   const showNotice = useCallback((type: Notice['type'], message: string): void => {
     window.clearTimeout(noticeTimer.current)
@@ -124,7 +136,10 @@ export function PosPage() {
   }, [])
 
   useEffect(() => {
-    return () => window.clearTimeout(noticeTimer.current)
+    return () => {
+      window.clearTimeout(noticeTimer.current)
+      window.clearTimeout(highlightTimer.current)
+    }
   }, [])
 
   const categories = useMemo(() => deriveCategories(products), [products])
@@ -149,6 +164,25 @@ export function PosPage() {
     })
   }, [products, query, isSearching, selectedCategory])
 
+  const cartQtyById = useMemo(
+    () => new Map(cart.map((item) => [item.product.id, item.quantity])),
+    [cart],
+  )
+
+  // En móvil el carrito aparece solo cuando hay productos: al agregar el
+  // primero lo llevamos a la vista para que se note.
+  const cartSectionRef = useRef<HTMLDivElement>(null)
+  const prevCartCount = useRef(0)
+  useEffect(() => {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0)
+    if (prevCartCount.current === 0 && count > 0) {
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        cartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
+    }
+    prevCartCount.current = count
+  }, [cart])
+
   const addProduct = (product: ProductosRow): void => {
     if (product.stock_actual <= 0) return
     setCart((current) => {
@@ -165,6 +199,7 @@ export function PosPage() {
       }
       return [...current, { product, quantity: 1 }]
     })
+    flashHighlight(product.id)
   }
 
   const increaseQuantity = (productId: string): void => {
@@ -179,6 +214,7 @@ export function PosPage() {
         return { ...item, quantity: item.quantity + 1 }
       }),
     )
+    flashHighlight(productId)
   }
 
   const decreaseQuantity = (productId: string): void => {
@@ -191,6 +227,13 @@ export function PosPage() {
           : [item],
       ),
     )
+  }
+
+  const removeFromCart = (productId: string): void => {
+    setCart((current) => current.filter((item) => item.product.id !== productId))
+    if (highlightId === productId) {
+      setHighlightId(null)
+    }
   }
 
   const handleSearchEnter = (): void => {
@@ -343,31 +386,38 @@ export function PosPage() {
   }
 
   const handleDiscardSuspended = (): void => {
-    const ok = window.confirm(
-      '¿Descartar la venta suspendida?\nLos artículos guardados se perderán.',
-    )
-    if (!ok) return
+    if (!suspendedSale) return
+    setDiscardOpen(true)
+  }
+
+  const confirmDiscardSuspended = (): void => {
     clearSuspendedSale()
     setSuspendedSale(null)
+    setDiscardOpen(false)
     showNotice('success', 'Venta suspendida descartada')
   }
 
   const retry = useCallback((): void => refresh(), [refresh])
 
-  const content = loading ? (
-    <p className="py-10 text-center text-lg text-slate-400">
-      Cargando productos…
-    </p>
-  ) : error ? (
-    <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
-      <p className="text-lg font-semibold text-rose-700">
-        No se pudieron cargar los productos: {error}
+  const isFirstLoad = loading && products.length === 0
+
+  const content = isFirstLoad ? (
+    <PosSkeleton />
+  ) : error && products.length === 0 ? (
+    <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+        <AlertTriangle size={22} aria-hidden="true" />
+      </span>
+      <p className="text-lg font-extrabold tracking-tight text-white">
+        No se pudieron cargar los productos
       </p>
+      <p className="text-sm font-medium text-white/70">{error}</p>
       <button
         type="button"
         onClick={retry}
-        className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+        className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
       >
+        <RotateCcw size={15} aria-hidden="true" />
         Reintentar
       </button>
     </div>
@@ -375,21 +425,30 @@ export function PosPage() {
     <ProductGrid
       products={filteredProducts}
       title="Resultados de búsqueda"
+      cartQuantities={cartQtyById}
+      highlightId={highlightId}
       onAdd={addProduct}
+      onIncrease={increaseQuantity}
+      onDecrease={decreaseQuantity}
     />
   ) : selectedCategory ? (
-    <div>
+    <div className="fade-in">
       <button
         type="button"
         onClick={() => setSelectedCategory(null)}
-        className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 font-semibold text-slate-600 shadow-sm transition-all hover:bg-slate-50 active:scale-95"
+        className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0 active:scale-95"
       >
-        ← Volver a categorías
+        <ArrowLeft size={16} aria-hidden="true" />
+        Volver a categorías
       </button>
       <ProductGrid
         products={filteredProducts}
         title={selectedCategory.label}
+        cartQuantities={cartQtyById}
+        highlightId={highlightId}
         onAdd={addProduct}
+        onIncrease={increaseQuantity}
+        onDecrease={decreaseQuantity}
       />
     </div>
   ) : (
@@ -403,16 +462,35 @@ export function PosPage() {
   )
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-4">
+      <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+            Punto de venta
+          </p>
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+            Caja
+          </h1>
+        </div>
+        {loading && products.length > 0 && (
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-white/75 backdrop-blur-xl">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
+            Sincronizando catálogo…
+          </span>
+        )}
+      </header>
+
       {suspendedSale && (
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3">
+        <div className="fade-up flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/30 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
           <div className="flex items-center gap-3">
-            <span className="text-2xl" aria-hidden="true">
-              ⏸️
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
+              <PauseCircle size={22} aria-hidden="true" />
             </span>
             <div>
-              <p className="font-bold text-amber-800">Hay una venta suspendida</p>
-              <p className="text-sm text-amber-700">
+              <p className="text-sm font-black tracking-tight text-white">
+                Hay una venta suspendida
+              </p>
+              <p className="text-xs font-semibold text-white/65">
                 {suspendedSale.count} {suspendedSale.count === 1 ? 'artículo' : 'artículos'} ·{' '}
                 {formatMoney(suspendedSale.total)}
               </p>
@@ -422,14 +500,14 @@ export function PosPage() {
             <button
               type="button"
               onClick={handleResume}
-              className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-amber-600"
+              className="rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-black text-amber-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
             >
               Retomar venta
             </button>
             <button
               type="button"
               onClick={handleDiscardSuspended}
-              className="rounded-xl border-2 border-amber-300 px-4 py-2 text-sm font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+              className="rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20"
             >
               Descartar
             </button>
@@ -447,12 +525,14 @@ export function PosPage() {
           <div className="min-h-0 flex-1 overflow-y-auto pr-1">{content}</div>
         </section>
 
-        <div className="min-h-0">
+        <div ref={cartSectionRef} className="min-h-0 scroll-mt-2">
           <Cart
             items={cart}
             charging={charging}
+            highlightId={highlightId}
             onIncrease={increaseQuantity}
             onDecrease={decreaseQuantity}
+            onRemove={removeFromCart}
             onCharge={openPayment}
             onSuspend={handleSuspend}
           />
@@ -480,6 +560,20 @@ export function PosPage() {
       {lastSale && (
         <ReceiptModal sale={lastSale} onClose={() => setLastSale(null)} />
       )}
+
+      <ConfirmDialog
+        open={discardOpen}
+        title="¿Descartar venta suspendida?"
+        description={
+          suspendedSale
+            ? `${suspendedSale.count} ${suspendedSale.count === 1 ? 'artículo' : 'artículos'} por ${formatMoney(suspendedSale.total)} se perderán y no podrás recuperarlos.`
+            : 'Los artículos guardados se perderán.'
+        }
+        confirmLabel="Sí, descartar"
+        cancelLabel="Mantener"
+        onConfirm={confirmDiscardSuspended}
+        onCancel={() => setDiscardOpen(false)}
+      />
 
       {notice && <Toast type={notice.type} message={notice.message} />}
     </div>

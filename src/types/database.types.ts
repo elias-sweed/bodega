@@ -27,6 +27,8 @@ export type VentasRow = {
   fecha: string
   total: number
   metodo_pago: string
+  origen: string
+  ticket_externo: string | null
 }
 
 export type VentasInsert = Omit<VentasRow, 'id' | 'fecha'>

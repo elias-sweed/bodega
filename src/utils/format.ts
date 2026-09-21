@@ -45,6 +45,35 @@ export function formatDateTime(value: string): string {
     .replace(', ', ' ')
 }
 
+/** Solo la fecha: "12/05/2026" */
+export function formatFechaCorta(value: string): string {
+  return new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(value))
+}
+
+/** Solo la hora: "15:40" */
+export function formatHora(value: string): string {
+  return new Intl.DateTimeFormat('es-PE', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+export type FranjaId = 'todo' | 'manana' | 'tarde' | 'noche'
+
+/** Mañana 06–12, tarde 12–19, noche 19–06 (hora local) */
+export function enFranja(fechaISO: string, franja: FranjaId): boolean {
+  if (franja === 'todo') return true
+  const hora = new Date(fechaISO).getHours()
+  if (!Number.isFinite(hora)) return true
+  if (franja === 'manana') return hora >= 6 && hora < 12
+  if (franja === 'tarde') return hora >= 12 && hora < 19
+  return hora >= 19 || hora < 6
+}
+
 export function shortId(id: string): string {
   return id.slice(0, 8).toUpperCase()
 }

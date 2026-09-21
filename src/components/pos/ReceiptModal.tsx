@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { CheckCircle2, MessageCircle, Printer, X } from 'lucide-react'
 import type { CartItem } from '../../types'
 import { formatMoney } from '../../utils/format'
 
@@ -112,27 +113,47 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <h2 className="text-lg font-black text-slate-900">Venta registrada</h2>
+    <div
+      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      onClick={onClose}
+    >
+      <div
+        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Venta registrada"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200/30 bg-emerald-400/20 text-emerald-200">
+              <CheckCircle2 size={22} aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-lg font-black tracking-tighter text-white">
+                Venta registrada
+              </h2>
+              <p className="text-xs font-semibold text-white/55">
+                Recibo {shortId(sale.venta_id)} · {sale.metodo_pago}
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="-mr-1 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
             aria-label="Cerrar"
           >
-            ✕
+            <X size={15} aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mt-4 rounded-2xl bg-slate-50 p-4 font-mono text-sm text-slate-800">
+        <div className="mt-4 rounded-2xl bg-white p-4 font-mono text-sm text-slate-800 shadow-inner">
           <p className="mb-1 flex items-center justify-between gap-2">
             <span className="font-bold">Bodega POS</span>
           </p>
           <p className="text-xs text-slate-500">
-            Recibo <strong>{shortId(sale.venta_id)}</strong> ·{' '}
-            {sale.metodo_pago} ·{' '}
+            Recibo <strong>{shortId(sale.venta_id)}</strong> · {sale.metodo_pago} ·{' '}
             {new Date(sale.fecha).toLocaleDateString('es-PE')}{' '}
             {new Date(sale.fecha).toLocaleTimeString('es-PE', {
               hour: '2-digit',
@@ -160,13 +181,14 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-col gap-2">
+        <div className="mt-5 flex flex-col gap-2.5">
           <button
             type="button"
             onClick={() => printReceipt(sale)}
-            className="h-12 w-full rounded-xl border-2 border-slate-200 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.99]"
           >
-            🖨️ Imprimir recibo
+            <Printer size={16} aria-hidden="true" />
+            Imprimir recibo
           </button>
           <button
             type="button"
@@ -177,9 +199,10 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
                 'noopener,noreferrer',
               )
             }
-            className="h-12 w-full rounded-xl bg-emerald-500 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:bg-emerald-600 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black text-white shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.99]"
           >
-            📲 Enviar por WhatsApp
+            <MessageCircle size={16} aria-hidden="true" />
+            Enviar por WhatsApp
           </button>
         </div>
       </div>

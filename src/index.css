@@ -28,6 +28,39 @@
   .fade-in {
     animation: fade-in 0.8s ease both;
   }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0.08) 30%,
+      rgb(255 255 255 / 0.22) 50%,
+      rgb(255 255 255 / 0.08) 70%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+
+  .animate-pop {
+    animation: pop 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) both;
+  }
+
+  .float-plus {
+    animation: float-plus 0.7s ease both;
+  }
+
+  .row-flash {
+    animation: row-flash 1.2s ease both;
+  }
+
+  .animate-slide-right {
+    animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-slide-left {
+    animation: slide-in-left 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 @keyframes toast-in {
@@ -60,5 +93,73 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes float-plus {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1);
+  }
+}
+
+@keyframes row-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  25% {
+    background-color: rgb(52 211 153 / 0.22);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

@@ -10,7 +10,14 @@ interface ProductFormModalProps {
   onClose: () => void
   onSubmit: (product: ProductosInsert) => Promise<void>
   initial?: ProductosRow | null
-  initialPrefill?: { nombre: string; categoria: string } | null
+  initialPrefill?: {
+    nombre: string
+    categoria: string
+    codigo_barras?: string
+    precio_venta?: string
+    costo?: string
+    stock_minimo?: string
+  } | null
 }
 
 interface FormValues {
@@ -158,14 +165,14 @@ interface CategoriaSugerida {
 }
 
 const moneyInputClass =
-  'h-14 w-full rounded-2xl border-2 border-slate-200 bg-white pl-10 pr-4 text-xl text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+  'h-14 w-full rounded-2xl border border-white/25 bg-white/10 pl-10 pr-4 text-xl font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
 
 const plainInputClass =
-  'h-14 w-full rounded-2xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
+  'h-14 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-lg font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <p className="mb-2 text-sm font-black uppercase tracking-wide text-slate-500">
+    <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/60">
       {children}
     </p>
   )
@@ -193,7 +200,14 @@ export function ProductFormModal({
       ...EMPTY_VALUES,
       stock_actual: '0',
       ...(initialPrefill
-        ? { nombre: initialPrefill.nombre, categoria: initialPrefill.categoria }
+        ? {
+            nombre: initialPrefill.nombre,
+            categoria: initialPrefill.categoria,
+            codigo_barras: initialPrefill.codigo_barras ?? '',
+            precio_venta: initialPrefill.precio_venta ?? '',
+            costo: initialPrefill.costo ?? '',
+            stock_minimo: initialPrefill.stock_minimo ?? '',
+          }
         : {}),
     }
   })
@@ -389,24 +403,29 @@ export function ProductFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="nuevo-producto-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="max-h-full w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
       >
-        <div className="mb-5 flex items-center justify-between">
-          <h2 id="nuevo-producto-title" className="text-2xl font-black text-slate-900">
-            {initial ? 'Editar producto' : 'Nuevo producto'}
-          </h2>
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+              Inventario
+            </p>
+            <h2 id="nuevo-producto-title" className="text-2xl font-black tracking-tighter text-white">
+              {initial ? 'Editar producto' : 'Nuevo producto'}
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
           >
             <X size={18} strokeWidth={2.5} />
           </button>
@@ -448,7 +467,7 @@ export function ProductFormModal({
             }
           />
           {isCustomCategory && (
-            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-sky-600">
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-emerald-200">
               <Check size={14} strokeWidth={3} aria-hidden="true" />
               Se creará la nueva categoría “{toTitleCase(values.categoria)}”
             </p>
@@ -460,11 +479,11 @@ export function ProductFormModal({
           <SectionTitle>Precios (cuánto ganas)</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-slate-700">
+              <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-white/75">
                 ¿En cuánto lo vendes?
               </label>
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-white/40">
                   S/
                 </span>
                 <input
@@ -479,17 +498,17 @@ export function ProductFormModal({
                   placeholder="2.50"
                 />
               </div>
-              <p className="mt-1 text-xs font-semibold text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-white/45">
                 Lo que pagará el cliente.
               </p>
             </div>
 
             <div>
-              <label htmlFor="costo" className="mb-1 block text-sm font-bold text-slate-700">
+              <label htmlFor="costo" className="mb-1 block text-sm font-bold text-white/75">
                 ¿Cuánto te cuesta cada uno?
               </label>
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-white/40">
                   S/
                 </span>
                 <input
@@ -504,7 +523,7 @@ export function ProductFormModal({
                   placeholder="1.20"
                 />
               </div>
-              <p className="mt-1 text-xs font-semibold text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-white/45">
                 Lo que pagas al comprarlo.
               </p>
             </div>
@@ -512,21 +531,21 @@ export function ProductFormModal({
 
           {gananciaInfo !== null && (
             <div
-              className={`mt-3 flex flex-wrap items-center gap-2 rounded-2xl border-2 px-4 py-3 ${
+              className={`mt-3 flex flex-wrap items-center gap-2 rounded-2xl border px-4 py-3 backdrop-blur-xl ${
                 gananciaInfo.ganancia >= 0
-                  ? 'border-emerald-200 bg-emerald-50'
-                  : 'border-rose-200 bg-rose-50'
+                  ? 'border-emerald-200/30 bg-emerald-400/15'
+                  : 'border-rose-200/30 bg-rose-400/15'
               }`}
             >
               <TrendingUp
                 size={20}
                 strokeWidth={2.5}
                 aria-hidden="true"
-                className={gananciaInfo.ganancia >= 0 ? 'text-emerald-600' : 'text-rose-600'}
+                className={gananciaInfo.ganancia >= 0 ? 'text-emerald-200' : 'text-rose-200'}
               />
               <p
-                className={`text-lg font-black ${
-                  gananciaInfo.ganancia >= 0 ? 'text-emerald-700' : 'text-rose-700'
+                className={`text-lg font-black tracking-tight ${
+                  gananciaInfo.ganancia >= 0 ? 'text-emerald-100' : 'text-rose-100'
                 }`}
               >
                 {gananciaInfo.ganancia >= 0 ? 'Ganas' : 'Estás vendiendo perdiendo'}{' '}
@@ -534,7 +553,7 @@ export function ProductFormModal({
                 {Math.round(gananciaInfo.margen)}%)
               </p>
               {gananciaInfo.ganancia < 0 && (
-                <span className="rounded-lg bg-rose-600 px-2 py-0.5 text-xs font-bold text-white">
+                <span className="rounded-lg border border-rose-200/40 bg-rose-500/40 px-2 py-0.5 text-xs font-black text-white">
                   Revísalo
                 </span>
               )}
@@ -546,10 +565,10 @@ export function ProductFormModal({
             onClick={() => setPaqueteOpen((open) => !open)}
             aria-expanded={paqueteOpen}
             aria-controls="calculadora-paquete"
-            className={`mt-3 inline-flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-sm font-bold transition-colors ${
+            className={`mt-3 inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-extrabold backdrop-blur-xl transition-all duration-300 active:scale-[0.98] ${
               paqueteOpen
-                ? 'border-sky-300 bg-sky-50 text-sky-700'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                ? 'border-sky-200/40 bg-sky-400/20 text-sky-100'
+                : 'border-white/20 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
             }`}
           >
             <PackageSearch size={18} strokeWidth={2.5} aria-hidden="true" />
@@ -559,10 +578,10 @@ export function ProductFormModal({
           {paqueteOpen && (
             <div
               id="calculadora-paquete"
-              className="mt-3 space-y-3 rounded-2xl border-2 border-slate-100 bg-slate-50 p-4"
+              className="mt-3 space-y-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl"
             >
               <div>
-                <label htmlFor="paquete-precio" className="mb-1 block text-xs font-bold text-slate-600">
+                <label htmlFor="paquete-precio" className="mb-1 block text-xs font-bold text-white/70">
                   La caja / paquete costó (S/)
                 </label>
                 <input
@@ -576,12 +595,12 @@ export function ProductFormModal({
                     setPaquetePrecio(e.target.value)
                     applyCalculatedCost(e.target.value, paqueteUnidades)
                   }}
-                  className="h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                  className="h-12 w-full rounded-xl border border-white/25 bg-white/10 px-3 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50"
                   placeholder="Ej. 24.00"
                 />
               </div>
               <div>
-                <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-bold text-slate-600">
+                <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-bold text-white/70">
                   ¿Cuántas unidades trae?
                 </label>
                 <input
@@ -595,13 +614,13 @@ export function ProductFormModal({
                     setPaqueteUnidades(e.target.value)
                     applyCalculatedCost(paquetePrecio, e.target.value)
                   }}
-                  className="h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-3 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+                  className="h-12 w-full rounded-xl border border-white/25 bg-white/10 px-3 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50"
                   placeholder="Ej. 24"
                 />
               </div>
               {costoCalc !== null && (
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-emerald-100 px-3 py-2">
-                  <p className="text-sm font-black text-emerald-700">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200/30 bg-emerald-400/15 px-3 py-2">
+                  <p className="text-sm font-black text-emerald-100">
                     Cada unidad te cuesta ≈ {formatMoney(costoCalc)}
                   </p>
                   <button
@@ -610,7 +629,7 @@ export function ProductFormModal({
                       setField('costo', costoCalc.toFixed(2))
                       setPaqueteOpen(false)
                     }}
-                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-emerald-700 active:scale-[0.98]"
+                    className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white transition-all hover:bg-emerald-400 active:scale-[0.98]"
                   >
                     Usar este costo [ S/ {formatMoney(costoCalc)} ]
                   </button>
@@ -625,7 +644,7 @@ export function ProductFormModal({
           <SectionTitle>¿Cuándo avisarte?</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="stock_minimo" className="mb-1 block text-sm font-bold text-slate-700">
+              <label htmlFor="stock_minimo" className="mb-1 block text-sm font-bold text-white/75">
                 ¿Cuántos deben quedar para avisarte?
               </label>
               <input
@@ -639,14 +658,14 @@ export function ProductFormModal({
                 className={plainInputClass}
                 placeholder="Ej. 5"
               />
-              <p className="mt-1 text-xs font-semibold text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-white/45">
                 Cuando queden menos que eso, la app te avisará. En blanco = 5.
               </p>
             </div>
 
             {showStockField && (
               <div>
-                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-slate-700">
+                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-white/75">
                   ¿Cuántas unidades hay ahorita?
                 </label>
                 <input
@@ -671,11 +690,11 @@ export function ProductFormModal({
             type="button"
             onClick={() => setOpcionesOpen((open) => !open)}
             aria-expanded={opcionesOpen}
-            className="flex w-full items-center justify-between rounded-2xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-100"
+            className="flex w-full items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-extrabold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20"
           >
             Opciones {opcionesOpen ? '' : '(opcional)'}
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 transition-transform ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white transition-transform duration-300 ${
                 opcionesOpen ? 'rotate-180' : ''
               }`}
             >
@@ -684,7 +703,7 @@ export function ProductFormModal({
           </button>
           {opcionesOpen && (
             <div className="mt-3">
-              <label htmlFor="codigo_barras" className="mb-1 block text-sm font-bold text-slate-700">
+              <label htmlFor="codigo_barras" className="mb-1 block text-sm font-bold text-white/75">
                 Código de barras
               </label>
               <input
@@ -694,7 +713,7 @@ export function ProductFormModal({
                 className={plainInputClass}
                 placeholder="Ej. 7501234567890"
               />
-              <p className="mt-1 text-xs font-semibold text-slate-400">
+              <p className="mt-1 text-xs font-semibold text-white/45">
                 Solo si el producto tiene código. En blanco = se guarda sin código.
               </p>
             </div>
@@ -704,24 +723,24 @@ export function ProductFormModal({
         {error && (
           <p
             role="alert"
-            className="mb-4 rounded-xl bg-rose-100 px-4 py-2 font-semibold text-rose-700"
+            className="mb-4 rounded-2xl border border-rose-200/30 bg-rose-400/20 px-4 py-2.5 font-bold text-rose-100"
           >
             {error}
           </p>
         )}
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border-2 border-slate-200 px-6 py-3 text-base font-bold text-slate-600 transition-colors hover:bg-slate-50"
+            className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3 text-base font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-8 py-3 text-base font-black text-white shadow-lg transition-all hover:bg-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="flex items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-8 py-3 text-base font-black text-white shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             <Check size={18} strokeWidth={3} aria-hidden="true" />
             {submitting

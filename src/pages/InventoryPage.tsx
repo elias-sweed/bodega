@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
+import { AlertTriangle, PackagePlus, RotateCcw } from 'lucide-react'
+import { Toast } from '../components/common/Toast'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
+import { InventorySkeleton } from '../components/inventory/InventorySkeleton'
+import { KardexModal } from '../components/inventory/KardexModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
 import {
@@ -19,14 +23,32 @@ export function InventoryPage() {
   const { products, loading, error, refresh, addProduct, updateProduct, deleteProduct } =
     useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  const recentIds = useMemo<string[]>(
+    () =>
+      Array.isArray((location.state as { recentIds?: unknown } | null)?.recentIds)
+        ? ((location.state as { recentIds: string[] }).recentIds ?? [])
+        : [],
+    // Se lee una sola vez al entrar desde Compras
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
   const initialNewName = searchParams.get('nuevo')
   const [modalOpen, setModalOpen] = useState(initialNewName !== null)
-  const [prefill, setPrefill] = useState<{ nombre: string; categoria: string } | null>(
+  const [prefill, setPrefill] = useState<{
+    nombre: string
+    categoria: string
+    codigo_barras?: string
+    precio_venta?: string
+    costo?: string
+    stock_minimo?: string
+  } | null>(
     initialNewName ? { nombre: initialNewName, categoria: '' } : null,
   )
   const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
+  const [kardexProduct, setKardexProduct] = useState<ProductosRow | null>(null)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
 
@@ -123,6 +145,29 @@ export function InventoryPage() {
     setDeletingProduct(product)
   }
 
+  const handleQuickAdjust = async (product: ProductosRow, delta: 1 | -1): Promise<void> => {
+    const nuevoStock = product.stock_actual + delta
+    if (nuevoStock < 0) {
+      showNotice('error', 'El stock no puede ser negativo.')
+      return
+    }
+    try {
+      const updated = await ajustarStock(
+        product.id,
+        nuevoStock,
+        false,
+        'Ajuste rápido desde inventario',
+      )
+      showNotice('success', `Stock de "${product.nombre}" ajustado a ${updated.stock_actual}`)
+      refresh(true)
+    } catch (cause) {
+      showNotice(
+        'error',
+        getFriendlyError(cause, 'No se pudo ajustar el stock. Inténtalo de nuevo.'),
+      )
+    }
+  }
+
   const confirmDelete = async (): Promise<void> => {
     if (!deletingProduct) return
     const product = deletingProduct
@@ -138,17 +183,28 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-5">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-5">
+      <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Inventario</h1>
-          <div className="flex items-center gap-3 text-sm font-semibold">
-            <span className="text-slate-500">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+            Catálogo
+          </p>
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+            Inventario
+          </h1>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold">
+            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
             {lowStockCount > 0 && (
-              <span className="rounded-full bg-rose-100 px-3 py-0.5 font-bold text-rose-700">
+              <span className="rounded-full border border-rose-200/30 bg-rose-400/25 px-3 py-0.5 text-xs font-black text-rose-50 backdrop-blur-xl">
                 {lowStockCount} con stock bajo
+              </span>
+            )}
+            {loading && products.length > 0 && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
+                Sincronizando…
               </span>
             )}
           </div>
@@ -159,39 +215,56 @@ export function InventoryPage() {
             setPrefill(null)
             setModalOpen(true)
           }}
-          className="h-14 rounded-2xl bg-sky-500 px-6 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98]"
+          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-6 text-base font-black tracking-tight text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
         >
-          + Nuevo producto
+          <PackagePlus size={19} aria-hidden="true" />
+          Nuevo producto
         </button>
       </header>
 
-      {loading ? (
-        <p className="py-10 text-center text-lg text-slate-400">Cargando productos…</p>
-      ) : error ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
-          <p className="text-lg font-semibold text-rose-700">
-            No se pudieron cargar los productos: {error}
+      {loading && products.length === 0 ? (
+        <InventorySkeleton />
+      ) : error && products.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+            <AlertTriangle size={22} aria-hidden="true" />
+          </span>
+          <p className="text-lg font-extrabold tracking-tight text-white">
+            No se pudieron cargar los productos
           </p>
+          <p className="text-sm font-medium text-white/70">{error}</p>
           <button
             type="button"
             onClick={() => refresh()}
-            className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
           >
+            <RotateCcw size={15} aria-hidden="true" />
             Reintentar
           </button>
         </div>
       ) : totalProducts === 0 ? (
-        <p className="py-10 text-center text-lg text-slate-400">
-          Aún no hay productos. Agrega el primero.
-        </p>
+        <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center backdrop-blur-2xl">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+            <PackagePlus size={26} aria-hidden="true" />
+          </span>
+          <p className="text-lg font-black tracking-tight text-white">Aún no hay productos</p>
+          <p className="text-sm font-medium text-white/60">
+            Agrega el primero con el botón Nuevo producto.
+          </p>
+        </div>
       ) : (
-        <ProductTable
-          products={products}
-          isAdmin={isAdmin}
-          onEdit={(product) => setEditingProduct(product)}
-          onAdjustStock={(product) => setAdjustingProduct(product)}
-          onDelete={(product) => handleDeleteRequest(product)}
-        />
+        <div className="fade-in">
+          <ProductTable
+            products={products}
+            isAdmin={isAdmin}
+            onEdit={(product) => setEditingProduct(product)}
+            onAdjustStock={(product) => setAdjustingProduct(product)}
+            onDelete={(product) => handleDeleteRequest(product)}
+            onQuickAdjust={(product, delta) => handleQuickAdjust(product, delta)}
+            onKardex={(product) => setKardexProduct(product)}
+            pinnedIds={recentIds}
+          />
+        </div>
       )}
 
       {modalOpen && (
@@ -229,17 +302,14 @@ export function InventoryPage() {
         />
       )}
 
-      {notice && (
-        <div
-          role="status"
-          className={`fixed inset-x-0 bottom-6 z-10 mx-auto w-max rounded-2xl px-6 py-3 text-lg font-bold text-white shadow-xl ${
-            notice.type === 'success' ? 'bg-emerald-500' : 'bg-rose-600'
-          }`}
-        >
-          {notice.type === 'success' ? '✓ ' : '✕ '}
-          {notice.message}
-        </div>
+      {kardexProduct && (
+        <KardexModal
+          product={kardexProduct}
+          onClose={() => setKardexProduct(null)}
+        />
       )}
+
+      {notice && <Toast type={notice.type} message={notice.message} />}
     </div>
   )
 }

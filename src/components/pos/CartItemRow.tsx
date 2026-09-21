@@ -1,21 +1,37 @@
+import { useEffect, useRef } from 'react'
+import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react'
 import type { CartItem } from '../../types'
 import { formatMoney } from '../../utils/format'
 
 interface CartItemRowProps {
   item: CartItem
+  highlight?: boolean
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
+  onRemove: (productId: string) => void
 }
 
-export function CartItemRow({ item, onIncrease, onDecrease }: CartItemRowProps) {
+export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, onRemove }: CartItemRowProps) {
   const { product, quantity } = item
   const atMaxStock = quantity >= product.stock_actual
+  const rowRef = useRef<HTMLLIElement>(null)
+
+  useEffect(() => {
+    if (highlight) {
+      rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [highlight, quantity])
 
   return (
-    <li className="flex items-center gap-3 border-b border-slate-100 py-3 last:border-none">
+    <li
+      ref={rowRef}
+      className={`flex items-center gap-3 rounded-xl border-b border-white/10 py-3 last:border-none ${highlight ? 'row-flash border border-emerald-200/40 px-2' : ''}`}
+    >
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-slate-800">{product.nombre}</p>
-        <p className="text-xs text-slate-500">
+        <p className="truncate text-sm font-extrabold tracking-tight text-white">
+          {product.nombre}
+        </p>
+        <p className="text-xs font-medium text-white/55">
           {formatMoney(product.precio_venta)} c/u
         </p>
       </div>
@@ -24,26 +40,53 @@ export function CartItemRow({ item, onIncrease, onDecrease }: CartItemRowProps) 
         <button
           type="button"
           onClick={() => onDecrease(product.id)}
-          className="h-10 w-10 rounded-xl bg-rose-100 text-xl font-black text-rose-700 transition-all hover:bg-rose-200 active:scale-95"
+          aria-label={`Quitar uno de ${product.nombre}`}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-100 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
         >
-          −
+          <Minus size={15} aria-hidden="true" />
         </button>
-        <span className="w-8 text-center text-lg font-bold text-slate-800">
+        <span key={quantity} className="animate-pop w-7 text-center text-base font-black tabular-nums text-white">
           {quantity}
         </span>
         <button
           type="button"
           disabled={atMaxStock}
           onClick={() => onIncrease(product.id)}
-          className="h-10 w-10 rounded-xl bg-emerald-100 text-xl font-black text-emerald-700 transition-all hover:bg-emerald-200 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
+          aria-label={`Agregar uno de ${product.nombre}`}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-200/25 bg-emerald-400/20 text-emerald-100 transition-all duration-200 hover:bg-emerald-400/35 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          +
+          <Plus size={15} aria-hidden="true" />
         </button>
       </div>
 
-      <p className="w-20 text-right font-bold text-slate-800">
+      <p className="w-20 shrink-0 text-right text-sm font-black tracking-tight text-white">
         {formatMoney(product.precio_venta * quantity)}
       </p>
+
+      <button
+        type="button"
+        onClick={() => onRemove(product.id)}
+        aria-label={`Eliminar ${product.nombre} del carrito (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
+        title={`Eliminar línea (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/50 transition-all duration-200 hover:border-rose-200/40 hover:bg-rose-400/25 hover:text-rose-100 active:scale-90"
+      >
+        <Trash2 size={15} aria-hidden="true" />
+      </button>
     </li>
+  )
+}
+
+export function CartEmptyState() {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+        <ShoppingCart size={24} aria-hidden="true" />
+      </span>
+      <p className="text-sm font-bold text-white/75">
+        El carrito está vacío.
+        <br />
+        <span className="font-medium text-white/50">Toca un producto para agregarlo.</span>
+      </p>
+    </div>
   )
 }

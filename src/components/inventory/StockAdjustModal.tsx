@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
-import { PackageMinus, PackagePlus } from 'lucide-react'
+import { PackageMinus, PackagePlus, X } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
 
 export interface StockAdjustPayload {
@@ -19,8 +18,9 @@ const MOTIVOS_ENTRADA = ['Corrección de inventario'] as const
 const MOTIVOS_SALIDA = ['Producto vencido', 'Producto dañado/roto', 'Consumo interno'] as const
 
 const inputClass =
-  'h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400'
-const labelClass = 'mt-4 mb-1 block text-sm font-semibold text-slate-600'
+  'h-12 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+const labelClass =
+  'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-white/60'
 
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
   const [stock, setStock] = useState(String(product.stock_actual))
@@ -45,7 +45,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
     }
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     setError(null)
     const value = Number(stock)
@@ -75,31 +75,37 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
       role="dialog"
       aria-modal="true"
       aria-labelledby="ajustar-stock-title"
-      className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="ajustar-stock-title" className="text-2xl font-bold text-slate-900">
-            Ajustar stock
-          </h2>
+        <div className="mb-1 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+              Inventario
+            </p>
+            <h2 id="ajustar-stock-title" className="text-xl font-black tracking-tighter text-white">
+              Ajustar stock
+            </h2>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="h-10 w-10 rounded-xl bg-slate-100 text-xl font-bold text-slate-500 transition-colors hover:bg-slate-200"
+            aria-label="Cerrar"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
-        <p className="text-sm text-slate-500">
-          <strong className="text-slate-800">{product.nombre}</strong> — stock
-          actual: {product.stock_actual}
+        <p className="text-sm font-medium text-white/65">
+          <strong className="font-extrabold text-white">{product.nombre}</strong> — stock
+          actual: <span className="font-black tabular-nums text-white">{product.stock_actual}</span>
         </p>
 
         <label htmlFor="nuevo-stock" className={labelClass}>
@@ -128,7 +134,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors focus:border-sky-400"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
           >
             {MOTIVOS_ENTRADA.map((name) => (
               <option key={name} value={name}>
@@ -142,7 +148,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-xl border-2 border-slate-200 bg-white px-4 text-lg text-slate-900 outline-none transition-colors focus:border-sky-400"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
           >
             {MOTIVOS_SALIDA.map((name) => (
               <option key={name} value={name}>
@@ -153,37 +159,39 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         )}
 
         {delta !== 0 && (
-          <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+          <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white/70 backdrop-blur-xl">
             {movementType === 'entrada' ? (
-              <PackagePlus size={14} className="shrink-0 text-emerald-600" aria-hidden="true" />
+              <PackagePlus size={14} className="shrink-0 text-emerald-300" aria-hidden="true" />
             ) : (
-              <PackageMinus size={14} className="shrink-0 text-rose-600" aria-hidden="true" />
+              <PackageMinus size={14} className="shrink-0 text-rose-300" aria-hidden="true" />
             )}
-            Se registrará un movimiento de{' '}
-            <span className={delta > 0 ? 'font-bold text-emerald-600' : 'font-bold text-rose-600'}>
-              {movementType} {Math.abs(delta)}
-            </span>{' '}
-            · {motivo} · queda en {parsed}.
+            <span>
+              Movimiento de{' '}
+              <span className={delta > 0 ? 'font-black text-emerald-200' : 'font-black text-rose-200'}>
+                {movementType} {Math.abs(delta)}
+              </span>{' '}
+              · {motivo} · queda en {parsed}.
+            </span>
           </p>
         )}
 
         {movementType === 'entrada' && (
           <label
             htmlFor="es-regalo"
-            className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 transition-colors has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50"
+            className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl transition-all duration-300 has-[:checked]:border-emerald-200/50 has-[:checked]:bg-emerald-400/15"
           >
             <input
               id="es-regalo"
               type="checkbox"
               checked={esRegalo}
               onChange={(e) => setEsRegalo(e.target.checked)}
-              className="mt-1 h-5 w-5 shrink-0 accent-emerald-500"
+              className="mt-1 h-5 w-5 shrink-0 accent-emerald-400"
             />
             <span>
-              <span className="block text-sm font-bold text-slate-800">
+              <span className="block text-sm font-extrabold text-white">
                 Regalo / Bonificación
               </span>
-              <span className="block text-xs text-slate-500">
+              <span className="block text-xs font-medium text-white/55">
                 El ingreso se registra sin costo para el negocio (0.00).
               </span>
             </span>
@@ -193,24 +201,24 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-xl bg-rose-100 px-4 py-2 font-semibold text-rose-700"
+            className="mt-3 rounded-2xl border border-rose-200/30 bg-rose-400/20 px-4 py-2 text-sm font-bold text-rose-100"
           >
             {error}
           </p>
         )}
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="h-14 flex-1 rounded-2xl bg-slate-100 text-lg font-bold text-slate-600 transition-colors hover:bg-slate-200"
+            className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="h-14 flex-[2] rounded-2xl bg-sky-500 text-lg font-bold text-white shadow-lg transition-all hover:bg-sky-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-sm font-black text-white shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {submitting ? 'Guardando…' : 'Ajustar stock'}
           </button>

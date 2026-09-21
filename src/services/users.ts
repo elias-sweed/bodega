@@ -70,3 +70,25 @@ export async function removeUsuarioAutorizado(email: string): Promise<void> {
     throw new Error(error.message)
   }
 }
+
+/**
+ * Crea la cuenta de acceso + otorga el rol en un solo paso, llamando a la
+ * Edge Function `crear-usuario` (desplegada en Supabase). Si el correo ya
+ * tenía cuenta, solo le otorga/actualiza el acceso.
+ */
+export async function crearCuentaConAcceso(
+  email: string,
+  rol: 'admin' | 'cajero',
+): Promise<{ existed: boolean }> {
+  const { data, error } = await supabase.functions.invoke('crear-usuario', {
+    body: { email: email.trim().toLowerCase(), rol },
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+  if (data?.error) {
+    throw new Error(String(data.error))
+  }
+  return { existed: Boolean(data?.existed) }
+}

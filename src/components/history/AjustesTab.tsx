@@ -1,12 +1,15 @@
 import { useMemo } from 'react'
+import { ClipboardList, RotateCcw, SearchX, TriangleAlert } from 'lucide-react'
 import { useIngresosHistory } from '../../hooks/useHistory'
-import { fechaEnRango, formatDateTime } from '../../utils/format'
+import { fechaEnRango, formatFechaCorta, formatHora, enFranja } from '../../utils/format'
 import {
   esAjusteIngreso,
   groupByCompra,
   proveedorDeCompra,
 } from './ingresos'
+import { HistorySkeleton } from './HistorySkeleton'
 import type { HistoryFilter } from './types'
+import { describeFilter } from './types'
 
 interface AjusteEntry {
   key: string
@@ -19,6 +22,7 @@ interface AjusteEntry {
 
 function matchesFilter(entry: AjusteEntry, filter: HistoryFilter): boolean {
   if (!fechaEnRango(entry.fecha, filter.from, filter.to)) return false
+  if (!enFranja(entry.fecha, filter.franja)) return false
   const query = filter.query.trim().toLowerCase()
   if (query === '') return true
   return (
@@ -59,19 +63,23 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
     [ajustes, filter],
   )
 
-  if (loading) {
-    return <p className="py-10 text-center text-lg text-slate-400">Cargando ajustes…</p>
+  if (loading && ingresos.length === 0) {
+    return <HistorySkeleton />
   }
 
-  if (error) {
+  if (error && ingresos.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-2xl bg-rose-50 p-8 text-center">
-        <p className="text-lg font-semibold text-rose-700">{error}</p>
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+          <TriangleAlert size={22} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-extrabold tracking-tight text-white">{error}</p>
         <button
           type="button"
           onClick={() => refresh()}
-          className="rounded-xl bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700"
+          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
         >
+          <RotateCcw size={15} aria-hidden="true" />
           Reintentar
         </button>
       </div>
@@ -80,19 +88,36 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
 
   if (ingresos.length === 0) {
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-        <p className="text-lg font-semibold text-slate-500">
-          Aún no hay ajustes registrados. Usa "Ajustar stock" en Inventario.
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+          <ClipboardList size={26} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-black tracking-tight text-white">
+          Vacío, y eso es normal.
+        </p>
+        <p className="max-w-md text-sm font-medium leading-relaxed text-white/60">
+          Aquí solo aparecen las correcciones: algo vencido, dañado, lo que se
+          consumió en casa o un conteo mal hecho. Todo lo que vendes está en
+          Ventas y todo lo que compras está en Compras.
         </p>
       </div>
     )
   }
 
   if (filteredAjustes.length === 0) {
+    const detalle = describeFilter(filter)
     return (
-      <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-        <p className="text-lg font-semibold text-slate-500">
-          No hay ajustes que coincidan con el filtro.
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+          <SearchX size={26} aria-hidden="true" />
+        </span>
+        <p className="text-lg font-black tracking-tight text-white">
+          {detalle
+            ? `No hay ajustes ${detalle}.`
+            : 'No hay ajustes que coincidan con el filtro.'}
+        </p>
+        <p className="text-sm font-medium text-white/60">
+          Prueba con otro día, horario o búsqueda.
         </p>
       </div>
     )
@@ -100,33 +125,46 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <p className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white/60 backdrop-blur-2xl">
+        Aquí ves los cambios de stock que <span className="font-black text-white/85">no fueron ventas ni compras</span>:
+        productos vencidos, dañados, consumo de la casa y correcciones de conteo.
+      </p>
       <ul className="flex flex-col gap-2">
         {filteredAjustes.map((entry) => (
           <li
             key={entry.key}
-            className="flex items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4 shadow-sm"
+            className="flex items-center justify-between gap-4 rounded-[28px] border border-white/15 bg-white/10 px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 hover:bg-white/15"
           >
             <div className="min-w-0">
-              <span className="mb-1 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-slate-900 text-white">
-                {entry.salida ? 'Merma / Salida' : 'Ajuste / Entrada'}
+              <span className={`mb-1 inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide backdrop-blur-xl ${
+                entry.salida
+                  ? 'border-rose-200/30 bg-rose-400/20 text-rose-100'
+                  : 'border-emerald-200/30 bg-emerald-400/20 text-emerald-100'
+              }`}>
+                {entry.salida ? 'Salió del inventario' : 'Entró al inventario'}
               </span>
-              <span className="block truncate text-sm font-bold text-slate-800">
+              <span className="block truncate text-base font-black tracking-tight text-white">
                 {entry.producto}
               </span>
-              <span className="block text-xs font-semibold text-slate-500">
-                {formatDateTime(entry.fecha)}
+              <span className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="text-sm font-extrabold text-white">
+                  {formatFechaCorta(entry.fecha)}
+                </span>
+                <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-0.5 text-xs font-black tabular-nums text-white">
+                  {formatHora(entry.fecha)}
+                </span>
               </span>
-              <span className="block text-xs font-semibold text-slate-500">
+              <span className="mt-0.5 block text-xs font-semibold text-white/60">
                 Motivo: {entry.motivo}
               </span>
             </div>
             <div className="shrink-0 text-right">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <span className="block text-xs font-bold uppercase tracking-wide text-white/45">
                 Movimiento
               </span>
               <span
-                className={`text-lg font-black ${
-                  entry.salida ? 'text-rose-600' : 'text-emerald-600'
+                className={`text-lg font-black tracking-tight ${
+                  entry.salida ? 'text-rose-200' : 'text-emerald-200'
                 }`}
               >
                 {entry.salida ? '−' : '+'}

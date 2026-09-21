@@ -1,5 +1,5 @@
 import type { IngresosMercaderiaRow } from '../../types/database.types'
-import { fechaEnRango, shortId } from '../../utils/format'
+import { fechaEnRango, formatFechaCorta, shortId, enFranja } from '../../utils/format'
 import type { HistoryFilter } from './types'
 
 export interface CompraGroup {
@@ -91,14 +91,18 @@ export function matchesCompraFilter(
   compra: CompraGroup,
   proveedorMap: Record<string, string>,
   filter: HistoryFilter,
+  numero: number,
 ): boolean {
   if (!fechaEnRango(compra.fecha, filter.from, filter.to)) return false
+  if (!enFranja(compra.fecha, filter.franja)) return false
   const query = filter.query.trim().toLowerCase()
   if (query === '') return true
   const proveedor = proveedorDeCompra(compra, proveedorMap)
   return (
     proveedor.toLowerCase().includes(query) ||
     (compra.comprobante ?? '').toLowerCase().includes(query) ||
-    shortId(compra.key).includes(query)
+    shortId(compra.key).includes(query) ||
+    formatFechaCorta(compra.fecha).includes(query) ||
+    String(numero) === query
   )
 }

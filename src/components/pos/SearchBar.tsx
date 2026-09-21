@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 
 interface SearchBarProps {
@@ -19,8 +20,8 @@ export function SearchBar({ value, onChange, onEnter }: SearchBarProps) {
 
   return (
     <div className="relative shrink-0">
-      <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-2xl">
-        🔍
+      <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-white/60">
+        <Search size={22} aria-hidden="true" />
       </span>
       <input
         type="search"
@@ -30,7 +31,7 @@ export function SearchBar({ value, onChange, onEnter }: SearchBarProps) {
         onKeyDown={handleKeyDown}
         placeholder="Buscar producto o escanear código de barras…"
         enterKeyHint="search"
-        className="h-16 w-full rounded-2xl border-2 border-slate-200 bg-white pl-14 pr-6 text-xl text-slate-900 shadow-sm outline-none transition-colors placeholder:text-slate-400 focus:border-sky-400"
+        className="h-16 w-full rounded-2xl border border-white/25 bg-white/10 pl-14 pr-6 text-lg font-semibold tracking-tight text-white shadow-[0_16px_40px_-18px_rgba(0,0,0,0.6)] outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-white/45 hover:bg-white/15 focus:border-white/50 focus:bg-white/15"
       />
     </div>
   )
