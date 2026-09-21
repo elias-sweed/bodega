@@ -15,6 +15,15 @@ function shortId(ventaId: string): string {
   return ventaId.replace(/-/g, '').slice(0, 8).toUpperCase()
 }
 
+function esc(value: string): string {
+  return value.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ??
+      c,
+  )
+}
+
 function printReceipt(sale: LastSale): void {
   const win = window.open('', '_blank', 'width=400,height=650')
   if (!win) return
@@ -22,7 +31,7 @@ function printReceipt(sale: LastSale): void {
   const rows = sale.items
     .map(
       (item) => `<tr>
-        <td>${item.quantity} x ${item.product.nombre}</td>
+        <td>${item.quantity} x ${esc(item.product.nombre)}</td>
         <td style="text-align:right">${formatMoney(
           item.product.precio_venta * item.quantity,
         )}</td>

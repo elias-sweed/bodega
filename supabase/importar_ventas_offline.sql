@@ -57,6 +57,11 @@ declare
   v_negativo boolean := false;
   v_ticket text := nullif(btrim(coalesce(p_ticket, '')), '');
 begin
+  -- Solo miembros de la bodega (igual que el resto de RPC).
+  if not public.es_miembro() then
+    raise exception 'No autorizado';
+  end if;
+
   -- (a) Duplicado: el mismo ticket offline ya fue importado antes
   if v_ticket is not null
      and exists (
@@ -123,7 +128,7 @@ end;
 $$;
 
 grant execute on function public.registrar_venta_backfill(json, text, timestamptz, text)
-  to anon, authenticated;
+  to authenticated;
 
 -- VERIFICACIÓN: debe devolver 1 fila.
 select p.proname,
