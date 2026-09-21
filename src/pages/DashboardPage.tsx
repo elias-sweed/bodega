@@ -7,8 +7,10 @@ import { MetodoDonut } from '../components/dashboard/MetodoDonut'
 import { QuickActions } from '../components/dashboard/QuickActions'
 import { SalesTodayCard } from '../components/dashboard/SalesTodayCard'
 import { StockResumenCard } from '../components/dashboard/StockResumenCard'
+import { TodayProducts } from '../components/dashboard/TodayProducts'
 import { WeeklySalesChart } from '../components/dashboard/WeeklySalesChart'
 import { useDashboardStats } from '../hooks/useDashboardStats'
+import { useTodayProducts } from '../hooks/useTodayProducts'
 import { useWeeklySales } from '../hooks/useWeeklySales'
 
 function timeAgo(savedAt: number | null): string | null {
@@ -27,6 +29,7 @@ export function DashboardPage() {
   const { resumen, lowStock, loading, isRefreshing, error, updatedAt, refresh } =
     useDashboardStats()
   const { dias, ayerTotal, loading: weeklyLoading } = useWeeklySales()
+  const { productos: productosHoy, loading: productosLoading } = useTodayProducts()
   const retry = useCallback((): void => refresh(), [refresh])
   const freshness = timeAgo(updatedAt)
 
@@ -113,6 +116,8 @@ export function DashboardPage() {
           <SalesTodayCard resumen={resumen} ayerTotal={ayerTotal} />
 
           <WeeklySalesChart dias={dias} loading={weeklyLoading} />
+
+          <TodayProducts productos={productosHoy} loading={productosLoading} />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <GastoMesCard total={resumen.gasto_compras_mes} />

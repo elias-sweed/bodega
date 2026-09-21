@@ -78,39 +78,39 @@ export function SalesTodayCard({ resumen, ayerTotal = 0 }: SalesTodayCardProps) 
           </p>
         </div>
 
-        <div className="w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 px-5 py-4 backdrop-blur-xl sm:max-w-[15rem]">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/70">
+        <div className="w-full shrink-0 rounded-2xl border border-white/25 bg-white/10 px-6 py-5 backdrop-blur-xl sm:max-w-[18rem]">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
             Cobrado vs ganado
           </p>
-          <div className="mt-3 flex h-28 items-end justify-center gap-4">
+          <div className="mt-3 flex h-36 items-end justify-center gap-5">
             <div className="flex h-full flex-col items-center justify-end gap-1.5">
-              <span className="text-xs font-black tabular-nums text-white">
+              <span className="text-sm font-black tabular-nums text-white">
                 {formatMoney(cobrado)}
               </span>
               <div
-                className="w-12 rounded-t-xl border border-white/30 bg-gradient-to-t from-white/25 to-white/55"
+                className="w-14 rounded-t-xl border border-white/30 bg-gradient-to-t from-white/25 to-white/55"
                 style={{ height: `${Math.max(cobrado > 0 ? 10 : 4, Math.round((cobrado / maximo) * 100))}%` }}
               />
-              <span className="flex items-center gap-1 text-[11px] font-bold text-white/70">
+              <span className="flex items-center gap-1 text-xs font-bold text-white/70">
                 <span className="h-2 w-2 rounded-full bg-white/60" aria-hidden="true" />
                 Cobrado
               </span>
             </div>
             <div className="flex h-full flex-col items-center justify-end gap-1.5">
-              <span className="text-xs font-black tabular-nums text-emerald-200">
+              <span className="text-sm font-black tabular-nums text-emerald-200">
                 {formatMoney(ganado)}
               </span>
               <div
-                className="w-12 rounded-t-xl border border-emerald-200/50 bg-gradient-to-t from-emerald-500/90 to-emerald-300 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)]"
+                className="w-14 rounded-t-xl border border-emerald-200/50 bg-gradient-to-t from-emerald-500/90 to-emerald-300 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)]"
                 style={{ height: `${Math.max(ganado > 0 ? 10 : 4, Math.round((ganado / maximo) * 100))}%` }}
               />
-              <span className="flex items-center gap-1 text-[11px] font-bold text-white/70">
+              <span className="flex items-center gap-1 text-xs font-bold text-white/70">
                 <span className="h-2 w-2 rounded-full bg-emerald-300" aria-hidden="true" />
                 Ganado
               </span>
             </div>
           </div>
-          <p className="mt-2 text-center text-[11px] font-medium text-white/50">
+          <p className="mt-2.5 text-center text-xs font-medium text-white/50">
             Lo verde es lo que te queda libre.
           </p>
         </div>
