@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell } from 'lucide-react'
+import { Bell, CalendarDays, History, LayoutDashboard, Package, ShoppingBag, Users, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Silk from '../components/Silk'
 import { UserMenu } from '../components/auth/UserMenu'
@@ -15,12 +15,21 @@ function todayLabel(): string {
 }
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
-  return `rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+  return `flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
     isActive
-      ? 'bg-white/15 text-white'
+      ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
       : 'text-slate-300 hover:bg-white/10 hover:text-white'
   }`
 }
+
+const NAV_ITEMS: { to: string; label: string; icon: typeof Bell; end?: boolean }[] = [
+  { to: '/', label: 'Resumen', icon: LayoutDashboard, end: true },
+  { to: '/caja', label: 'Caja', icon: Wallet },
+  { to: '/inventario', label: 'Inventario', icon: Package },
+  { to: '/compras', label: 'Compras', icon: ShoppingBag },
+  { to: '/historial', label: 'Historial', icon: History },
+  { to: '/usuarios', label: 'Usuarios', icon: Users },
+]
 
 export function PosLayout() {
   const { rol } = useAuth()
@@ -68,50 +77,65 @@ export function PosLayout() {
 
   return (
     <div className="flex h-screen flex-col bg-slate-100">
-      <header className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 px-6 py-3 text-white">
-        <div className="flex items-center gap-2 text-lg font-bold">
-          <span aria-hidden="true">🛒</span>
-          <span>Bodega POS</span>
-        </div>
-        <nav className="flex flex-wrap items-center gap-1 lg:gap-2">
-          <NavLink to="/" end className={navLinkClass}>
-            Resumen
-          </NavLink>
-          <NavLink to="/caja" className={navLinkClass}>
-            Caja
-          </NavLink>
-          <NavLink to="/inventario" className={navLinkClass}>
-            Inventario
-          </NavLink>
-          <NavLink to="/compras" className={navLinkClass}>
-            Compras
-          </NavLink>
-          <NavLink to="/historial" className={navLinkClass}>
-            Historial
-          </NavLink>
-          {rol === 'admin' && (
-            <NavLink to="/usuarios" className={navLinkClass}>
-              Usuarios
-            </NavLink>
-          )}
-        </nav>
-        <div className="flex items-center gap-4">
-          <span className="hidden text-sm text-slate-300 md:inline">
-            {todayLabel()}
-          </span>
-          <NavLink
-            to="/notificaciones"
-            aria-label="Notificaciones de productos agotados"
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <Bell size={20} aria-hidden="true" />
-            {agotados.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-white">
-                {agotados.length}
+      <header className="relative z-40 shrink-0 border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950">
+        {/* brillo inferior de la barra */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent"
+        />
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 lg:px-6">
+          {/* marca */}
+          <div className="flex items-center gap-2.5">
+            <span
+              aria-hidden="true"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-base shadow-lg shadow-indigo-500/30"
+            >
+              🛒
+            </span>
+            <span className="leading-none">
+              <span className="block text-[15px] font-black tracking-tight text-white">
+                Bodega POS
               </span>
-            )}
-          </NavLink>
-          <UserMenu />
+              <span className="mt-0.5 block text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/45">
+                Panel de ventas
+              </span>
+            </span>
+          </div>
+
+          {/* navegación */}
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-1 lg:order-none lg:w-auto lg:justify-center">
+            {NAV_ITEMS.map((item) => {
+              if (item.to === '/usuarios' && rol !== 'admin') return null
+              const Icon = item.icon
+              return (
+                <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
+                  <Icon size={15} aria-hidden="true" className="shrink-0" />
+                  {item.label}
+                </NavLink>
+              )
+            })}
+          </nav>
+
+          {/* acciones */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold capitalize text-slate-300 xl:inline-flex">
+              <CalendarDays size={14} aria-hidden="true" className="text-indigo-300" />
+              {todayLabel()}
+            </span>
+            <NavLink
+              to="/notificaciones"
+              aria-label="Notificaciones de productos agotados"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition-all duration-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
+            >
+              <Bell size={20} aria-hidden="true" />
+              {agotados.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-white">
+                  {agotados.length}
+                </span>
+              )}
+            </NavLink>
+            <UserMenu />
+          </div>
         </div>
       </header>
 

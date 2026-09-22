@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, RefreshCw, X } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, X } from 'lucide-react'
+import { DashboardHero } from '../components/dashboard/DashboardHero'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
 import { LowStockList } from '../components/dashboard/LowStockList'
@@ -148,19 +149,7 @@ export function DashboardPage() {
   if (loading && resumen === null) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
-        <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
-              Bodega · Panel
-            </p>
-            <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
-              Resumen del día
-            </h1>
-            <p className="mt-1 text-sm font-medium text-white/65">
-              Preparando tu resumen premium…
-            </p>
-          </div>
-        </header>
+        <DashboardHero subtitulo="Preparando tu resumen premium…" />
         <DashboardSkeleton />
       </div>
     )
@@ -168,40 +157,12 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
-      <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
-            Bodega · Panel
-          </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
-            Resumen del día
-          </h1>
-          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm font-medium text-white/65">
-            Todo lo que necesitas saber de tu bodega hoy.
-            {freshness && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${isRefreshing ? 'animate-pulse bg-amber-300' : 'bg-emerald-300'}`}
-                />
-                {isRefreshing ? 'actualizando…' : freshness}
-              </span>
-            )}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={retry}
-          disabled={isRefreshing}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/15 px-5 text-sm font-extrabold tracking-tight text-white shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
-        >
-          <RefreshCw
-            size={16}
-            aria-hidden="true"
-            className={isRefreshing ? 'animate-spin' : ''}
-          />
-          {isRefreshing ? 'Actualizando' : 'Actualizar'}
-        </button>
-      </header>
+      <DashboardHero
+        subtitulo="Todo lo que necesitas saber de tu bodega hoy."
+        freshness={freshness}
+        isRefreshing={isRefreshing}
+        onRefresh={retry}
+      />
 
       {error && resumen === null ? (
         <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
