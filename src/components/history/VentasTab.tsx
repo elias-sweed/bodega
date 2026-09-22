@@ -8,7 +8,7 @@ import {
   fetchProductNames,
 } from '../../services/history'
 import type { DetalleVentasRow, VentasRow } from '../../types/database.types'
-import { formatFechaCorta, formatHora, formatMoney, shortId, fechaEnRango, enFranja, claveDia } from '../../utils/format'
+import { formatFechaCorta, formatHora, formatMoney, shortId, fechaEnRango, enFranja, claveDia, claveHoy } from '../../utils/format'
 import { Toast } from '../common/Toast'
 import { HistorySkeleton } from './HistorySkeleton'
 import type { HistoryFilter } from './types'
@@ -398,7 +398,13 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                       </div>
                       <button
                         type="button"
-                        onClick={() => navigate('/', { state: { fechaVista: claveDia(venta.fecha) } })}
+                        onClick={() => {
+                          const clave = claveDia(venta.fecha)
+                          // Si es hoy, al dashboard normal (sin vista de día)
+                          navigate('/', {
+                            state: clave === claveHoy() ? null : { fechaVista: clave },
+                          })
+                        }}
                         className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
                       >
                         <BarChart3 size={16} aria-hidden="true" />

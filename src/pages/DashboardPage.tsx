@@ -13,6 +13,7 @@ import { WeeklySalesChart } from '../components/dashboard/WeeklySalesChart'
 import { useDashboardStats } from '../hooks/useDashboardStats'
 import { useTodayProducts } from '../hooks/useTodayProducts'
 import { useWeeklySales } from '../hooks/useWeeklySales'
+import { claveHoy } from '../utils/format'
 
 function timeAgo(savedAt: number | null): string | null {
   if (!savedAt) return null
@@ -32,7 +33,10 @@ export function DashboardPage() {
   // Vista de un día pasado (llega desde Historial). Vive solo en la
   // navegación: cambiar de sección o usar el menú vuelve al día de hoy;
   // recargar conserva el día porque el navegador guarda el estado.
-  const fechaVista = (location.state as { fechaVista?: string } | null)?.fechaVista ?? null
+  // Si el día pedido es hoy no hay vista de día: el dashboard ya es hoy.
+  const fechaVistaPedida =
+    (location.state as { fechaVista?: string } | null)?.fechaVista ?? null
+  const fechaVista = fechaVistaPedida === claveHoy() ? null : fechaVistaPedida
 
   const rangoDia = useMemo(() => {
     if (!fechaVista) return undefined

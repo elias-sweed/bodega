@@ -71,6 +71,11 @@ export function claveDia(value: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+/** Clave local YYYY-MM-DD de hoy */
+export function claveHoy(): string {
+  return claveDia(new Date().toISOString())
+}
+
 /** Mañana 06–12, tarde 12–19, noche 19–06 (hora local) */
 export function enFranja(fechaISO: string, franja: FranjaId): boolean {
   if (franja === 'todo') return true
