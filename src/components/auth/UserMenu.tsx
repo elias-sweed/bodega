@@ -51,11 +51,11 @@ export function UserMenu() {
             className="h-9 w-9 rounded-full object-cover"
           />
         ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-ink">
             {initial}
           </span>
         )}
-        <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-slate-200 lg:block">
+        <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-ink lg:block">
           {displayName}
           <span className="ml-2 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-bold text-sky-300">
             {rolLabel}
@@ -65,7 +65,7 @@ export function UserMenu() {
           type="button"
           onClick={() => void handleSignOut()}
           disabled={signingOut}
-          className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/20 disabled:cursor-wait disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-3 disabled:cursor-wait disabled:opacity-50"
         >
           <svg
             viewBox="0 0 24 24"

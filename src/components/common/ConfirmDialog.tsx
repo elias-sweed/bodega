@@ -33,14 +33,14 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fade-in fixed inset-0 z-40 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-40 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       role="alertdialog"
       aria-modal="true"
       aria-label={title}
       onClick={onCancel}
     >
       <div
-        className="fade-up w-full max-w-sm rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up w-full max-w-sm rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -51,14 +51,14 @@ export function ConfirmDialog({
             type="button"
             onClick={onCancel}
             aria-label="Cerrar"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
           >
             <X size={15} aria-hidden="true" />
           </button>
         </div>
 
-        <h2 className="mt-4 text-xl font-black tracking-tighter text-white">{title}</h2>
-        <p className="mt-1.5 text-sm font-medium leading-relaxed text-white/65">
+        <h2 className="mt-4 text-xl font-black tracking-tighter text-ink">{title}</h2>
+        <p className="mt-1.5 text-sm font-medium leading-relaxed text-muted">
           {description}
         </p>
 
@@ -66,14 +66,14 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="h-12 rounded-2xl border border-white/25 bg-white/10 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
+            className="h-12 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="h-12 rounded-2xl border border-rose-200/30 bg-gradient-to-br from-rose-400/90 to-rose-600/90 text-sm font-black text-white shadow-[0_14px_36px_-14px_rgba(244,63,94,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+            className="h-12 rounded-2xl border border-rose-200/30 bg-gradient-to-br from-rose-400/90 to-rose-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(244,63,94,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
           >
             {confirmLabel}
           </button>

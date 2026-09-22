@@ -18,9 +18,9 @@ const MOTIVOS_ENTRADA = ['Corrección de inventario'] as const
 const MOTIVOS_SALIDA = ['Producto vencido', 'Producto dañado/roto', 'Consumo interno'] as const
 
 const inputClass =
-  'h-12 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-12 w-full rounded-2xl border border-line bg-surface px-4 text-lg font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 const labelClass =
-  'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-white/60'
+  'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
   const [stock, setStock] = useState(String(product.stock_actual))
@@ -75,21 +75,21 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
       role="dialog"
       aria-modal="true"
       aria-labelledby="ajustar-stock-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
       >
         <div className="mb-1 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
               Inventario
             </p>
-            <h2 id="ajustar-stock-title" className="text-xl font-black tracking-tighter text-white">
+            <h2 id="ajustar-stock-title" className="text-xl font-black tracking-tighter text-ink">
               Ajustar stock
             </h2>
           </div>
@@ -97,15 +97,15 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
           >
             <X size={16} aria-hidden="true" />
           </button>
         </div>
 
-        <p className="text-sm font-medium text-white/65">
-          <strong className="font-extrabold text-white">{product.nombre}</strong> — stock
-          actual: <span className="font-black tabular-nums text-white">{product.stock_actual}</span>
+        <p className="text-sm font-medium text-muted">
+          <strong className="font-extrabold text-ink">{product.nombre}</strong> — stock
+          actual: <span className="font-black tabular-nums text-ink">{product.stock_actual}</span>
         </p>
 
         <label htmlFor="nuevo-stock" className={labelClass}>
@@ -134,7 +134,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
           >
             {MOTIVOS_ENTRADA.map((name) => (
               <option key={name} value={name}>
@@ -148,7 +148,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
           >
             {MOTIVOS_SALIDA.map((name) => (
               <option key={name} value={name}>
@@ -159,7 +159,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         )}
 
         {delta !== 0 && (
-          <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white/70 backdrop-blur-xl">
+          <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-muted backdrop-blur-xl">
             {movementType === 'entrada' ? (
               <PackagePlus size={14} className="shrink-0 text-emerald-300" aria-hidden="true" />
             ) : (
@@ -178,7 +178,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {movementType === 'entrada' && (
           <label
             htmlFor="es-regalo"
-            className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-xl transition-all duration-300 has-[:checked]:border-emerald-200/50 has-[:checked]:bg-emerald-400/15"
+            className="mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl transition-all duration-300 has-[:checked]:border-emerald-200/50 has-[:checked]:bg-emerald-400/15"
           >
             <input
               id="es-regalo"
@@ -188,10 +188,10 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
               className="mt-1 h-5 w-5 shrink-0 accent-emerald-400"
             />
             <span>
-              <span className="block text-sm font-extrabold text-white">
+              <span className="block text-sm font-extrabold text-ink">
                 Regalo / Bonificación
               </span>
-              <span className="block text-xs font-medium text-white/55">
+              <span className="block text-xs font-medium text-muted">
                 El ingreso se registra sin costo para el negocio (0.00).
               </span>
             </span>
@@ -211,14 +211,14 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
           <button
             type="button"
             onClick={onClose}
-            className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
+            className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-sm font-black text-white shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {submitting ? 'Guardando…' : 'Ajustar stock'}
           </button>

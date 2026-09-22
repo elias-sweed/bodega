@@ -5,12 +5,12 @@ export function InventorySkeleton() {
         <div className="skeleton-shimmer h-11 w-full max-w-xs rounded-xl" />
         <div className="skeleton-shimmer h-11 w-44 rounded-xl" />
       </div>
-      <div className="overflow-hidden rounded-[28px] border border-white/15 bg-white/10 backdrop-blur-2xl">
+      <div className="overflow-hidden rounded-[28px] border border-line bg-surface backdrop-blur-2xl">
         <div className="flex flex-col">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="flex items-center gap-4 border-b border-white/10 px-5 py-4 last:border-none"
+              className="flex items-center gap-4 border-b border-line px-5 py-4 last:border-none"
             >
               <div className="min-w-0 flex-1">
                 <div className="skeleton-shimmer h-4 w-1/3 rounded-full" />

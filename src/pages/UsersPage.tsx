@@ -21,9 +21,9 @@ type Notice = {
 }
 
 const inputClass =
-  'h-12 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-medium text-white outline-none transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-12 w-full rounded-2xl border border-line bg-surface px-4 text-base font-medium text-ink outline-none transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 const labelClass =
-  'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-white/60'
+  'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted'
 
 export function UsersPage() {
   const { rol, user, signOut } = useAuth()
@@ -80,16 +80,16 @@ export function UsersPage() {
   if (!isAdmin) {
     return (
       <div className="fade-in mx-auto flex h-full w-full max-w-md flex-col items-center justify-center p-4">
-        <div className="fade-up w-full rounded-[28px] border border-white/15 bg-white/10 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white">
+        <div className="fade-up w-full rounded-[28px] border border-line bg-surface p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-ink">
             <ShieldAlert size={26} aria-hidden="true" />
           </span>
-          <h1 className="mt-4 text-xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-4 text-xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
             Acceso no autorizado
           </h1>
-          <p className="mt-2 text-sm font-medium text-white/65">
+          <p className="mt-2 text-sm font-medium text-muted">
             Solo un administrador puede gestionar los accesos. El correo{' '}
-            <strong className="text-white">{user?.email}</strong> no tiene
+            <strong className="text-ink">{user?.email}</strong> no tiene
             permiso para ver esta página.
           </p>
           <button
@@ -99,7 +99,7 @@ export function UsersPage() {
               setSigningOut(true)
               void signOut()
             }}
-            className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/15 text-base font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+            className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface-2 text-base font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
           >
             <LogOut size={18} aria-hidden="true" />
             {signingOut ? 'Cerrando…' : 'Cerrar sesión'}
@@ -211,17 +211,17 @@ export function UsersPage() {
   return (
     <div className="fade-in mx-auto flex h-full w-full max-w-4xl flex-col gap-6">
       <header className="flex shrink-0 items-center gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white backdrop-blur-xl">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-ink backdrop-blur-xl">
           <Users size={22} aria-hidden="true" />
         </span>
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Acceso
           </p>
-          <h1 className="mt-0.5 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-0.5 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
             Usuarios
           </h1>
-          <p className="mt-1 text-sm font-medium text-white/65">
+          <p className="mt-1 text-sm font-medium text-muted">
             Controla quién puede entrar al sistema y con qué rol.
           </p>
         </div>
@@ -233,12 +233,12 @@ export function UsersPage() {
           <strong className="font-extrabold">Todo se hace aquí:</strong> escribe el
           correo, elige el rol y pulsa el botón: la cuenta se crea sola. Después
           dile a la persona que en el login use{' '}
-          <strong className="font-extrabold text-white">"Olvidé mi contraseña"</strong>{' '}
+          <strong className="font-extrabold text-ink">"Olvidé mi contraseña"</strong>{' '}
           para poner su propia clave (que revise spam si no le llega).
         </p>
       </div>
 
-      <section className="fade-up shrink-0 rounded-[28px] border border-white/15 bg-white/10 p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-6">
+      <section className="fade-up shrink-0 rounded-[28px] border border-line bg-surface p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-6">
         <form onSubmit={handleAdd} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div>
@@ -264,7 +264,7 @@ export function UsersPage() {
                 id="usuario-rol"
                 value={nuevoRol}
                 onChange={(e) => setNuevoRol(e.target.value as UsuarioRol)}
-                className={`${inputClass} cursor-pointer [&>option]:bg-[#2a1568] [&>option]:text-white`}
+                className={`${inputClass} cursor-pointer [&>option]:bg-[#171242] [&>option]:text-ink`}
               >
                 <option value="cajero">Cajero</option>
                 <option value="admin">Admin</option>
@@ -274,7 +274,7 @@ export function UsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-base font-black tracking-tight text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-base font-black tracking-tight text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
           >
             <UserPlus size={18} strokeWidth={2.5} aria-hidden="true" />
             {saving ? 'Creando…' : 'Crear cuenta y dar acceso'}
@@ -282,7 +282,7 @@ export function UsersPage() {
         </form>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-white/15 bg-white/10 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
         {loading ? (
           <div className="flex flex-col gap-3 p-5" aria-label="Cargando usuarios">
             {[0, 1, 2].map((i) => (
@@ -298,10 +298,10 @@ export function UsersPage() {
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
               <ShieldAlert size={22} aria-hidden="true" />
             </span>
-            <p className="text-base font-extrabold tracking-tight text-white">
+            <p className="text-base font-extrabold tracking-tight text-ink">
               No se pudo cargar el listado
             </p>
-            <p className="text-sm font-medium text-white/70">{error}</p>
+            <p className="text-sm font-medium text-muted">{error}</p>
             <button
               type="button"
               onClick={() => void loadList()}
@@ -312,26 +312,26 @@ export function UsersPage() {
             </button>
           </div>
         ) : usuarios.length === 0 ? (
-          <div className="m-5 flex flex-col items-center gap-2 rounded-[20px] border border-white/15 bg-white/10 p-10 text-center backdrop-blur-xl">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+          <div className="m-5 flex flex-col items-center gap-2 rounded-[20px] border border-line bg-surface p-10 text-center backdrop-blur-xl">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
               <Users size={22} aria-hidden="true" />
             </span>
-            <p className="mt-2 text-base font-extrabold tracking-tight text-white">
+            <p className="mt-2 text-base font-extrabold tracking-tight text-ink">
               Todavía no hay usuarios con acceso
             </p>
-            <p className="text-sm font-medium text-white/65">
+            <p className="text-sm font-medium text-muted">
               Agrega el primer correo con el formulario de arriba.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-white/10">
+          <ul className="divide-y divide-line">
             {usuarios.map((usuario) => (
               <li
                 key={usuario.email}
                 className="fade-up flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-bold text-white">
+                  <p className="truncate font-bold text-ink">
                     {usuario.email}
                     {usuario.email === user?.email && (
                       <span className="ml-2 text-xs font-extrabold text-emerald-200">
@@ -339,7 +339,7 @@ export function UsersPage() {
                       </span>
                     )}
                   </p>
-                  <p className="text-xs font-medium text-white/45">
+                  <p className="text-xs font-medium text-muted">
                     Desde{' '}
                     {new Date(usuario.created_at).toLocaleDateString('es-PE')}
                   </p>
@@ -349,7 +349,7 @@ export function UsersPage() {
                     className={`rounded-full border px-3 py-1 text-xs font-extrabold ${
                       usuario.rol === 'admin'
                         ? 'border-violet-200/30 bg-violet-400/25 text-violet-100'
-                        : 'border-white/20 bg-white/10 text-white/75'
+                        : 'border-line bg-surface text-muted'
                     }`}
                   >
                     {usuario.rol === 'admin' ? 'Admin' : 'Cajero'}
@@ -357,7 +357,7 @@ export function UsersPage() {
                   <button
                     type="button"
                     onClick={() => void handleChangeRol(usuario)}
-                    className="rounded-xl border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0 active:scale-95"
+                    className="rounded-xl border border-line bg-surface px-3 py-1.5 text-xs font-bold text-ink backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
                   >
                     Cambiar rol
                   </button>

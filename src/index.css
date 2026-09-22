@@ -1,5 +1,25 @@
 @import 'tailwindcss';
 
+@theme {
+  /* Paleta "índigo noche + ámbar".
+     Los paneles son MÁS OSCUROS y más opacos que el fondo morado, para que el
+     contenido se separe en vez de fundirse con la animación de atrás. */
+  --color-surface-sub: rgba(23, 18, 66, 0.45);
+  --color-surface: rgba(23, 18, 66, 0.88);
+  --color-surface-2: rgba(34, 26, 99, 0.92);
+  --color-surface-3: rgba(44, 34, 119, 0.96);
+
+  --color-line: rgba(255, 255, 255, 0.15);
+  --color-line-strong: rgba(255, 255, 255, 0.42);
+
+  --color-ink: #f5f3ff;
+  --color-muted: #a5a0d0;
+
+  --color-gold: #fbbf24;
+  --color-profit: #34d399;
+  --color-loss: #fb7185;
+}
+
 @layer base {
   html {
     font-family:

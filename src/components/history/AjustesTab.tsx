@@ -73,7 +73,7 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
-        <p className="text-lg font-extrabold tracking-tight text-white">{error}</p>
+        <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>
         <button
           type="button"
           onClick={() => refresh()}
@@ -88,14 +88,14 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
 
   if (ingresos.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <ClipboardList size={26} aria-hidden="true" />
         </span>
-        <p className="text-lg font-black tracking-tight text-white">
+        <p className="text-lg font-black tracking-tight text-ink">
           Vacío, y eso es normal.
         </p>
-        <p className="max-w-md text-sm font-medium leading-relaxed text-white/60">
+        <p className="max-w-md text-sm font-medium leading-relaxed text-muted">
           Aquí solo aparecen las correcciones: algo vencido, dañado, lo que se
           consumió en casa o un conteo mal hecho. Todo lo que vendes está en
           Ventas y todo lo que compras está en Compras.
@@ -107,16 +107,16 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
   if (filteredAjustes.length === 0) {
     const detalle = describeFilter(filter)
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <SearchX size={26} aria-hidden="true" />
         </span>
-        <p className="text-lg font-black tracking-tight text-white">
+        <p className="text-lg font-black tracking-tight text-ink">
           {detalle
             ? `No hay ajustes ${detalle}.`
             : 'No hay ajustes que coincidan con el filtro.'}
         </p>
-        <p className="text-sm font-medium text-white/60">
+        <p className="text-sm font-medium text-muted">
           Prueba con otro día, horario o búsqueda.
         </p>
       </div>
@@ -125,15 +125,15 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white/60 backdrop-blur-2xl">
-        Aquí ves los cambios de stock que <span className="font-black text-white/85">no fueron ventas ni compras</span>:
+      <p className="rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-semibold text-muted backdrop-blur-2xl">
+        Aquí ves los cambios de stock que <span className="font-black text-ink">no fueron ventas ni compras</span>:
         productos vencidos, dañados, consumo de la casa y correcciones de conteo.
       </p>
       <ul className="flex flex-col gap-2">
         {filteredAjustes.map((entry) => (
           <li
             key={entry.key}
-            className="flex items-center justify-between gap-4 rounded-[28px] border border-white/15 bg-white/10 px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 hover:bg-white/15"
+            className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-surface px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2"
           >
             <div className="min-w-0">
               <span className={`mb-1 inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide backdrop-blur-xl ${
@@ -143,23 +143,23 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
               }`}>
                 {entry.salida ? 'Salió del inventario' : 'Entró al inventario'}
               </span>
-              <span className="block truncate text-base font-black tracking-tight text-white">
+              <span className="block truncate text-base font-black tracking-tight text-ink">
                 {entry.producto}
               </span>
               <span className="mt-1 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-extrabold text-white">
+                <span className="text-sm font-extrabold text-ink">
                   {formatFechaCorta(entry.fecha)}
                 </span>
-                <span className="rounded-full border border-white/25 bg-white/15 px-2.5 py-0.5 text-xs font-black tabular-nums text-white">
+                <span className="rounded-full border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-black tabular-nums text-ink">
                   {formatHora(entry.fecha)}
                 </span>
               </span>
-              <span className="mt-0.5 block text-xs font-semibold text-white/60">
+              <span className="mt-0.5 block text-xs font-semibold text-muted">
                 Motivo: {entry.motivo}
               </span>
             </div>
             <div className="shrink-0 text-right">
-              <span className="block text-xs font-bold uppercase tracking-wide text-white/45">
+              <span className="block text-xs font-bold uppercase tracking-wide text-muted">
                 Movimiento
               </span>
               <span

@@ -408,10 +408,10 @@ export function PosPage() {
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
         <AlertTriangle size={22} aria-hidden="true" />
       </span>
-      <p className="text-lg font-extrabold tracking-tight text-white">
+      <p className="text-lg font-extrabold tracking-tight text-ink">
         No se pudieron cargar los productos
       </p>
-      <p className="text-sm font-medium text-white/70">{error}</p>
+      <p className="text-sm font-medium text-muted">{error}</p>
       <button
         type="button"
         onClick={retry}
@@ -436,7 +436,7 @@ export function PosPage() {
       <button
         type="button"
         onClick={() => setSelectedCategory(null)}
-        className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0 active:scale-95"
+        className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
       >
         <ArrowLeft size={16} aria-hidden="true" />
         Volver a categorías
@@ -465,15 +465,15 @@ export function PosPage() {
     <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-4">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Punto de venta
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
             Caja
           </h1>
         </div>
         {loading && products.length > 0 && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-white/75 backdrop-blur-xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-muted backdrop-blur-xl">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
             Sincronizando catálogo…
           </span>
@@ -487,10 +487,10 @@ export function PosPage() {
               <PauseCircle size={22} aria-hidden="true" />
             </span>
             <div>
-              <p className="text-sm font-black tracking-tight text-white">
+              <p className="text-sm font-black tracking-tight text-ink">
                 Hay una venta suspendida
               </p>
-              <p className="text-xs font-semibold text-white/65">
+              <p className="text-xs font-semibold text-muted">
                 {suspendedSale.count} {suspendedSale.count === 1 ? 'artículo' : 'artículos'} ·{' '}
                 {formatMoney(suspendedSale.total)}
               </p>
@@ -507,7 +507,7 @@ export function PosPage() {
             <button
               type="button"
               onClick={handleDiscardSuspended}
-              className="rounded-2xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20"
+              className="rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm font-bold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3"
             >
               Descartar
             </button>

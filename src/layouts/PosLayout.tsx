@@ -17,8 +17,8 @@ function todayLabel(): string {
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return `flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
     isActive
-      ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
-      : 'text-slate-300 hover:bg-white/10 hover:text-white'
+      ? 'bg-surface-2 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
+      : 'text-muted hover:bg-surface hover:text-ink'
   }`
 }
 
@@ -77,7 +77,7 @@ export function PosLayout() {
 
   return (
     <div className="flex h-screen flex-col bg-slate-100">
-      <header className="relative z-40 shrink-0 border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950">
+      <header className="relative z-40 shrink-0 border-b border-line bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950">
         {/* brillo inferior de la barra */}
         <span
           aria-hidden="true"
@@ -93,17 +93,17 @@ export function PosLayout() {
               🛒
             </span>
             <span className="leading-none">
-              <span className="block text-[15px] font-black tracking-tight text-white">
+              <span className="block text-[15px] font-black tracking-tight text-ink">
                 Bodega POS
               </span>
-              <span className="mt-0.5 block text-[9px] font-extrabold uppercase tracking-[0.22em] text-white/45">
+              <span className="mt-0.5 block text-[9px] font-extrabold uppercase tracking-[0.22em] text-muted">
                 Panel de ventas
               </span>
             </span>
           </div>
 
           {/* navegación */}
-          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-white/5 p-1 lg:order-none lg:w-auto lg:justify-center">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-line bg-surface-sub p-1 lg:order-none lg:w-auto lg:justify-center">
             {NAV_ITEMS.map((item) => {
               if (item.to === '/usuarios' && rol !== 'admin') return null
               const Icon = item.icon
@@ -118,18 +118,18 @@ export function PosLayout() {
 
           {/* acciones */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold capitalize text-slate-300 xl:inline-flex">
+            <span className="hidden items-center gap-2 rounded-2xl border border-line bg-surface-sub px-3 py-2 text-xs font-bold capitalize text-muted xl:inline-flex">
               <CalendarDays size={14} aria-hidden="true" className="text-indigo-300" />
               {todayLabel()}
             </span>
             <NavLink
               to="/notificaciones"
               aria-label="Notificaciones de productos agotados"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition-all duration-200 hover:border-white/20 hover:bg-white/10 hover:text-white"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-sub text-ink transition-all duration-200 hover:border-line hover:bg-surface hover:text-ink"
             >
               <Bell size={20} aria-hidden="true" />
               {agotados.length > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-white">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-ink">
                   {agotados.length}
                 </span>
               )}
@@ -146,7 +146,7 @@ export function PosLayout() {
           role="status"
           className="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl"
         >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-500 text-ink shadow-lg">
             <Bell size={20} fill="currentColor" aria-hidden="true" />
           </span>
           <span>
@@ -154,7 +154,7 @@ export function PosLayout() {
               {notifToast.count}{' '}
               {notifToast.count === 1 ? 'nueva notificación' : 'nuevas notificaciones'}
             </span>
-            <span className="block text-xs font-semibold text-slate-500">
+            <span className="block text-xs font-semibold text-muted/70">
               «{notifToast.producto}» se agotó
             </span>
           </span>

@@ -14,7 +14,7 @@ interface ProveedorSelectProps {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-12 w-full rounded-xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 
 export function ProveedorSelect({
   proveedores,
@@ -55,14 +55,14 @@ export function ProveedorSelect({
 
   return (
     <div>
-      <label htmlFor="proveedor" className="mb-2 block text-base font-extrabold tracking-tight text-white">
+      <label htmlFor="proveedor" className="mb-2 block text-base font-extrabold tracking-tight text-ink">
         ¿Quién trajo la mercadería?
       </label>
       <select
         id="proveedor"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full cursor-pointer rounded-2xl border border-white/25 bg-white/10 px-4 text-base font-semibold text-white shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-white/15 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
       >
         <option value={PROVEEDOR_GENERICO}>
           Proveedor Varios / Sin Comprobante
@@ -78,7 +78,7 @@ export function ProveedorSelect({
       <button
         type="button"
         onClick={() => setShowForm((open) => !open)}
-        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-3 py-2 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95"
+        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95"
       >
         <Plus size={15} strokeWidth={3} aria-hidden="true" />
         {showForm ? 'Cerrar' : 'Registrar un proveedor nuevo'}
@@ -87,10 +87,10 @@ export function ProveedorSelect({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="fade-in mt-3 flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl"
+          className="fade-in mt-3 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl"
         >
           <div>
-            <label htmlFor="nuevo-proveedor-nombre" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-white/60">
+            <label htmlFor="nuevo-proveedor-nombre" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-muted">
               Nombre del proveedor
             </label>
             <input
@@ -104,7 +104,7 @@ export function ProveedorSelect({
             />
           </div>
           <div>
-            <label htmlFor="nuevo-proveedor-empresa" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-white/60">
+            <label htmlFor="nuevo-proveedor-empresa" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-muted">
               Empresa (opcional)
             </label>
             <input
@@ -124,7 +124,7 @@ export function ProveedorSelect({
           <button
             type="submit"
             disabled={saving}
-            className="h-12 rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-base font-black text-white shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-base font-black text-ink shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {saving ? 'Guardando…' : 'Guardar y usar este proveedor'}
           </button>

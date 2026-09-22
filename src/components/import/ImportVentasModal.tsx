@@ -336,13 +336,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       onClick={() => {
         if (!importing) onClose()
       }}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -350,10 +350,10 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
               Regularizar ventas sin internet
             </p>
-            <h2 className="mt-0.5 text-xl font-black tracking-tighter text-white">
+            <h2 className="mt-0.5 text-xl font-black tracking-tighter text-ink">
               Importar Excel
             </h2>
           </div>
@@ -361,7 +361,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={onClose}
             disabled={importing}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white disabled:opacity-40"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink disabled:opacity-40"
             aria-label="Cerrar"
           >
             <X size={15} aria-hidden="true" />
@@ -378,18 +378,18 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 <span
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black ${
                     done
-                      ? 'border border-emerald-200/40 bg-emerald-400/80 text-white'
+                      ? 'border border-emerald-200/40 bg-emerald-400/80 text-ink'
                       : active
-                        ? 'border border-white/40 bg-white/20 text-white'
-                        : 'border border-white/15 bg-white/5 text-white/40'
+                        ? 'border border-line-strong bg-surface-3 text-ink'
+                        : 'border border-line bg-surface-sub text-muted'
                   }`}
                 >
                   {done ? <CheckCircle2 size={14} aria-hidden="true" /> : n}
                 </span>
-                <span className={`text-xs font-bold ${active ? 'text-white' : 'text-white/45'}`}>
+                <span className={`text-xs font-bold ${active ? 'text-ink' : 'text-muted'}`}>
                   {n}. {label}
                 </span>
-                {idx < STEPS.length - 1 && <span className="h-px flex-1 bg-white/15" aria-hidden="true" />}
+                {idx < STEPS.length - 1 && <span className="h-px flex-1 bg-surface-2" aria-hidden="true" />}
               </li>
             )
           })}
@@ -397,22 +397,22 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
 
         {step === 1 && (
           <div className="mt-5">
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-muted">
               Descarga la plantilla, registra ahí las ventas hechas sin internet
-              (una fila por producto, mismo <span className="font-bold text-white">ticket</span> por
+              (una fila por producto, mismo <span className="font-bold text-ink">ticket</span> por
               venta) y súbela como .csv.
             </p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={downloadTemplate}
-                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-black text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
               >
                 <Download size={16} aria-hidden="true" />
                 Descargar plantilla
               </button>
               <label
-                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] ${
+                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] ${
                   catalogLoading ? 'cursor-wait opacity-60' : ''
                 }`}
               >
@@ -431,7 +431,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 />
               </label>
             </div>
-            <p className="mt-3 font-mono text-[11px] leading-relaxed text-white/45">
+            <p className="mt-3 font-mono text-[11px] leading-relaxed text-muted">
               ticket;fecha;hora;codigo;cantidad;precio;metodo — fecha DD/MM/AAAA, hora HH:MM,
               código = código de barras o nombre exacto del producto.
             </p>
@@ -446,8 +446,8 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
 
         {step === 2 && (
           <div className="mt-5">
-            <p className="text-sm text-white/70">
-              <span className="font-bold text-white">{fileName || 'Archivo'}</span> —{' '}
+            <p className="text-sm text-muted">
+              <span className="font-bold text-ink">{fileName || 'Archivo'}</span> —{' '}
               {groups.length} ticket(s), {rows.length} fila(s)
               {errorCount > 0 && (
                 <span className="font-bold text-rose-200">, {errorCount} con error</span>
@@ -465,10 +465,10 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm font-black text-white">
+                    <span className="text-sm font-black text-ink">
                       Ticket {group.ticket}
                     </span>
-                    <span className="text-xs font-bold text-white/60">
+                    <span className="text-xs font-bold text-muted">
                       {group.fechaLabel} · {group.validRows.length}/{group.rows.length} ítems ·{' '}
                       {group.metodo || '—'} · S/ {group.total.toFixed(2)}
                     </span>
@@ -483,7 +483,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                         className={`rounded-xl px-2.5 py-1.5 text-xs ${
                           row.error
                             ? 'border border-rose-200/25 bg-rose-500/15 font-bold text-rose-100'
-                            : 'border border-white/10 bg-white/5 text-white/75'
+                            : 'border border-line bg-surface-sub text-muted'
                         }`}
                       >
                         {row.error ?? (
@@ -503,7 +503,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={reset}
                 disabled={importing}
-                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98] disabled:opacity-40"
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-black text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:opacity-40"
               >
                 Atrás
               </button>
@@ -511,7 +511,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => void handleConfirm()}
                 disabled={validGroups.length === 0 || importing}
-                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black tracking-widest text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
+                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black tracking-widest text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
               >
                 {importing ? (
                   <>
@@ -536,24 +536,24 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-2xl border border-emerald-200/30 bg-emerald-400/15 p-3 text-center backdrop-blur-xl">
                 <p className="text-2xl font-black text-emerald-200">{result.ok}</p>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Importadas</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Importadas</p>
               </div>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-white">{result.duplicados.length}</p>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Duplicadas</p>
+              <div className="rounded-2xl border border-line bg-surface p-3 text-center backdrop-blur-xl">
+                <p className="text-2xl font-black text-ink">{result.duplicados.length}</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Duplicadas</p>
               </div>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-white">{result.stockNegativo.length}</p>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Stock negat.</p>
+              <div className="rounded-2xl border border-line bg-surface p-3 text-center backdrop-blur-xl">
+                <p className="text-2xl font-black text-ink">{result.stockNegativo.length}</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Stock negat.</p>
               </div>
               <div className="rounded-2xl border border-rose-200/30 bg-rose-500/15 p-3 text-center backdrop-blur-xl">
                 <p className="text-2xl font-black text-rose-200">{result.errores.length}</p>
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">Errores</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Errores</p>
               </div>
             </div>
 
             {result.duplicados.length > 0 && (
-              <p className="mt-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-2.5 text-xs font-bold text-white/75 backdrop-blur-xl">
+              <p className="mt-3 rounded-2xl border border-line bg-surface px-4 py-2.5 text-xs font-bold text-muted backdrop-blur-xl">
                 <FileText size={13} className="mr-1.5 inline" aria-hidden="true" />
                 Omitidas por duplicadas: {result.duplicados.join(', ')}
               </p>
@@ -577,13 +577,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               </ul>
             )}
             {result.ok === 0 && result.duplicados.length === 0 && result.errores.length === 0 && (
-              <p className="mt-2 text-xs font-bold text-white/60">Sin cambios.</p>
+              <p className="mt-2 text-xs font-bold text-muted">Sin cambios.</p>
             )}
 
             <button
               type="button"
               onClick={onClose}
-              className="mt-4 h-12 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black tracking-[0.2em] text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+              className="mt-4 h-12 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
             >
               CERRAR
             </button>

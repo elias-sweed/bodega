@@ -186,14 +186,14 @@ export function InventoryPage() {
     <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-5">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Catálogo
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
             Inventario
           </h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold">
-            <span className="rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
+            <span className="rounded-full border border-line bg-surface px-3 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
             {lowStockCount > 0 && (
@@ -202,7 +202,7 @@ export function InventoryPage() {
               </span>
             )}
             {loading && products.length > 0 && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-300" />
                 Sincronizando…
               </span>
@@ -215,7 +215,7 @@ export function InventoryPage() {
             setPrefill(null)
             setModalOpen(true)
           }}
-          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-6 text-base font-black tracking-tight text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-6 text-base font-black tracking-tight text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
         >
           <PackagePlus size={19} aria-hidden="true" />
           Nuevo producto
@@ -229,10 +229,10 @@ export function InventoryPage() {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
-          <p className="text-lg font-extrabold tracking-tight text-white">
+          <p className="text-lg font-extrabold tracking-tight text-ink">
             No se pudieron cargar los productos
           </p>
-          <p className="text-sm font-medium text-white/70">{error}</p>
+          <p className="text-sm font-medium text-muted">{error}</p>
           <button
             type="button"
             onClick={() => refresh()}
@@ -243,12 +243,12 @@ export function InventoryPage() {
           </button>
         </div>
       ) : totalProducts === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-[28px] border border-white/15 bg-white/10 p-12 text-center backdrop-blur-2xl">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+        <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center backdrop-blur-2xl">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
             <PackagePlus size={26} aria-hidden="true" />
           </span>
-          <p className="text-lg font-black tracking-tight text-white">Aún no hay productos</p>
-          <p className="text-sm font-medium text-white/60">
+          <p className="text-lg font-black tracking-tight text-ink">Aún no hay productos</p>
+          <p className="text-sm font-medium text-muted">
             Agrega el primero con el botón Nuevo producto.
           </p>
         </div>

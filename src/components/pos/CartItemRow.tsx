@@ -25,13 +25,13 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
   return (
     <li
       ref={rowRef}
-      className={`flex items-center gap-3 rounded-xl border-b border-white/10 py-3 last:border-none ${highlight ? 'row-flash border border-emerald-200/40 px-2' : ''}`}
+      className={`flex items-center gap-3 rounded-xl border-b border-line py-3 last:border-none ${highlight ? 'row-flash border border-emerald-200/40 px-2' : ''}`}
     >
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-extrabold tracking-tight text-white">
+        <p className="truncate text-sm font-extrabold tracking-tight text-ink">
           {product.nombre}
         </p>
-        <p className="text-xs font-medium text-white/55">
+        <p className="text-xs font-medium text-muted">
           {formatMoney(product.precio_venta)} c/u
         </p>
       </div>
@@ -45,7 +45,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
         >
           <Minus size={15} aria-hidden="true" />
         </button>
-        <span key={quantity} className="animate-pop w-7 text-center text-base font-black tabular-nums text-white">
+        <span key={quantity} className="animate-pop w-7 text-center text-base font-black tabular-nums text-ink">
           {quantity}
         </span>
         <button
@@ -59,7 +59,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
         </button>
       </div>
 
-      <p className="w-20 shrink-0 text-right text-sm font-black tracking-tight text-white">
+      <p className="w-20 shrink-0 text-right text-sm font-black tracking-tight text-ink">
         {formatMoney(product.precio_venta * quantity)}
       </p>
 
@@ -68,7 +68,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
         onClick={() => onRemove(product.id)}
         aria-label={`Eliminar ${product.nombre} del carrito (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
         title={`Eliminar línea (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/50 transition-all duration-200 hover:border-rose-200/40 hover:bg-rose-400/25 hover:text-rose-100 active:scale-90"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-sub text-muted transition-all duration-200 hover:border-rose-200/40 hover:bg-rose-400/25 hover:text-rose-100 active:scale-90"
       >
         <Trash2 size={15} aria-hidden="true" />
       </button>
@@ -79,13 +79,13 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
 export function CartEmptyState() {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
         <ShoppingCart size={24} aria-hidden="true" />
       </span>
-      <p className="text-sm font-bold text-white/75">
+      <p className="text-sm font-bold text-muted">
         El carrito está vacío.
         <br />
-        <span className="font-medium text-white/50">Toca un producto para agregarlo.</span>
+        <span className="font-medium text-muted">Toca un producto para agregarlo.</span>
       </p>
     </div>
   )

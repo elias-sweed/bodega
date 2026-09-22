@@ -109,20 +109,20 @@ export function HistoryPage() {
     <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5 overflow-y-auto px-4 pb-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Registro
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
             Historial
           </h1>
-          <p className="mt-1 text-sm font-medium text-white/65">
+          <p className="mt-1 text-sm font-medium text-muted">
             Qué vendiste y qué compraste, por día y por horario.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowImport(true)}
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-white/25 bg-white/15 px-4 text-sm font-extrabold text-white shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 active:scale-[0.98]"
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
         >
           <Upload size={16} aria-hidden="true" />
           Importar Excel
@@ -130,7 +130,7 @@ export function HistoryPage() {
       </header>
 
       <div className="flex flex-col gap-3">
-        <div className="flex w-max max-w-full gap-2 overflow-x-auto rounded-[20px] border border-white/15 bg-white/10 p-1.5 backdrop-blur-2xl">
+        <div className="flex w-max max-w-full gap-2 overflow-x-auto rounded-[20px] border border-line bg-surface p-1.5 backdrop-blur-2xl">
           {TABS.map((item) => (
             <button
               key={item.id}
@@ -140,7 +140,7 @@ export function HistoryPage() {
               className={`rounded-xl px-5 py-2 text-base font-black tracking-tight transition-all duration-300 active:scale-95 ${
                 tab === item.id
                   ? 'bg-white text-[#2a1568] shadow'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                  : 'text-muted hover:bg-surface hover:text-ink'
               }`}
             >
               {item.label}
@@ -149,7 +149,7 @@ export function HistoryPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-2xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-2xl">
+          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 backdrop-blur-2xl">
             {RANGES.map((item) => (
               <button
                 key={item.id}
@@ -158,8 +158,8 @@ export function HistoryPage() {
                 aria-pressed={range === item.id}
                 className={`shrink-0 rounded-xl px-3.5 py-2 text-sm font-extrabold transition-all duration-300 active:scale-95 ${
                   range === item.id
-                    ? 'border border-white/40 bg-white/25 text-white shadow'
-                    : 'border border-transparent text-white/65 hover:bg-white/10 hover:text-white'
+                    ? 'border border-line-strong bg-surface-3 text-ink shadow'
+                    : 'border border-transparent text-muted hover:bg-surface hover:text-ink'
                 }`}
               >
                 {item.label}
@@ -168,8 +168,8 @@ export function HistoryPage() {
             <span
               className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-extrabold transition-all duration-300 ${
                 range === 'dia'
-                  ? 'border border-white/40 bg-white/25 text-white shadow'
-                  : 'border border-dashed border-white/30 text-white/75'
+                  ? 'border border-line-strong bg-surface-3 text-ink shadow'
+                  : 'border border-dashed border-line-strong text-muted'
               }`}
               title="Elige cualquier día del calendario: Hoy y Ayer son atajos de esto"
             >
@@ -183,12 +183,12 @@ export function HistoryPage() {
                   if (e.target.value) setRange('dia')
                 }}
                 aria-label="Elegir cualquier día del calendario"
-                className="w-28 bg-transparent text-sm font-extrabold text-white outline-none [color-scheme:dark]"
+                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:dark]"
               />
             </span>
           </div>
 
-          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-2xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-2xl">
+          <div className="flex max-w-full gap-1.5 overflow-x-auto rounded-2xl border border-line bg-surface p-1.5 backdrop-blur-2xl">
             {FRANJAS.map((item) => (
               <button
                 key={item.id}
@@ -199,7 +199,7 @@ export function HistoryPage() {
                 className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold transition-all duration-300 active:scale-95 ${
                   franja === item.id
                     ? 'border border-amber-200/50 bg-amber-400/25 text-amber-50 shadow'
-                    : 'border border-transparent text-white/65 hover:bg-white/10 hover:text-white'
+                    : 'border border-transparent text-muted hover:bg-surface hover:text-ink'
                 }`}
               >
                 <item.Icon size={14} aria-hidden="true" />
@@ -211,7 +211,7 @@ export function HistoryPage() {
           <div className="w-full">
             <label
               htmlFor="historial-busqueda"
-              className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60"
+              className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-muted"
             >
               <Search size={13} aria-hidden="true" />
               Búsqueda por fecha, número o palabra
@@ -219,7 +219,7 @@ export function HistoryPage() {
             <div className="relative w-full">
             <Search
               size={17}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 shrink-0 text-white/45"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 shrink-0 text-muted"
               aria-hidden="true"
             />
             <input
@@ -227,7 +227,7 @@ export function HistoryPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-12 w-full rounded-2xl border border-white/25 bg-white/10 pl-12 pr-4 text-base font-semibold text-white outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-white/40 hover:bg-white/15 focus:border-white/50 focus:bg-white/15"
+              className="h-12 w-full rounded-2xl border border-line bg-surface pl-12 pr-4 text-base font-semibold text-ink outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
               placeholder={
                 tab === 'ventas'
                   ? 'Ej. 12/05/2026, 5, ticket…'
@@ -241,14 +241,14 @@ export function HistoryPage() {
         </div>
 
         {(range !== 'todo' || franja !== 'todo') && (
-          <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/25 bg-white/15 px-4 py-3 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-            <p className="flex min-w-0 items-center gap-2 text-sm font-bold text-white/75">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 text-white">
+          <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-2 px-4 py-3 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+            <p className="flex min-w-0 items-center gap-2 text-sm font-bold text-muted">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2 text-ink">
                 <CalendarDays size={16} aria-hidden="true" />
               </span>
               <span>
                 Estás viendo:{' '}
-                <span className="font-black text-white">
+                <span className="font-black text-ink">
                   {range === 'todo'
                     ? 'todo'
                     : range === 'hoy'
@@ -262,7 +262,7 @@ export function HistoryPage() {
                             : customDate.split('-').reverse().join('/')}
                 </span>
                 {franja !== 'todo' && (
-                  <span className="font-black text-white">
+                  <span className="font-black text-ink">
                     {' '}
                     · {franja === 'manana' ? 'en la mañana (6am–12pm)' : franja === 'tarde' ? 'en la tarde (12–7pm)' : 'en la noche (7pm–6am)'}
                   </span>
@@ -275,7 +275,7 @@ export function HistoryPage() {
                 setRange('todo')
                 setFranja('todo')
               }}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-white shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
             >
               <X size={17} strokeWidth={3} aria-hidden="true" />
               Quitar filtros

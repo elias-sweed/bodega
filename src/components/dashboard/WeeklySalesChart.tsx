@@ -13,14 +13,14 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
   const mejor = dias.reduce((a, b) => (b.total > a.total ? b : a), dias[0])
 
   return (
-    <section className="fade-up rounded-[28px] border border-white/20 bg-white/10 p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+    <section className="fade-up rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
-          <BarChart3 size={16} aria-hidden="true" className="text-white/80" />
+        <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
+          <BarChart3 size={16} aria-hidden="true" className="text-ink" />
           Ventas de la semana
         </p>
-        <p className="text-xs font-bold text-white/60">
-          Total: <span className="font-black text-white">{formatMoney(totalSemana)}</span>
+        <p className="text-xs font-bold text-muted">
+          Total: <span className="font-black text-gold">{formatMoney(totalSemana)}</span>
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
                   style={{ animationDelay: `${i * 60}ms` }}
                   title={`${dia.etiqueta}: ${formatMoney(dia.total)}`}
                 >
-                  <span className="text-[10px] font-black tabular-nums text-white/70">
+                  <span className="text-[10px] font-black tabular-nums text-muted">
                     {dia.total > 0 ? (dia.total >= 1000 ? `${(dia.total / 1000).toFixed(1)}k` : Math.round(dia.total)) : ''}
                   </span>
                   <div className="flex h-32 w-full items-end">
@@ -54,15 +54,15 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
                         dia.esHoy
                           ? 'border border-emerald-200/50 bg-gradient-to-t from-emerald-500/80 to-emerald-300/90 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)]'
                           : dia.total > 0
-                            ? 'border border-white/20 bg-gradient-to-t from-white/25 to-white/45'
-                            : 'border border-white/10 bg-white/5'
+                            ? 'border border-gold/40 bg-gradient-to-t from-gold/45 to-gold/85'
+                            : 'border border-line bg-surface-sub'
                       }`}
                       style={{ height: `${alto}%` }}
                     />
                   </div>
                   <span
                     className={`text-[11px] font-black uppercase ${
-                      dia.esHoy ? 'text-emerald-200' : 'text-white/55'
+                      dia.esHoy ? 'text-emerald-200' : 'text-muted'
                     }`}
                   >
                     {dia.esHoy ? 'Hoy' : dia.etiqueta}
@@ -71,9 +71,9 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
               )
             })}
           </div>
-          <p className="mt-3 text-center text-xs font-semibold text-white/55">
+          <p className="mt-3 text-center text-xs font-semibold text-muted">
             {mejor && mejor.total > 0 ? (
-              <>Mejor día: <span className="font-black capitalize text-white/85">{mejor.esHoy ? 'hoy' : mejor.etiqueta}</span> con {formatMoney(mejor.total)}</>
+              <>Mejor día: <span className="font-black capitalize text-ink">{mejor.esHoy ? 'hoy' : mejor.etiqueta}</span> con {formatMoney(mejor.total)}</>
             ) : (
               'Aún no hay ventas esta semana. Lo que vendas aparecerá aquí.'
             )}

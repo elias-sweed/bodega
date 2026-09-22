@@ -123,11 +123,11 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
 
   return (
     <div
-      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -139,10 +139,10 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
               <CheckCircle2 size={22} aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-lg font-black tracking-tighter text-white">
+              <h2 className="text-lg font-black tracking-tighter text-ink">
                 Venta registrada
               </h2>
-              <p className="text-xs font-semibold text-white/55">
+              <p className="text-xs font-semibold text-muted">
                 Recibo {shortId(sale.venta_id)} · {sale.metodo_pago}
               </p>
             </div>
@@ -150,7 +150,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
             aria-label="Cerrar"
           >
             <X size={15} aria-hidden="true" />
@@ -161,7 +161,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <p className="mb-1 flex items-center justify-between gap-2">
             <span className="font-bold">Bodega POS</span>
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted/70">
             Recibo <strong>{shortId(sale.venta_id)}</strong> · {sale.metodo_pago} ·{' '}
             {new Date(sale.fecha).toLocaleDateString('es-PE')}{' '}
             {new Date(sale.fecha).toLocaleTimeString('es-PE', {
@@ -194,7 +194,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <button
             type="button"
             onClick={() => printReceipt(sale)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.99]"
           >
             <Printer size={16} aria-hidden="true" />
             Imprimir recibo
@@ -208,7 +208,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
                 'noopener,noreferrer',
               )
             }
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black text-white shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.99]"
           >
             <MessageCircle size={16} aria-hidden="true" />
             Enviar por WhatsApp

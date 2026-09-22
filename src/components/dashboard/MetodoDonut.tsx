@@ -40,14 +40,14 @@ export function MetodoDonut({
   })
 
   return (
-    <section className="fade-up flex h-full flex-col rounded-[28px] border border-white/20 bg-white/10 p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
-      <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
-        <PieChart size={16} aria-hidden="true" className="text-white/80" />
+    <section className="fade-up flex h-full flex-col rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+      <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
+        <PieChart size={16} aria-hidden="true" className="text-ink" />
         {titulo}
       </p>
 
       {total <= 0 ? (
-        <p className="flex flex-1 items-center justify-center py-8 text-center text-sm font-medium text-white/55">
+        <p className="flex flex-1 items-center justify-center py-8 text-center text-sm font-medium text-muted">
           {vacio}
         </p>
       ) : (
@@ -74,10 +74,10 @@ export function MetodoDonut({
               )}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-lg font-black tracking-tight text-white">
+              <span className="text-lg font-black tracking-tight text-gold">
                 {formatMoney(total)}
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/55">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted">
                 {centro}
               </span>
             </div>
@@ -91,13 +91,13 @@ export function MetodoDonut({
                   style={{ backgroundColor: arco.color }}
                   aria-hidden="true"
                 />
-                <span className="min-w-0 flex-1 truncate text-sm font-bold text-white/75">
+                <span className="min-w-0 flex-1 truncate text-sm font-bold text-muted">
                   {arco.etiqueta}
-                  <span className="ml-1.5 font-black tabular-nums text-white/45">
+                  <span className="ml-1.5 font-black tabular-nums text-muted">
                     {Math.round(arco.fraccion * 100)}%
                   </span>
                 </span>
-                <span className="shrink-0 text-sm font-black tabular-nums text-white">
+                <span className="shrink-0 text-sm font-black tabular-nums text-ink">
                   {formatMoney(valores[arco.clave])}
                 </span>
               </li>

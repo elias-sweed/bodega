@@ -9,7 +9,7 @@ interface CategoryGridProps {
 export function CategoryGrid({ categories, onSelect }: CategoryGridProps) {
   return (
     <section className="fade-in">
-      <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-white/70">
+      <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
         Categorías
       </h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">

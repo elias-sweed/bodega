@@ -47,7 +47,7 @@ export function DashboardHero({
   const nombre = user ? nombreUsuario(user) : ''
 
   return (
-    <header className="relative shrink-0 overflow-hidden rounded-[28px] border border-white/20 bg-white/10 p-6 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-7">
+    <header className="relative shrink-0 overflow-hidden rounded-[28px] border border-line bg-surface p-6 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-7">
       {/* brillos decorativos */}
       <div
         aria-hidden="true"
@@ -60,24 +60,24 @@ export function DashboardHero({
 
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-white/75">
+          <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-muted">
             <Sparkles size={12} aria-hidden="true" className="text-amber-200" />
             Bodega · Panel
           </p>
 
-          <h1 className="mt-3 text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
+          <h1 className="mt-3 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
             {saludoPorHora()}
             {nombre && <span className="text-indigo-200">, {nombre}</span>}
           </h1>
 
-          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-white/65">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-xs font-bold capitalize text-white/85">
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-muted">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold capitalize text-ink">
               <CalendarDays size={13} aria-hidden="true" className="text-indigo-200" />
               {fechaLarga()}
             </span>
             <span>{subtitulo}</span>
             {freshness && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-xs font-bold text-white/75 backdrop-blur-xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${isRefreshing ? 'animate-pulse bg-amber-300' : 'bg-emerald-300'}`}
                 />
@@ -92,7 +92,7 @@ export function DashboardHero({
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-white/25 bg-white/15 px-5 text-sm font-extrabold tracking-tight text-white shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/25 active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-5 text-sm font-extrabold tracking-tight text-ink shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
           >
             <RefreshCw
               size={16}

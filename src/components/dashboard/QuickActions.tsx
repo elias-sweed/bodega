@@ -30,8 +30,8 @@ const ACCIONES = [
 
 export function QuickActions({ layout = 'grid' }: { layout?: 'grid' | 'stack' }) {
   return (
-    <section className="fade-up h-full rounded-[28px] border border-white/20 bg-white/10 p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
-      <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-white/70">
+    <section className="fade-up h-full rounded-[28px] border border-line bg-surface p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+      <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
         <Zap size={15} aria-hidden="true" className="text-amber-200" />
         Accesos rápidos
       </p>
@@ -48,10 +48,10 @@ export function QuickActions({ layout = 'grid' }: { layout?: 'grid' | 'stack' })
               <accion.Icon size={20} aria-hidden="true" />
             </span>
             <span className="min-w-0">
-              <span className="block text-sm font-black tracking-tight text-white">
+              <span className="block text-sm font-black tracking-tight text-ink">
                 {accion.etiqueta}
               </span>
-              <span className="block text-xs font-medium text-white/55">
+              <span className="block text-xs font-medium text-muted">
                 {accion.detalle}
               </span>
             </span>

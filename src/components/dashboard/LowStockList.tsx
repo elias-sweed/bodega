@@ -13,8 +13,8 @@ export function LowStockList({ products }: LowStockListProps) {
           <CheckCircle2 size={22} aria-hidden="true" />
         </span>
         <div>
-          <p className="text-lg font-black tracking-tight text-white">Todo en orden</p>
-          <p className="text-sm font-medium text-white/70">
+          <p className="text-lg font-black tracking-tight text-ink">Todo en orden</p>
+          <p className="text-sm font-medium text-muted">
             Ningún producto por agotarse por ahora.
           </p>
         </div>
@@ -29,7 +29,7 @@ export function LowStockList({ products }: LowStockListProps) {
         return (
           <li
             key={product.id}
-            className="group flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 px-5 py-4 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/15"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-2"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span
@@ -42,10 +42,10 @@ export function LowStockList({ products }: LowStockListProps) {
                 <TriangleAlert size={18} aria-hidden="true" />
               </span>
               <div className="min-w-0">
-                <p className="truncate text-base font-extrabold tracking-tight text-white">
+                <p className="truncate text-base font-extrabold tracking-tight text-ink">
                   {product.nombre}
                 </p>
-                <p className="truncate text-xs font-semibold uppercase tracking-widest text-white/55">
+                <p className="truncate text-xs font-semibold uppercase tracking-widest text-muted">
                   {product.categoria}
                 </p>
               </div>
@@ -60,7 +60,7 @@ export function LowStockList({ products }: LowStockListProps) {
               >
                 {agotado ? 'Agotado' : 'Por agotarse'}
               </span>
-              <p className="mt-1.5 text-xs font-bold text-white/70">
+              <p className="mt-1.5 text-xs font-bold text-muted">
                 {product.stock_actual} en bodega · mín {product.stock_minimo}
               </p>
             </div>

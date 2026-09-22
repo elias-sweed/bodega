@@ -130,7 +130,7 @@ export function ResetPasswordPage() {
 
             <Link
               to="/login"
-              className="text-center text-sm font-semibold text-slate-400 hover:text-white"
+              className="text-center text-sm font-semibold text-muted hover:text-ink"
             >
               ← Volver al inicio de sesión
             </Link>

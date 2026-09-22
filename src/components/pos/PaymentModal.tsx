@@ -69,13 +69,13 @@ export function PaymentModal({
 
   return (
     <div
-      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       onClick={() => {
         if (!charging) onCancel()
       }}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -83,10 +83,10 @@ export function PaymentModal({
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
               Punto de venta
             </p>
-            <h2 className="mt-0.5 text-xl font-black tracking-tighter text-white">
+            <h2 className="mt-0.5 text-xl font-black tracking-tighter text-ink">
               Cobrar venta
             </h2>
           </div>
@@ -94,25 +94,25 @@ export function PaymentModal({
             type="button"
             onClick={onCancel}
             disabled={charging}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white disabled:opacity-40"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink disabled:opacity-40"
             aria-label="Cerrar"
           >
             <X size={15} aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mt-4 flex items-end justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-xl">
-          <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-white/60">
+        <div className="mt-4 flex items-end justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 backdrop-blur-xl">
+          <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted">
             <Wallet size={14} aria-hidden="true" />
             Total a cobrar
           </span>
-          <span className="text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+          <span className="text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
             {formatMoney(total)}
           </span>
         </div>
 
         <div className="mt-5">
-          <span className="mb-1.5 block text-xs font-extrabold uppercase tracking-[0.16em] text-white/60">
+          <span className="mb-1.5 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted">
             Método de pago
           </span>
           <div className="grid grid-cols-3 gap-2">
@@ -125,8 +125,8 @@ export function PaymentModal({
                 disabled={charging}
                 className={`h-12 rounded-2xl text-sm font-black tracking-tight transition-all duration-300 active:scale-[0.97] disabled:opacity-40 ${
                   metodoPago === metodo
-                    ? 'border border-emerald-200/40 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-white shadow-[0_12px_30px_-12px_rgba(16,185,129,0.8)]'
-                    : 'border border-white/15 bg-white/10 text-white/75 backdrop-blur-xl hover:bg-white/20 hover:text-white'
+                    ? 'border border-emerald-200/40 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-ink shadow-[0_12px_30px_-12px_rgba(16,185,129,0.8)]'
+                    : 'border border-line bg-surface text-muted backdrop-blur-xl hover:bg-surface-3 hover:text-ink'
                 }`}
               >
                 {metodo}
@@ -139,7 +139,7 @@ export function PaymentModal({
           <div className="mt-5">
             <label
               htmlFor="recibido"
-              className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60"
+              className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-muted"
             >
               <Banknote size={14} aria-hidden="true" />
               Pagó con (S/)
@@ -155,7 +155,7 @@ export function PaymentModal({
               value={recibidoRaw}
               onChange={(e) => setRecibidoRaw(e.target.value)}
               placeholder="0.00"
-              className="h-14 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-2xl font-black tracking-tight text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-emerald-300/60 focus:bg-white/15"
+              className="h-14 w-full rounded-2xl border border-line bg-surface px-4 text-2xl font-black tracking-tight text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-emerald-300/60 focus:bg-surface-2"
             />
 
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -171,7 +171,7 @@ export function PaymentModal({
                 type="button"
                 onClick={() => setRecibido(0)}
                 disabled={charging}
-                className="flex h-12 items-center justify-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 text-sm font-bold text-white/80 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98] disabled:opacity-40"
+                className="flex h-12 items-center justify-center gap-1.5 rounded-2xl border border-line bg-surface text-sm font-bold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:opacity-40"
               >
                 <Eraser size={15} aria-hidden="true" />
                 Borrar
@@ -185,15 +185,15 @@ export function PaymentModal({
                   type="button"
                   onClick={() => agregarAlRecibido(monto)}
                   disabled={charging}
-                  className="h-11 rounded-2xl border border-white/20 bg-white/10 text-sm font-black text-white backdrop-blur-xl transition-all duration-200 hover:border-emerald-200/40 hover:bg-emerald-400/25 active:scale-[0.97] disabled:opacity-40"
+                  className="h-11 rounded-2xl border border-line bg-surface text-sm font-black text-ink backdrop-blur-xl transition-all duration-200 hover:border-emerald-200/40 hover:bg-emerald-400/25 active:scale-[0.97] disabled:opacity-40"
                 >
                   S/ {monto}
                 </button>
               ))}
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-xl">
-              <span className="text-xs font-bold uppercase tracking-widest text-white/60">
+            <div className="mt-4 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 backdrop-blur-xl">
+              <span className="text-xs font-bold uppercase tracking-widest text-muted">
                 Vuelto
               </span>
               <span
@@ -218,7 +218,7 @@ export function PaymentModal({
           type="button"
           disabled={!canCharge}
           onClick={onConfirm}
-          className="mt-6 h-14 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-lg font-black tracking-[0.2em] text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
+          className="mt-6 h-14 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-lg font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
         >
           {charging ? 'PROCESANDO…' : 'CONFIRMAR COBRO'}
         </button>

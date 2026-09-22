@@ -36,17 +36,17 @@ export function ProductButton({
 
   return (
     <div
-      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-white/10 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 ${
+      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-surface shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 ${
         highlight
-          ? 'border-emerald-200/60 bg-white/20 shadow-[0_20px_50px_-18px_rgba(52,211,153,0.5)]'
-          : 'border-white/20'
+          ? 'border-emerald-200/60 bg-surface-3 shadow-[0_20px_50px_-18px_rgba(52,211,153,0.5)]'
+          : 'border-line'
       } ${agotado ? 'opacity-50' : ''}`}
     >
       {/* Contador visible: cuántos llevas en el carrito */}
       {qtyInCart > 0 && (
         <span
           key={qtyInCart}
-          className="animate-pop absolute -right-2 -top-2 z-10 flex h-8 min-w-8 items-center justify-center rounded-full border border-emerald-200/50 bg-gradient-to-br from-emerald-400 to-emerald-600 px-2 text-sm font-black tabular-nums text-white shadow-lg"
+          className="animate-pop absolute -right-2 -top-2 z-10 flex h-8 min-w-8 items-center justify-center rounded-full border border-emerald-200/50 bg-gradient-to-br from-emerald-400 to-emerald-600 px-2 text-sm font-black tabular-nums text-ink shadow-lg"
           aria-label={`${qtyInCart} en el carrito`}
         >
           ×{qtyInCart}
@@ -70,13 +70,13 @@ export function ProductButton({
         onClick={onAdd}
         aria-label={`Agregar ${product.nombre} al carrito${qtyInCart > 0 ? ` (llevas ${qtyInCart})` : ''}`}
         className={`flex flex-1 flex-col items-start justify-center gap-1.5 rounded-t-[22px] px-5 pb-2 pt-4 text-left transition-all duration-300 active:scale-[0.98] ${
-          agotado ? 'cursor-not-allowed' : 'hover:bg-white/10'
+          agotado ? 'cursor-not-allowed' : 'hover:bg-surface'
         }`}
       >
-        <span className="line-clamp-2 text-base font-extrabold leading-tight tracking-tight text-white">
+        <span className="line-clamp-2 text-base font-extrabold leading-tight tracking-tight text-ink">
           {product.nombre}
         </span>
-        <span className="text-xl font-black tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <span className="text-xl font-black tracking-tight text-ink drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
           {formatMoney(product.precio_venta)}
         </span>
 
@@ -84,7 +84,7 @@ export function ProductButton({
           className="flex w-full items-center gap-2"
           title={`Quedan ${product.stock_actual} unidades`}
         >
-          <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/20">
+          <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-3">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 agotado ? 'w-0' : stockStyle(product.stock_actual, product.stock_minimo)
@@ -108,7 +108,7 @@ export function ProductButton({
 
       {/* Corrección inmediata: restar/sumar sin ir al carrito ni al cobro */}
       {qtyInCart > 0 && !agotado && (
-        <div className="flex items-center justify-between gap-2 rounded-b-[22px] border-t border-white/10 bg-white/5 px-3 py-1.5">
+        <div className="flex items-center justify-between gap-2 rounded-b-[22px] border-t border-line bg-surface-sub px-3 py-1.5">
           <button
             type="button"
             onClick={onDecrease}
@@ -117,7 +117,7 @@ export function ProductButton({
           >
             <Minus size={14} aria-hidden="true" />
           </button>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
             {qtyInCart} en carrito
           </span>
           <button

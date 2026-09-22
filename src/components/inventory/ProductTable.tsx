@@ -102,12 +102,12 @@ function pageNumbers(current: number, total: number): (number | '…')[] {
 }
 
 const thClass =
-  'px-5 py-3 font-extrabold uppercase tracking-widest text-[11px] text-white/55'
+  'px-5 py-3 font-extrabold uppercase tracking-widest text-[11px] text-muted'
 
 const filterInputClass =
-  'h-11 w-full rounded-xl border border-white/25 bg-white/10 px-3 text-sm font-bold tabular-nums text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-11 w-full rounded-xl border border-line bg-surface px-3 text-sm font-bold tabular-nums text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 const filterLabelClass =
-  'mb-1 block text-[11px] font-extrabold uppercase tracking-widest text-white/55'
+  'mb-1 block text-[11px] font-extrabold uppercase tracking-widest text-muted'
 
 export function ProductTable({
   products,
@@ -170,7 +170,7 @@ export function ProductTable({
   }
 
   const thSortableClass =
-    'cursor-pointer select-none transition-colors duration-200 hover:text-white'
+    'cursor-pointer select-none transition-colors duration-200 hover:text-ink'
 
   const categories = useMemo(
     () =>
@@ -356,7 +356,7 @@ export function ProductTable({
         <label className="relative block w-full max-w-xs">
           <Search
             size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/45"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
             aria-hidden="true"
           />
           <input
@@ -364,21 +364,21 @@ export function ProductTable({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por nombre o código…"
-            className="h-11 w-full rounded-2xl border border-white/25 bg-white/10 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-white/40 hover:bg-white/15 focus:border-white/50 focus:bg-white/15"
+            className="h-11 w-full rounded-2xl border border-line bg-surface pl-11 pr-4 text-sm font-semibold text-ink outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
           />
         </label>
 
         <label className="relative block">
           <Tags
             size={16}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/45"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
             aria-hidden="true"
           />
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             aria-label="Filtrar por categoría"
-            className="h-11 cursor-pointer appearance-none rounded-2xl border border-white/25 bg-white/10 pl-9 pr-8 text-sm font-bold text-white outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-white/15 focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
           >
             <option value="todas">Todas las categorías</option>
             {categories.map((name) => (
@@ -395,8 +395,8 @@ export function ProductTable({
           aria-expanded={showFilters}
           className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-extrabold backdrop-blur-2xl transition-all duration-300 active:scale-95 ${
             showFilters || activeFilterCount > 0
-              ? 'border-white/40 bg-white/20 text-white'
-              : 'border-white/25 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white'
+              ? 'border-line-strong bg-surface-3 text-ink'
+              : 'border-line bg-surface text-ink hover:bg-surface-2 hover:text-ink'
           }`}
         >
           <SlidersHorizontal size={16} aria-hidden="true" />
@@ -412,13 +412,13 @@ export function ProductTable({
           type="button"
           onClick={handleExport}
           title="Exportar los productos filtrados a Excel"
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 text-sm font-extrabold text-white backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/20 active:translate-y-0 active:scale-95"
+          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
         >
           <Download size={16} aria-hidden="true" />
           Exportar
         </button>
 
-        <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold text-white/65 backdrop-blur-xl">
+        <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-muted backdrop-blur-xl">
           {sortedProducts.length} de {products.length}
         </span>
 
@@ -427,7 +427,7 @@ export function ProductTable({
             type="button"
             onClick={clearFilters}
             title="Quitar todos los filtros aplicados"
-            className="inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-white shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
+            className="inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
           >
             <X size={17} strokeWidth={3} aria-hidden="true" />
             Limpiar ({activeFilterCount})
@@ -436,7 +436,7 @@ export function ProductTable({
       </div>
 
       {showFilters && (
-        <div className="fade-in rounded-[22px] border border-white/15 bg-white/10 p-4 backdrop-blur-2xl">
+        <div className="fade-in rounded-[22px] border border-line bg-surface p-4 backdrop-blur-2xl">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div>
               <label htmlFor="filtro-margen" className={filterLabelClass}>
@@ -446,7 +446,7 @@ export function ProductTable({
                 id="filtro-margen"
                 value={margen}
                 onChange={(e) => setMargen(e.target.value as MargenFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-white/25 bg-white/10 px-3 text-sm font-bold text-white outline-none backdrop-blur-xl transition-all focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
               >
                 <option value="todos">Todos</option>
                 <option value="alto">Alto (≥ 20%)</option>
@@ -462,7 +462,7 @@ export function ProductTable({
                 id="filtro-stock"
                 value={stockFiltro}
                 onChange={(e) => setStockFiltro(e.target.value as StockFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-white/25 bg-white/10 px-3 text-sm font-bold text-white outline-none backdrop-blur-xl transition-all focus:border-white/50 [&>option]:bg-[#2a1568] [&>option]:text-white"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
               >
                 <option value="todos">Todos</option>
                 <option value="bajo">Bajo (≤ mín)</option>
@@ -484,7 +484,7 @@ export function ProductTable({
                   aria-label="Costo mínimo"
                   className={filterInputClass}
                 />
-                <span className="shrink-0 text-white/40">–</span>
+                <span className="shrink-0 text-muted">–</span>
                 <input
                   type="number"
                   min="0"
@@ -512,7 +512,7 @@ export function ProductTable({
                   aria-label="Stock mínimo desde"
                   className={filterInputClass}
                 />
-                <span className="shrink-0 text-white/40">–</span>
+                <span className="shrink-0 text-muted">–</span>
                 <input
                   type="number"
                   min="0"
@@ -530,23 +530,23 @@ export function ProductTable({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-[28px] border border-white/15 bg-white/10 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
         {sortedProducts.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-5 py-12 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/60">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
               <Search size={22} aria-hidden="true" />
             </span>
-            <p className="text-base font-black tracking-tight text-white">
+            <p className="text-base font-black tracking-tight text-ink">
               Sin coincidencias
             </p>
-            <p className="text-sm font-medium text-white/55">
+            <p className="text-sm font-medium text-muted">
               No se encontraron productos con los filtros aplicados.
             </p>
             {activeFilterCount > 0 && (
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-2 text-xs font-extrabold text-white backdrop-blur-xl transition-all hover:bg-white/20"
+                className="mt-2 rounded-2xl border border-line bg-surface px-4 py-2 text-xs font-extrabold text-ink backdrop-blur-xl transition-all hover:bg-surface-3"
               >
                 Limpiar filtros
               </button>
@@ -556,7 +556,7 @@ export function ProductTable({
           <div key={page} className={direction === 'prev' ? 'animate-slide-left' : 'animate-slide-right'}>
             <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-line">
                   <th className={`${thClass} w-14`}>N.º</th>
                   <th className={thClass}>
                     <button
@@ -644,32 +644,32 @@ export function ProductTable({
                   return (
                     <tr
                       key={product.id}
-                      className={`border-b border-white/10 transition-colors duration-200 last:border-none hover:bg-white/10 ${
+                      className={`border-b border-line transition-colors duration-200 last:border-none hover:bg-surface ${
                         lowStock ? 'bg-rose-400/10' : ''
                       } ${pinned ? 'row-flash border border-emerald-200/40 bg-emerald-400/10' : ''}`}
                     >
-                      <td className="px-5 py-3 font-mono text-xs tabular-nums text-white/40">
+                      <td className="px-5 py-3 font-mono text-xs tabular-nums text-muted">
                         {start + i + 1}
                       </td>
-                      <td className="px-5 py-3 font-extrabold tracking-tight text-white">
+                      <td className="px-5 py-3 font-extrabold tracking-tight text-ink">
                         {toTitleCase(product.nombre)}
                       </td>
                       {showBarcodeColumn && (
-                        <td className="px-5 py-3 font-mono text-xs text-white/45">
+                        <td className="px-5 py-3 font-mono text-xs text-muted">
                           {product.codigo_barras ?? '—'}
                         </td>
                       )}
-                      <td className="px-5 py-3 text-sm font-medium text-white/65">
+                      <td className="px-5 py-3 text-sm font-medium text-muted">
                         {product.categoria.trim() === ''
                           ? '—'
                           : toTitleCase(product.categoria)}
                       </td>
-                      <td className="px-5 py-3 text-right font-black tabular-nums text-white">
+                      <td className="px-5 py-3 text-right font-black tabular-nums text-ink">
                         {formatMoney(product.precio_venta)}
                       </td>
                       <td className="px-5 py-3 text-right">
                         {margin === null ? (
-                          <span className="text-white/35">—</span>
+                          <span className="text-muted">—</span>
                         ) : (
                           <span
                             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-black ${marginClass(margin)}`}
@@ -685,13 +685,13 @@ export function ProductTable({
                         )}
                       </td>
                       {isAdmin && (
-                        <td className="px-5 py-3 text-right tabular-nums text-white/60">
+                        <td className="px-5 py-3 text-right tabular-nums text-muted">
                           {formatMoney(product.costo)}
                         </td>
                       )}
                       <td
                         className={`px-5 py-3 text-right font-black tabular-nums ${
-                          lowStock ? 'text-rose-200' : 'text-white'
+                          lowStock ? 'text-rose-200' : 'text-ink'
                         }`}
                       >
                         <span className="inline-flex items-center justify-end gap-1">
@@ -701,7 +701,7 @@ export function ProductTable({
                             disabled={busy || product.stock_actual <= 0}
                             title="Quitar 1 unidad"
                             aria-label={`Quitar 1 unidad a ${product.nombre}`}
-                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
                           >
                             <Minus size={12} strokeWidth={3} aria-hidden="true" />
                           </button>
@@ -712,13 +712,13 @@ export function ProductTable({
                             disabled={busy}
                             title="Agregar 1 unidad"
                             aria-label={`Agregar 1 unidad a ${product.nombre}`}
-                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
                           >
                             <Plus size={12} strokeWidth={3} aria-hidden="true" />
                           </button>
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-right tabular-nums text-white/45">
+                      <td className="px-5 py-3 text-right tabular-nums text-muted">
                         {product.stock_minimo}
                       </td>
                       <td className="px-5 py-3 text-right">
@@ -733,7 +733,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onKardex?.(product)}
                             title="Ver movimientos del producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-black text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 hover:text-white active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-1.5 text-xs font-black text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 hover:text-ink active:scale-95"
                           >
                             <History size={13} strokeWidth={2.5} aria-hidden="true" />
                             Movimientos
@@ -777,8 +777,8 @@ export function ProductTable({
       </div>
 
       {sortedProducts.length > 0 && (
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] border border-white/15 bg-white/10 px-5 py-4 backdrop-blur-2xl">
-          <p className="text-xs font-bold tabular-nums text-white/65">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] border border-line bg-surface px-5 py-4 backdrop-blur-2xl">
+          <p className="text-xs font-bold tabular-nums text-muted">
             {sortedProducts.length === 0
               ? 'Sin resultados'
               : `${start + 1}–${end} de ${sortedProducts.length}`}
@@ -789,13 +789,13 @@ export function ProductTable({
               onClick={() => goToPage(page - 1, 'prev')}
               disabled={page <= 1}
               aria-label="Página anterior"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
             >
               <ChevronLeft size={17} aria-hidden="true" />
             </button>
             {pageNumbers(page, totalPages).map((p, i) =>
               p === '…' ? (
-                <span key={`gap-${i}`} className="px-1 text-xs font-bold text-white/40">
+                <span key={`gap-${i}`} className="px-1 text-xs font-bold text-muted">
                   …
                 </span>
               ) : (
@@ -807,8 +807,8 @@ export function ProductTable({
                   aria-current={p === page ? 'page' : undefined}
                   className={`h-9 min-w-9 rounded-xl px-2 text-sm font-black tabular-nums backdrop-blur-xl transition-all duration-200 active:scale-95 ${
                     p === page
-                      ? 'border border-white/40 bg-white/25 text-white shadow'
-                      : 'border border-white/15 bg-white/5 text-white/65 hover:bg-white/15 hover:text-white'
+                      ? 'border border-line-strong bg-surface-3 text-ink shadow'
+                      : 'border border-line bg-surface-sub text-muted hover:bg-surface-2 hover:text-ink'
                   }`}
                 >
                   {p}
@@ -820,12 +820,12 @@ export function ProductTable({
               onClick={() => goToPage(page + 1, 'next')}
               disabled={page >= totalPages}
               aria-label="Página siguiente"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white/85 backdrop-blur-xl transition-all duration-200 hover:bg-white/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
             >
               <ChevronRight size={17} aria-hidden="true" />
             </button>
           </div>
-          <p className="text-xs font-bold tabular-nums text-white/65">
+          <p className="text-xs font-bold tabular-nums text-muted">
             Pág. {page} de {totalPages}
           </p>
         </div>

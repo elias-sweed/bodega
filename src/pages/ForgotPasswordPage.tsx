@@ -27,7 +27,7 @@ const COOLDOWN_MS = COOLDOWN_HOURS * 60 * 60 * 1000
 const STORAGE_KEY = 'pwd_reset_limit'
 
 const cancelButtonClass =
-  'h-12 w-full rounded-xl border border-white/10 text-base font-semibold text-slate-300 transition-colors hover:bg-white/5'
+  'h-12 w-full rounded-xl border border-line text-base font-semibold text-muted transition-colors hover:bg-surface-sub'
 
 function readLimit(): LimitState {
   try {
@@ -180,7 +180,7 @@ export function ForgotPasswordPage() {
                 {remaining} {remaining === 1 ? 'intento' : 'intentos'}.
               </p>
             ) : remaining === MAX_ATTEMPTS ? (
-              <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-semibold text-slate-400">
+              <p className="rounded-xl border border-line bg-surface-sub px-4 py-3 text-center text-sm font-semibold text-muted">
                 Tienes {MAX_ATTEMPTS} intentos. Al agotarlos, deberás esperar{' '}
                 {COOLDOWN_HOURS} horas para volver a intentar.
               </p>
@@ -205,7 +205,7 @@ export function ForgotPasswordPage() {
 
             <Link
               to="/login"
-              className="text-center text-sm font-semibold text-slate-400 hover:text-white"
+              className="text-center text-sm font-semibold text-muted hover:text-ink"
             >
               ← Volver al inicio de sesión
             </Link>
@@ -218,10 +218,10 @@ export function ForgotPasswordPage() {
               <span className="text-4xl" aria-hidden="true">
                 🤔
               </span>
-              <h2 className="mt-2 text-lg font-black text-white">
+              <h2 className="mt-2 text-lg font-black text-ink">
                 ¿Quieres recuperar tu contraseña?
               </h2>
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-sm text-muted">
                 Este es tu intento número {MAX_ATTEMPTS - 1} de {MAX_ATTEMPTS}.
                 Si confirmas, te quedará solo 1 intento más.
               </p>
@@ -256,7 +256,7 @@ export function ForgotPasswordPage() {
               <h2 className="mt-2 text-lg font-black text-rose-300">
                 ¡Cuidado! Es tu último intento
               </h2>
-              <p className="mt-3 text-sm text-slate-300">
+              <p className="mt-3 text-sm text-muted">
                 Este es el intento {MAX_ATTEMPTS} de {MAX_ATTEMPTS}. Después de
                 este, <strong>no podrás intentarlo de nuevo durante{' '}
                 {COOLDOWN_HOURS} horas</strong>. ¿Quieres continuar?
@@ -266,7 +266,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void doSend()}
-                  className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-base font-black uppercase tracking-[0.15em] text-white shadow-[0_14px_35px_-12px_rgba(244,63,94,0.6)] transition-all hover:from-rose-400 hover:to-rose-500 active:scale-[0.99] disabled:opacity-60"
+                  className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-base font-black uppercase tracking-[0.15em] text-ink shadow-[0_14px_35px_-12px_rgba(244,63,94,0.6)] transition-all hover:from-rose-400 hover:to-rose-500 active:scale-[0.99] disabled:opacity-60"
                 >
                   {submitting ? 'Enviando…' : 'Sí, estoy seguro'}
                 </button>

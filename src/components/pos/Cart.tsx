@@ -34,16 +34,16 @@ export function Cart({
 
   return (
     <aside
-      className={`h-full min-h-0 flex-col rounded-[28px] border border-white/20 bg-white/10 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.65)] backdrop-blur-2xl ${
+      className={`h-full min-h-0 flex-col rounded-[28px] border border-line bg-surface shadow-[0_24px_70px_-20px_rgba(0,0,0,0.65)] backdrop-blur-2xl ${
         items.length === 0 ? 'hidden lg:flex' : 'flex'
       }`}
     >
-      <header className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-        <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-white">
-          <ShoppingCart size={19} aria-hidden="true" className="text-white/75" />
+      <header className="flex items-center justify-between border-b border-line px-5 py-4">
+        <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-ink">
+          <ShoppingCart size={19} aria-hidden="true" className="text-muted" />
           Carrito
         </h2>
-        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80">
+        <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink">
           {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}
         </span>
       </header>
@@ -65,12 +65,12 @@ export function Cart({
         </ul>
       )}
 
-      <footer className="shrink-0 space-y-3 border-t border-white/10 p-5 pt-4">
+      <footer className="shrink-0 space-y-3 border-t border-line p-5 pt-4">
         <div className="flex items-end justify-between gap-4">
-          <span className="text-sm font-bold uppercase tracking-widest text-white/60">
+          <span className="text-sm font-bold uppercase tracking-widest text-muted">
             Total
           </span>
-          <span className="text-3xl font-black tracking-tighter text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+          <span className="text-3xl font-black tracking-tighter text-gold drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
             {formatMoney(total)}
           </span>
         </div>
@@ -79,7 +79,7 @@ export function Cart({
           type="button"
           disabled={!canCharge}
           onClick={onCharge}
-          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-xl font-black tracking-[0.2em] text-white shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40 disabled:shadow-none disabled:hover:translate-y-0"
+          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-xl font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
         >
           {charging ? 'COBRANDO…' : 'COBRAR'}
         </button>
@@ -88,7 +88,7 @@ export function Cart({
           type="button"
           disabled={items.length === 0 || charging}
           onClick={onSuspend}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 text-sm font-extrabold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Pause size={15} aria-hidden="true" />
           Suspender venta

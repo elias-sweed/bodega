@@ -34,7 +34,7 @@ export function PaymentQR({ method }: PaymentQRProps) {
   if (!number) {
     return (
       <div className="mt-5">
-        <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60">
+        <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-muted">
           Pago por {method}
         </p>
         <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-amber-200/30 bg-amber-400/10 px-4 text-center backdrop-blur-xl">
@@ -52,11 +52,11 @@ export function PaymentQR({ method }: PaymentQRProps) {
 
   return (
     <div className="mt-5">
-      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-white/60">
+      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-muted">
         <QrCode size={14} aria-hidden="true" />
         Pago por {method}
       </p>
-      <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl">
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl">
         {qrError ? (
           <p className="py-10 text-sm font-bold text-rose-200">
             No se pudo generar el QR. Reinicia la página.
@@ -65,7 +65,7 @@ export function PaymentQR({ method }: PaymentQRProps) {
           <img
             src={dataUrl}
             alt={`Código QR de ${method}`}
-            className="h-48 w-48 rounded-2xl border border-white/20 bg-white p-2 shadow-lg"
+            className="h-48 w-48 rounded-2xl border border-line bg-white p-2 shadow-lg"
           />
         ) : (
           <span
@@ -73,8 +73,8 @@ export function PaymentQR({ method }: PaymentQRProps) {
             aria-hidden="true"
           />
         )}
-        <p className="text-lg font-black tracking-wide text-white">{number}</p>
-        <p className="text-xs font-medium text-white/55">
+        <p className="text-lg font-black tracking-wide text-ink">{number}</p>
+        <p className="text-xs font-medium text-muted">
           El cliente escanea, paga y confirmas abajo.
         </p>
       </div>

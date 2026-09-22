@@ -85,7 +85,7 @@ export function DashboardPage() {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
         <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-          <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-white">
+          <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-ink">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
               <CalendarDays size={18} aria-hidden="true" />
             </span>
@@ -93,7 +93,7 @@ export function DashboardPage() {
               <span className="block truncate text-base font-black tracking-tight capitalize">
                 Resumen del {etiqueta}
               </span>
-              <span className="block text-xs font-semibold text-white/60">
+              <span className="block text-xs font-semibold text-muted">
                 Vista de ese día (no es hoy)
               </span>
             </span>
@@ -102,7 +102,7 @@ export function DashboardPage() {
             <button
               type="button"
               onClick={volverHistorial}
-              className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-white/25 bg-white/10 px-4 text-sm font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-95"
+              className="inline-flex h-10 items-center gap-1.5 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-95"
             >
               <ArrowLeft size={15} aria-hidden="true" />
               Volver al Historial
@@ -112,7 +112,7 @@ export function DashboardPage() {
               onClick={cerrarVista}
               aria-label="Cerrar vista y ver hoy"
               title="Cerrar y ver hoy"
-              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-95"
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-95"
             >
               <X size={17} aria-hidden="true" />
             </button>
@@ -169,10 +169,10 @@ export function DashboardPage() {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
-          <p className="text-lg font-extrabold tracking-tight text-white">
+          <p className="text-lg font-extrabold tracking-tight text-ink">
             No se pudo cargar el resumen
           </p>
-          <p className="text-sm font-medium text-white/70">{error}</p>
+          <p className="text-sm font-medium text-muted">{error}</p>
           <button
             type="button"
             onClick={retry}
@@ -213,14 +213,14 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <section className="rounded-[28px] border border-white/15 bg-white/[0.07] p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-white">
-                  <PackageSearch size={20} aria-hidden="true" className="text-white/80" />
+                <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-ink">
+                  <PackageSearch size={20} aria-hidden="true" className="text-ink" />
                   Atención: productos por agotarse
                 </h2>
-                <p className="mt-1 text-sm font-medium text-white/60">
+                <p className="mt-1 text-sm font-medium text-muted">
                   {lowStock.length}{' '}
                   {lowStock.length === 1
                     ? 'producto requiere'
@@ -228,7 +228,7 @@ export function DashboardPage() {
                   reabastecimiento.
                 </p>
               </div>
-              <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white/80">
+              <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink">
                 {lowStock.length} ítems
               </span>
             </div>

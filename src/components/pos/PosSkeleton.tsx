@@ -12,7 +12,7 @@ export function PosSkeleton() {
           {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
             <div
               key={i}
-              className="rounded-[22px] border border-white/15 bg-white/10 p-5 backdrop-blur-2xl"
+              className="rounded-[22px] border border-line bg-surface p-5 backdrop-blur-2xl"
             >
               <div className="skeleton-shimmer h-12 w-12 rounded-2xl" />
               <div className="skeleton-shimmer mt-4 h-5 w-3/4 rounded-full" />
@@ -23,13 +23,13 @@ export function PosSkeleton() {
         </div>
       </section>
 
-      <aside className="rounded-[28px] border border-white/20 bg-white/10 p-5 backdrop-blur-2xl">
+      <aside className="rounded-[28px] border border-line bg-surface p-5 backdrop-blur-2xl">
         <div className="skeleton-shimmer h-6 w-28 rounded-full" />
         <div className="mt-6 flex flex-col gap-3">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-3"
+              className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3"
             >
               <div className="min-w-0 flex-1">
                 <div className="skeleton-shimmer h-4 w-2/3 rounded-full" />

@@ -263,9 +263,9 @@ export function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-7 text-center text-sm text-slate-400">
+        <p className="mt-7 text-center text-sm text-muted">
           ¿No tienes cuenta?{' '}
-          <span className="font-semibold text-slate-200">
+          <span className="font-semibold text-ink">
             Contacta al administrador
           </span>
         </p>

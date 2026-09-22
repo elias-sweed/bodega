@@ -22,9 +22,9 @@ export function ProductGrid({
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="mt-6 rounded-[28px] border border-white/15 bg-white/10 p-10 text-center backdrop-blur-2xl">
-        <p className="text-lg font-black tracking-tight text-white">Sin resultados</p>
-        <p className="mt-1 text-sm font-medium text-white/60">
+      <div className="mt-6 rounded-[28px] border border-line bg-surface p-10 text-center backdrop-blur-2xl">
+        <p className="text-lg font-black tracking-tight text-ink">Sin resultados</p>
+        <p className="mt-1 text-sm font-medium text-muted">
           Prueba con otro nombre o código de barras.
         </p>
       </div>
@@ -33,7 +33,7 @@ export function ProductGrid({
 
   return (
     <section className="fade-in">
-      <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-white/70">
+      <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
         {title}
       </h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">

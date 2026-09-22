@@ -165,14 +165,14 @@ interface CategoriaSugerida {
 }
 
 const moneyInputClass =
-  'h-14 w-full rounded-2xl border border-white/25 bg-white/10 pl-10 pr-4 text-xl font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-14 w-full rounded-2xl border border-line bg-surface pl-10 pr-4 text-xl font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 
 const plainInputClass =
-  'h-14 w-full rounded-2xl border border-white/25 bg-white/10 px-4 text-lg font-semibold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50 focus:bg-white/15'
+  'h-14 w-full rounded-2xl border border-line bg-surface px-4 text-lg font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
 
 function SectionTitle({ children }: { children: string }) {
   return (
-    <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-white/60">
+    <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-muted">
       {children}
     </p>
   )
@@ -403,21 +403,21 @@ export function ProductFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="nuevo-producto-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#150834]/70 p-4 backdrop-blur-md"
+      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/20 bg-gradient-to-br from-[#3b1d8f]/95 via-[#2a1568]/95 to-[#1a0b3d]/95 p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
       >
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/55">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
               Inventario
             </p>
-            <h2 id="nuevo-producto-title" className="text-2xl font-black tracking-tighter text-white">
+            <h2 id="nuevo-producto-title" className="text-2xl font-black tracking-tighter text-ink">
               {initial ? 'Editar producto' : 'Nuevo producto'}
             </h2>
           </div>
@@ -425,7 +425,7 @@ export function ProductFormModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white/70 transition-all duration-200 hover:bg-white/20 hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
           >
             <X size={18} strokeWidth={2.5} />
           </button>
@@ -479,11 +479,11 @@ export function ProductFormModal({
           <SectionTitle>Precios (cuánto ganas)</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-white/75">
+              <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-muted">
                 ¿En cuánto lo vendes?
               </label>
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-white/40">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">
                   S/
                 </span>
                 <input
@@ -498,17 +498,17 @@ export function ProductFormModal({
                   placeholder="2.50"
                 />
               </div>
-              <p className="mt-1 text-xs font-semibold text-white/45">
+              <p className="mt-1 text-xs font-semibold text-muted">
                 Lo que pagará el cliente.
               </p>
             </div>
 
             <div>
-              <label htmlFor="costo" className="mb-1 block text-sm font-bold text-white/75">
+              <label htmlFor="costo" className="mb-1 block text-sm font-bold text-muted">
                 ¿Cuánto te cuesta cada uno?
               </label>
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-white/40">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">
                   S/
                 </span>
                 <input
@@ -523,7 +523,7 @@ export function ProductFormModal({
                   placeholder="1.20"
                 />
               </div>
-              <p className="mt-1 text-xs font-semibold text-white/45">
+              <p className="mt-1 text-xs font-semibold text-muted">
                 Lo que pagas al comprarlo.
               </p>
             </div>
@@ -553,7 +553,7 @@ export function ProductFormModal({
                 {Math.round(gananciaInfo.margen)}%)
               </p>
               {gananciaInfo.ganancia < 0 && (
-                <span className="rounded-lg border border-rose-200/40 bg-rose-500/40 px-2 py-0.5 text-xs font-black text-white">
+                <span className="rounded-lg border border-rose-200/40 bg-rose-500/40 px-2 py-0.5 text-xs font-black text-ink">
                   Revísalo
                 </span>
               )}
@@ -568,7 +568,7 @@ export function ProductFormModal({
             className={`mt-3 inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-extrabold backdrop-blur-xl transition-all duration-300 active:scale-[0.98] ${
               paqueteOpen
                 ? 'border-sky-200/40 bg-sky-400/20 text-sky-100'
-                : 'border-white/20 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
+                : 'border-line bg-surface text-ink hover:bg-surface-3 hover:text-ink'
             }`}
           >
             <PackageSearch size={18} strokeWidth={2.5} aria-hidden="true" />
@@ -578,10 +578,10 @@ export function ProductFormModal({
           {paqueteOpen && (
             <div
               id="calculadora-paquete"
-              className="mt-3 space-y-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-xl"
+              className="mt-3 space-y-3 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl"
             >
               <div>
-                <label htmlFor="paquete-precio" className="mb-1 block text-xs font-bold text-white/70">
+                <label htmlFor="paquete-precio" className="mb-1 block text-xs font-bold text-muted">
                   La caja / paquete costó (S/)
                 </label>
                 <input
@@ -595,12 +595,12 @@ export function ProductFormModal({
                     setPaquetePrecio(e.target.value)
                     applyCalculatedCost(e.target.value, paqueteUnidades)
                   }}
-                  className="h-12 w-full rounded-xl border border-white/25 bg-white/10 px-3 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50"
+                  className="h-12 w-full rounded-xl border border-line bg-surface px-3 text-lg font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong"
                   placeholder="Ej. 24.00"
                 />
               </div>
               <div>
-                <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-bold text-white/70">
+                <label htmlFor="paquete-unidades" className="mb-1 block text-xs font-bold text-muted">
                   ¿Cuántas unidades trae?
                 </label>
                 <input
@@ -614,7 +614,7 @@ export function ProductFormModal({
                     setPaqueteUnidades(e.target.value)
                     applyCalculatedCost(paquetePrecio, e.target.value)
                   }}
-                  className="h-12 w-full rounded-xl border border-white/25 bg-white/10 px-3 text-lg font-bold text-white outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-white/30 focus:border-white/50"
+                  className="h-12 w-full rounded-xl border border-line bg-surface px-3 text-lg font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong"
                   placeholder="Ej. 24"
                 />
               </div>
@@ -629,7 +629,7 @@ export function ProductFormModal({
                       setField('costo', costoCalc.toFixed(2))
                       setPaqueteOpen(false)
                     }}
-                    className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white transition-all hover:bg-emerald-400 active:scale-[0.98]"
+                    className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-ink transition-all hover:bg-emerald-400 active:scale-[0.98]"
                   >
                     Usar este costo [ S/ {formatMoney(costoCalc)} ]
                   </button>
@@ -644,7 +644,7 @@ export function ProductFormModal({
           <SectionTitle>¿Cuándo avisarte?</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="stock_minimo" className="mb-1 block text-sm font-bold text-white/75">
+              <label htmlFor="stock_minimo" className="mb-1 block text-sm font-bold text-muted">
                 ¿Cuántos deben quedar para avisarte?
               </label>
               <input
@@ -658,14 +658,14 @@ export function ProductFormModal({
                 className={plainInputClass}
                 placeholder="Ej. 5"
               />
-              <p className="mt-1 text-xs font-semibold text-white/45">
+              <p className="mt-1 text-xs font-semibold text-muted">
                 Cuando queden menos que eso, la app te avisará. En blanco = 5.
               </p>
             </div>
 
             {showStockField && (
               <div>
-                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-white/75">
+                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
                   ¿Cuántas unidades hay ahorita?
                 </label>
                 <input
@@ -690,11 +690,11 @@ export function ProductFormModal({
             type="button"
             onClick={() => setOpcionesOpen((open) => !open)}
             aria-expanded={opcionesOpen}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-extrabold text-white/85 backdrop-blur-xl transition-all duration-300 hover:bg-white/20"
+            className="flex w-full items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3"
           >
             Opciones {opcionesOpen ? '' : '(opcional)'}
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full bg-white/15 text-white transition-transform duration-300 ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-ink transition-transform duration-300 ${
                 opcionesOpen ? 'rotate-180' : ''
               }`}
             >
@@ -703,7 +703,7 @@ export function ProductFormModal({
           </button>
           {opcionesOpen && (
             <div className="mt-3">
-              <label htmlFor="codigo_barras" className="mb-1 block text-sm font-bold text-white/75">
+              <label htmlFor="codigo_barras" className="mb-1 block text-sm font-bold text-muted">
                 Código de barras
               </label>
               <input
@@ -713,7 +713,7 @@ export function ProductFormModal({
                 className={plainInputClass}
                 placeholder="Ej. 7501234567890"
               />
-              <p className="mt-1 text-xs font-semibold text-white/45">
+              <p className="mt-1 text-xs font-semibold text-muted">
                 Solo si el producto tiene código. En blanco = se guarda sin código.
               </p>
             </div>
@@ -733,14 +733,14 @@ export function ProductFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-white/25 bg-white/10 px-6 py-3 text-base font-extrabold text-white backdrop-blur-xl transition-all duration-300 hover:bg-white/20 active:scale-[0.98]"
+            className="rounded-2xl border border-line bg-surface px-6 py-3 text-base font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-8 py-3 text-base font-black text-white shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="flex items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-8 py-3 text-base font-black text-ink shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             <Check size={18} strokeWidth={3} aria-hidden="true" />
             {submitting
