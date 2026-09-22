@@ -76,7 +76,7 @@ export function DashboardPage() {
       ganancia_estimada_hoy: dia.ganancia,
     }
     return (
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
+      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
         <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
           <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-white">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
@@ -117,12 +117,20 @@ export function DashboardPage() {
         ) : (
           <div className="fade-in flex flex-col gap-6">
             <SalesTodayCard resumen={resumenDia} etiqueta="Ventas de ese día" />
-            <MetodoDonut efectivo={dia.efectivo} yape={dia.yape} plin={dia.plin} titulo="Ese día por método de pago" />
+            <MetodoDonut
+              efectivo={dia.efectivo}
+              yape={dia.yape}
+              plin={dia.plin}
+              titulo="Ese día por método de pago"
+              centro="Ese día"
+              vacio="Sin cobros ese día. Al vender, aquí verás cómo te pagaron."
+            />
             <TodayProducts
               productos={dia.productos}
               loading={dia.loading}
               titulo="Ese día por producto"
               subtitulo="Lo cobrado y lo ganado de cada producto ese día."
+              vacio="Sin ventas registradas ese día."
             />
           </div>
         )}
@@ -133,7 +141,7 @@ export function DashboardPage() {
   // Primera vez (sin caché): skeletons premium
   if (loading && resumen === null) {
     return (
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
+      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
         <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">
@@ -153,7 +161,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-6 pb-10">
+    <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-white/60">

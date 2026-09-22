@@ -6,6 +6,10 @@ interface MetodoDonutProps {
   yape: number
   plin: number
   titulo?: string
+  /** Texto dentro del centro del donut (por defecto: hoy) */
+  centro?: string
+  /** Texto cuando no hay cobros en el rango */
+  vacio?: string
 }
 
 const SEGMENTOS = [
@@ -14,7 +18,14 @@ const SEGMENTOS = [
   { clave: 'plin', etiqueta: 'Plin', color: '#c084fc' },
 ] as const
 
-export function MetodoDonut({ efectivo, yape, plin, titulo = 'Hoy por método de pago' }: MetodoDonutProps) {
+export function MetodoDonut({
+  efectivo,
+  yape,
+  plin,
+  titulo = 'Hoy por método de pago',
+  centro = 'Hoy',
+  vacio = 'Sin cobros hoy. Al vender, aquí verás cómo te pagaron.',
+}: MetodoDonutProps) {
   const valores = { efectivo, yape, plin }
   const total = efectivo + yape + plin
   const RADIO = 52
@@ -37,10 +48,10 @@ export function MetodoDonut({ efectivo, yape, plin, titulo = 'Hoy por método de
 
       {total <= 0 ? (
         <p className="flex flex-1 items-center justify-center py-8 text-center text-sm font-medium text-white/55">
-          Sin cobros hoy. Al vender, aquí verás cómo te pagaron.
+          {vacio}
         </p>
       ) : (
-        <div className="mt-4 flex flex-1 flex-wrap items-center gap-5">
+        <div className="mt-4 flex flex-1 flex-wrap items-center justify-center gap-5 sm:justify-start">
           <div className="relative h-32 w-32 shrink-0">
             <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90">
               <circle cx="64" cy="64" r={RADIO} fill="none" stroke="rgb(255 255 255 / 0.12)" strokeWidth="16" />
@@ -67,12 +78,12 @@ export function MetodoDonut({ efectivo, yape, plin, titulo = 'Hoy por método de
                 {formatMoney(total)}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-white/55">
-                Hoy
+                {centro}
               </span>
             </div>
           </div>
 
-          <ul className="flex min-w-0 flex-1 flex-col gap-2.5">
+          <ul className="flex min-w-0 max-w-xl flex-1 flex-col gap-2.5">
             {arcos.map((arco) => (
               <li key={arco.clave} className="flex items-center gap-2.5">
                 <span

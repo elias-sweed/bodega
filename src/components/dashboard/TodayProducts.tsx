@@ -8,6 +8,8 @@ interface TodayProductsProps {
   loading: boolean
   titulo?: string
   subtitulo?: string
+  /** Mensaje cuando no hay ventas en el rango */
+  vacio?: string
 }
 
 export function TodayProducts({
@@ -15,6 +17,7 @@ export function TodayProducts({
   loading,
   titulo = 'Hoy por producto',
   subtitulo = 'Lo cobrado y lo ganado de cada producto. Toca uno para ver el detalle.',
+  vacio = 'Sin ventas hoy todavía. Lo que vendas saldrá aquí por producto.',
 }: TodayProductsProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const maxCobrado = Math.max(1, ...productos.map((p) => p.cobrado))
@@ -54,7 +57,7 @@ export function TodayProducts({
           </div>
         ) : productos.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-white/25 bg-white/5 px-5 py-8 text-center text-sm font-semibold text-white/55">
-            Sin ventas hoy todavía. Lo que vendas saldrá aquí por producto.
+            {vacio}
           </p>
         ) : (
           <ul className="flex flex-col gap-3">

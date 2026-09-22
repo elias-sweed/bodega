@@ -31,7 +31,7 @@ export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de h
   const maximo = Math.max(1, cobrado, ganado)
 
   return (
-    <section className="fade-up relative overflow-hidden rounded-[28px] border border-white/25 bg-gradient-to-br from-white/25 via-white/10 to-white/5 p-7 shadow-[0_24px_70px_-18px_rgba(20,5,80,0.7)] backdrop-blur-2xl sm:p-8">
+    <section className="fade-up relative shrink-0 overflow-hidden rounded-[28px] border border-white/25 bg-gradient-to-br from-white/25 via-white/10 to-white/5 p-7 shadow-[0_24px_70px_-18px_rgba(20,5,80,0.7)] backdrop-blur-2xl sm:p-8">
       {/* brillos decorativos */}
       <div
         aria-hidden="true"
