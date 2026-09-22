@@ -65,11 +65,13 @@ export function DashboardPage() {
 
   // ---- MODO VISTA DE DÍA (desde Historial) ----
   if (rangoDia) {
-    const etiqueta = rangoDia.desde.toLocaleDateString('es-PE', {
-      weekday: 'long',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    // "viernes 19 de septiembre 2026" para nombrar el día en cada título
+    const diaSemana = rangoDia.desde.toLocaleDateString('es-PE', { weekday: 'long' })
+    const diaMes = rangoDia.desde.toLocaleDateString('es-PE', { day: 'numeric', month: 'long' })
+    const etiqueta = `${diaSemana} ${diaMes} ${rangoDia.desde.getFullYear()}`
+    const etiquetaCorta = rangoDia.desde.toLocaleDateString('es-PE', {
+      day: 'numeric',
+      month: 'short',
     })
     const resumenDia = {
       ventas_hoy_total: dia.total,
@@ -120,19 +122,19 @@ export function DashboardPage() {
           <DashboardSkeleton />
         ) : (
           <div className="fade-in flex flex-col gap-6">
-            <SalesTodayCard resumen={resumenDia} etiqueta="Ventas de ese día" />
+            <SalesTodayCard resumen={resumenDia} etiqueta={`Ventas del ${etiqueta}`} />
             <MetodoDonut
               efectivo={dia.efectivo}
               yape={dia.yape}
               plin={dia.plin}
-              titulo="Ese día por método de pago"
-              centro="Ese día"
+              titulo={`Método de pago del ${etiqueta}`}
+              centro={etiquetaCorta}
               vacio="Sin cobros ese día. Al vender, aquí verás cómo te pagaron."
             />
             <TodayProducts
               productos={dia.productos}
               loading={dia.loading}
-              titulo="Ese día por producto"
+              titulo={`Productos del ${etiqueta}`}
               subtitulo="Lo cobrado y lo ganado de cada producto ese día."
               vacio="Sin ventas registradas ese día."
             />
