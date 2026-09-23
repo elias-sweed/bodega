@@ -11,7 +11,20 @@ export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
     throw new Error(getFriendlyError(error, 'No se pudo cargar el resumen del día.'))
   }
   if (!data) {
-    throw new Error('No se pudo cargar el resumen del día. Verifica tus permisos.')
+    // Sin actividad aún (primer día, bodega nueva): no es un error, es un
+    // resumen en ceros para que la UI muestre un estado vacío amigable.
+    return {
+      ventas_hoy_total: 0,
+      ventas_hoy_count: 0,
+      efectivo_hoy: 0,
+      yape_hoy: 0,
+      plin_hoy: 0,
+      gasto_compras_mes: 0,
+      ganancia_estimada_hoy: 0,
+      total_productos: 0,
+      bajos_stock: 0,
+      agotados: 0,
+    }
   }
   return data
 }

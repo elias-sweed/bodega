@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, X } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, ShoppingCart, Sparkles, X } from 'lucide-react'
 import { DashboardHero } from '../components/dashboard/DashboardHero'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
@@ -170,21 +170,58 @@ export function DashboardPage() {
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
-            No se pudo cargar el resumen
+            Todavía no hay resumen que mostrar
           </p>
-          <p className="text-sm font-medium text-muted">{error}</p>
-          <button
-            type="button"
-            onClick={retry}
-            className="rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform hover:-translate-y-0.5"
-          >
-            Reintentar
-          </button>
+          <p className="max-w-md text-sm font-medium text-muted">
+            Si es tu primer día, es normal: el resumen aparecerá con tus
+            primeras ventas. Si no, puede ser un pequeño susto de conexión.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/caja')}
+              className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-5 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0"
+            >
+              Ir a la Caja
+            </button>
+            <button
+              type="button"
+              onClick={retry}
+              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform hover:-translate-y-0.5"
+            >
+              Reintentar
+            </button>
+          </div>
         </div>
       ) : resumen === null ? (
         <DashboardSkeleton />
       ) : (
         <div className="fade-in flex flex-col gap-6">
+          {resumen.ventas_hoy_count === 0 && resumen.ventas_hoy_total === 0 && (
+            <section className="relative shrink-0 overflow-hidden rounded-[28px] border border-gold/40 bg-gold/10 p-6 shadow-sm backdrop-blur-2xl sm:p-7">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-gold">
+                    <Sparkles size={20} aria-hidden="true" />
+                    Aún no has vendido hoy
+                  </h2>
+                  <p className="mt-1 text-sm font-medium text-muted">
+                    Aquí verás tu resumen del día apenas registres tu primera
+                    venta. No hay nada que mostrar todavía, y eso está bien.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/caja')}
+                  className="inline-flex h-12 shrink-0 items-center gap-2 rounded-2xl border border-gold/40 bg-gold px-6 text-sm font-black tracking-tight text-amber-950 shadow-[0_10px_30px_-12px_rgba(251,191,36,0.6)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
+                >
+                  <ShoppingCart size={17} aria-hidden="true" />
+                  Registrar mi primera venta
+                </button>
+              </div>
+            </section>
+          )}
+
           <SalesTodayCard resumen={resumen} ayerTotal={ayerTotal} />
 
           <WeeklySalesChart dias={dias} loading={weeklyLoading} />
