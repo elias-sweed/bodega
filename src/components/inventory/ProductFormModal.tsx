@@ -467,7 +467,7 @@ export function ProductFormModal({
             }
           />
           {isCustomCategory && (
-            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-emerald-700">
+            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-profit">
               <Check size={14} strokeWidth={3} aria-hidden="true" />
               Se creará la nueva categoría “{toTitleCase(values.categoria)}”
             </p>
@@ -541,11 +541,11 @@ export function ProductFormModal({
                 size={20}
                 strokeWidth={2.5}
                 aria-hidden="true"
-                className={gananciaInfo.ganancia >= 0 ? 'text-emerald-700' : 'text-rose-700'}
+                className={gananciaInfo.ganancia >= 0 ? 'text-profit' : 'text-loss'}
               />
               <p
                 className={`text-lg font-black tracking-tight ${
-                  gananciaInfo.ganancia >= 0 ? 'text-emerald-700' : 'text-rose-700'
+                  gananciaInfo.ganancia >= 0 ? 'text-profit' : 'text-loss'
                 }`}
               >
                 {gananciaInfo.ganancia >= 0 ? 'Ganas' : 'Estás vendiendo perdiendo'}{' '}
@@ -567,7 +567,7 @@ export function ProductFormModal({
             aria-controls="calculadora-paquete"
             className={`mt-3 inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-extrabold backdrop-blur-xl transition-all duration-300 active:scale-[0.98] ${
               paqueteOpen
-                ? 'border-sky-200 bg-sky-100 text-sky-700'
+                ? 'border-sky-400/40 bg-sky-400/15 text-sky-200'
                 : 'border-line bg-surface text-ink hover:bg-surface-3 hover:text-ink'
             }`}
           >
@@ -620,7 +620,7 @@ export function ProductFormModal({
               </div>
               {costoCalc !== null && (
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200/30 bg-emerald-400/15 px-3 py-2">
-                  <p className="text-sm font-black text-emerald-700">
+                  <p className="text-sm font-black text-profit">
                     Cada unidad te cuesta ≈ {formatMoney(costoCalc)}
                   </p>
                   <button
@@ -723,7 +723,7 @@ export function ProductFormModal({
         {error && (
           <p
             role="alert"
-            className="mb-4 rounded-2xl border border-rose-200/30 bg-rose-400/20 px-4 py-2.5 font-bold text-rose-700"
+            className="mb-4 rounded-2xl border border-rose-200/30 bg-rose-400/20 px-4 py-2.5 font-bold text-loss"
           >
             {error}
           </p>

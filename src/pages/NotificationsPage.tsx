@@ -41,8 +41,8 @@ export function NotificationsPage() {
           ))}
         </div>
       ) : error ? (
-        <div className="fade-up flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+        <div className="fade-up flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
             <TriangleAlert size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -58,8 +58,8 @@ export function NotificationsPage() {
           </button>
         </div>
       ) : agotados.length === 0 ? (
-        <div className="fade-up flex flex-col items-center gap-3 rounded-[28px] border border-emerald-200 bg-emerald-100 p-10 text-center shadow-sm backdrop-blur-2xl">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-100 text-emerald-700">
+        <div className="fade-up flex flex-col items-center gap-3 rounded-[28px] border border-profit/40 bg-profit/15 p-10 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-profit/40 bg-profit/15 text-profit">
             <CheckCircle2 size={28} aria-hidden="true" />
           </span>
           <p className="mt-1 text-lg font-black tracking-tighter text-ink">
@@ -75,7 +75,7 @@ export function NotificationsPage() {
           {agotados.map((product) => (
             <li
               key={product.id}
-              className="fade-up rounded-[28px] border border-rose-200 bg-rose-100 p-4 shadow-sm backdrop-blur-2xl sm:p-5"
+              className="fade-up rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-4 shadow-sm backdrop-blur-2xl sm:p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -85,7 +85,7 @@ export function NotificationsPage() {
                   <p className="text-sm font-semibold text-muted">
                     {product.categoria}
                   </p>
-                  <p className="mt-2 inline-block rounded-full border border-rose-200 bg-rose-100 px-3 py-1 text-xs font-extrabold text-rose-700">
+                  <p className="mt-2 inline-block rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1 text-xs font-extrabold text-loss">
                     Ya no hay más (0 unidades)
                   </p>
                 </div>

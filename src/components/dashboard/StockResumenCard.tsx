@@ -24,7 +24,7 @@ export function StockResumenCard({ total, bajos, agotados }: StockResumenCardPro
         </div>
         <div className="h-12 w-px self-center bg-surface-2" aria-hidden="true" />
         <div>
-          <p className="text-4xl font-black tracking-tighter text-amber-700 ">
+          <p className="text-4xl font-black tracking-tighter text-gold ">
             {bajos}
           </p>
           <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted">
@@ -33,7 +33,7 @@ export function StockResumenCard({ total, bajos, agotados }: StockResumenCardPro
         </div>
         <div className="h-12 w-px self-center bg-surface-2" aria-hidden="true" />
         <div>
-          <p className="text-4xl font-black tracking-tighter text-rose-700 ">
+          <p className="text-4xl font-black tracking-tighter text-loss ">
             {agotados}
           </p>
           <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted">

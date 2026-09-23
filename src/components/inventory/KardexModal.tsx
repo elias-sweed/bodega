@@ -18,17 +18,17 @@ interface KardexModalProps {
 
 const TIPO_STYLE = {
   venta: {
-    wrap: 'border-rose-200/30 bg-rose-400/20 text-rose-700',
+    wrap: 'border-rose-200/30 bg-rose-400/20 text-loss',
     Icon: ArrowDownLeft,
     label: 'Salida',
   },
   compra: {
-    wrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700',
+    wrap: 'border-emerald-200/30 bg-emerald-400/20 text-profit',
     Icon: ArrowUpRight,
     label: 'Entrada',
   },
   ajuste: {
-    wrap: 'border-amber-200/30 bg-amber-400/20 text-amber-700',
+    wrap: 'border-amber-200/30 bg-amber-400/20 text-gold',
     Icon: Wrench,
     label: 'Ajuste',
   },
@@ -104,8 +104,8 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
         {data && (
           <div className="grid shrink-0 grid-cols-3 gap-2 px-6 pb-4">
             {[
-              { label: 'Entradas', value: data.totalEntradas, tone: 'text-emerald-700' },
-              { label: 'Salidas', value: data.totalSalidas, tone: 'text-rose-700' },
+              { label: 'Entradas', value: data.totalEntradas, tone: 'text-profit' },
+              { label: 'Salidas', value: data.totalSalidas, tone: 'text-loss' },
               { label: 'Stock actual', value: product.stock_actual, tone: 'text-ink' },
             ].map((stat) => (
               <div
@@ -191,8 +191,8 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
                     <span
                       className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-black tabular-nums ${
                         entrada
-                          ? 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700'
-                          : 'border-rose-200/30 bg-rose-400/20 text-rose-700'
+                          ? 'border-emerald-200/30 bg-emerald-400/20 text-profit'
+                          : 'border-rose-200/30 bg-rose-400/20 text-loss'
                       }`}
                     >
                       {entrada ? `+${m.cantidad}` : m.cantidad}

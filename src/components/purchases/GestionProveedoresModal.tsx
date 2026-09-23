@@ -73,7 +73,7 @@ export function GestionProveedoresModal({
         </div>
 
         {error && (
-          <p className="mb-4 rounded-2xl border border-rose-200 bg-rose-100 px-4 py-2 text-sm font-bold text-rose-700">
+          <p className="mb-4 rounded-2xl border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-bold text-loss">
             {error}
           </p>
         )}
@@ -129,7 +129,7 @@ export function GestionProveedoresModal({
                     <button
                       type="button"
                       onClick={() => setConfirmingId(proveedor.id)}
-                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-rose-200 bg-rose-100 px-3 text-sm font-black text-rose-700 transition-all duration-200 hover:bg-rose-200/60 active:scale-95"
+                      className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-rose-400/40 bg-rose-400/15 px-3 text-sm font-black text-loss transition-all duration-200 hover:bg-rose-200/60 active:scale-95"
                     >
                       <Trash2 size={15} strokeWidth={2.5} aria-hidden="true" />
                       Eliminar

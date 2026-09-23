@@ -102,6 +102,49 @@
   transition: background-color 9999s ease-in-out 0s;
 }
 
+/* ---------------------------------------------------------------------------
+   App (dashboard + todas las secciones): mismo fondo Silk del login sobre
+   índigo noche. Se redefinen los tokens a la paleta oscura "índigo noche"
+   para TODO el sub-árbol de PosLayout: los paneles de cristal premium
+   (bg-surface, border-line, text-ink…) contrastan de lleno con el fondo.
+   ------------------------------------------------------------------------- */
+.app-shell {
+  --color-surface-sub: rgba(18, 13, 56, 0.6);
+  --color-surface: rgba(21, 16, 64, 0.82);
+  --color-surface-2: rgba(37, 28, 104, 0.86);
+  --color-surface-3: rgba(52, 40, 132, 0.93);
+
+  --color-line: rgba(255, 255, 255, 0.13);
+  --color-line-strong: rgba(255, 255, 255, 0.42);
+
+  --color-ink: #f4f2ff;
+  --color-muted: #a9a4d6;
+
+  --color-gold: #fbbf24;
+  --color-profit: #34d399;
+  --color-loss: #fb7185;
+}
+
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  color-scheme: dark;
+}
+
+.app-shell input:-webkit-autofill,
+.app-shell input:-webkit-autofill:hover,
+.app-shell input:-webkit-autofill:focus,
+.app-shell input:-webkit-autofill:active,
+.app-shell input:autofill,
+.app-shell input:-moz-autofill {
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px #2a1568 inset;
+  box-shadow: 0 0 0 1000px #2a1568 inset;
+  caret-color: #fff;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 @layer utilities {
   .toast-enter {
     animation: toast-in 0.28s cubic-bezier(0.21, 1.02, 0.73, 1) both;

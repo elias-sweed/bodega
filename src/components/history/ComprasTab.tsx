@@ -48,7 +48,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
   if (error && ingresos.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-loss">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>

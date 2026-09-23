@@ -13,7 +13,7 @@ export function SessionExpiredModal({ onAccept }: SessionExpiredModalProps) {
       className="fade-in fixed inset-0 z-[70] flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
     >
       <div className="fade-up w-full max-w-sm rounded-[28px] border border-line bg-surface p-6 text-center shadow-sm backdrop-blur-2xl">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200 bg-amber-100 text-amber-700">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-gold/40 bg-gold/15 text-gold">
           <LogOut size={26} aria-hidden="true" />
         </span>
         <h2 className="mt-4 text-xl font-black tracking-tighter text-ink">

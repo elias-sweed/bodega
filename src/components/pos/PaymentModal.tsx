@@ -163,7 +163,7 @@ export function PaymentModal({
                 type="button"
                 onClick={() => setRecibido(total)}
                 disabled={charging}
-                className="h-12 rounded-2xl border border-emerald-200 bg-emerald-100 px-2 text-xs font-black text-emerald-700 backdrop-blur-xl transition-all duration-300 hover:bg-emerald-200/60 active:scale-[0.98] disabled:opacity-40"
+                className="h-12 rounded-2xl border border-profit/40 bg-profit/15 px-2 text-xs font-black text-profit backdrop-blur-xl transition-all duration-300 hover:bg-profit/25 active:scale-[0.98] disabled:opacity-40"
               >
                 Completo ({formatMoney(total)})
               </button>
@@ -198,14 +198,14 @@ export function PaymentModal({
               </span>
               <span
                 className={`text-2xl font-black tracking-tight ${
-                  vuelto >= 0 ? 'text-emerald-600' : 'text-rose-700'
+                  vuelto >= 0 ? 'text-profit' : 'text-loss'
                 }`}
               >
                 {formatMoney(Math.max(vuelto, 0))}
               </span>
             </div>
             {vuelto < 0 && (
-              <p className="mt-2 text-xs font-bold text-rose-700">
+              <p className="mt-2 text-xs font-bold text-loss">
                 Falta {formatMoney(-vuelto)} para completar el pago.
               </p>
             )}

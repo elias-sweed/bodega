@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { BarChart3, Bell, CalendarDays, History, LayoutDashboard, Package, ShoppingBag, Users, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { UserMenu } from '../components/auth/UserMenu'
+import Silk from '../components/Silk'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
 
@@ -16,8 +17,8 @@ function todayLabel(): string {
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return `flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
     isActive
-      ? 'bg-emerald-600 text-white shadow-sm'
-      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+      ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
+      : 'text-muted hover:bg-surface-2 hover:text-ink'
   }`
 }
 
@@ -76,14 +77,23 @@ export function PosLayout() {
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
 return (
-    <div className="flex h-screen flex-col bg-slate-100">
-      <header className="relative z-40 shrink-0 border-b border-slate-200 bg-white">
+    <div className="app-shell relative flex h-screen flex-col overflow-hidden">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <Silk
+          speed={5}
+          scale={1}
+          color="#5227FF"
+          noiseIntensity={1.5}
+          rotation={0}
+        />
+      </div>
+      <header className="relative z-40 shrink-0 border-b border-line bg-surface/70 backdrop-blur-2xl">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 lg:px-6">
           {/* marca */}
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden="true"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-base shadow-sm"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-700 text-base shadow-lg shadow-violet-900/40 ring-1 ring-white/10"
             >
               🛒
             </span>
@@ -98,7 +108,7 @@ return (
           </div>
 
           {/* navegación */}
-          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1 lg:order-none lg:w-auto lg:justify-center">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-line bg-surface/60 p-1 backdrop-blur-2xl lg:order-none lg:w-auto lg:justify-center">
             {NAV_ITEMS.map((item) => {
               if (item.to === '/usuarios' && rol !== 'admin') return null
               const Icon = item.icon
@@ -113,14 +123,14 @@ return (
 
           {/* acciones */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold capitalize text-muted xl:inline-flex">
-              <CalendarDays size={14} aria-hidden="true" className="text-slate-400" />
+            <span className="hidden items-center gap-2 rounded-2xl border border-line bg-surface/60 px-3 py-2 text-xs font-bold capitalize text-muted backdrop-blur-2xl xl:inline-flex">
+              <CalendarDays size={14} aria-hidden="true" className="text-muted" />
               {todayLabel()}
             </span>
             <NavLink
               to="/notificaciones"
               aria-label="Notificaciones de productos agotados"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface/70 text-muted backdrop-blur-xl transition-all duration-200 hover:bg-surface-2 hover:text-ink"
             >
               <Bell size={20} aria-hidden="true" />
               {agotados.length > 0 && (
@@ -139,17 +149,17 @@ return (
           to="/notificaciones"
           onClick={() => setNotifToast(null)}
           role="status"
-          className="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg"
+          className="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 p-3 shadow-xl shadow-black/30 backdrop-blur-2xl"
         >
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm">
             <Bell size={20} fill="currentColor" aria-hidden="true" />
           </span>
           <span>
-            <span className="block text-sm font-black text-slate-900">
+            <span className="block text-sm font-black text-ink">
               {notifToast.count}{' '}
               {notifToast.count === 1 ? 'nueva notificación' : 'nuevas notificaciones'}
             </span>
-            <span className="block text-xs font-semibold text-muted/70">
+            <span className="block text-xs font-semibold text-muted">
               «{notifToast.producto}» se agotó
             </span>
           </span>

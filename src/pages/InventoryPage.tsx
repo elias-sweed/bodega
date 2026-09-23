@@ -175,7 +175,7 @@ export function InventoryPage() {
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
             {lowStockCount > 0 && (
-              <span className="rounded-full border border-rose-200 bg-rose-100 px-3 py-0.5 text-xs font-black text-rose-700 backdrop-blur-xl">
+              <span className="rounded-full border border-rose-400/40 bg-rose-400/15 px-3 py-0.5 text-xs font-black text-loss backdrop-blur-xl">
                 {lowStockCount} con stock bajo
               </span>
             )}
@@ -203,8 +203,8 @@ export function InventoryPage() {
       {loading && products.length === 0 ? (
         <InventorySkeleton />
       ) : error && products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">

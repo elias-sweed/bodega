@@ -56,10 +56,10 @@ function Fila({
           <span
             className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-black ${
               signo === '−'
-                ? 'bg-rose-100 text-rose-700'
+                ? 'bg-rose-400/15 text-loss'
                 : signo === '='
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-sky-100 text-sky-700'
+                  ? 'bg-profit/15 text-profit'
+                  : 'bg-sky-400/15 text-sky-200'
             }`}
           >
             {signo}
@@ -261,8 +261,8 @@ function ReporteResumen({ mes }: { mes: string }) {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
           <BarChart3 size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -304,32 +304,32 @@ function ReporteResumen({ mes }: { mes: string }) {
         <button
           type="button"
           onClick={handleImprimir}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-extrabold text-emerald-800 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-100 active:translate-y-0 active:scale-[0.98]"
+          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-profit/30 bg-profit/10 px-4 text-sm font-extrabold text-profit shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-profit/20 active:translate-y-0 active:scale-[0.98]"
         >
           <Printer size={16} aria-hidden="true" />
           Imprimir
         </button>
       </div>
 
-      <section className="relative overflow-hidden rounded-[28px] border border-emerald-200 bg-emerald-50 p-6 shadow-sm backdrop-blur-2xl sm:p-7">
+      <section className="relative overflow-hidden rounded-[28px] border border-profit/25 bg-profit/10 p-6 shadow-sm backdrop-blur-2xl sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald-700">
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-profit">
               Ganancia Líquida Libre · Utilidad Neta
             </p>
-            <p className="mt-1 max-w-md text-sm font-semibold text-emerald-800/80">
+            <p className="mt-1 max-w-md text-sm font-semibold text-profit/80">
               Lo que queda de las ventas del mes después de cubrir compras y
               pérdidas por mermas y consumo.
             </p>
             <p
               className={`mt-3 text-4xl font-black tracking-tighter tabular-nums sm:text-5xl ${
-                reporte.gananciaLiquida >= 0 ? 'text-emerald-700' : 'text-loss'
+                reporte.gananciaLiquida >= 0 ? 'text-profit' : 'text-loss'
               }`}
             >
               {formatMoney(reporte.gananciaLiquida)}
             </p>
           </div>
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-200 bg-white text-emerald-600 shadow-sm">
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-profit/30 bg-profit/10 text-profit shadow-sm">
             {reporte.gananciaLiquida >= 0 ? (
               <TrendingUp size={30} strokeWidth={2.5} aria-hidden="true" />
             ) : (
@@ -338,13 +338,13 @@ function ReporteResumen({ mes }: { mes: string }) {
           </span>
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
-          <span className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-800">
+          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
             {reporte.numeroVentas} {reporte.numeroVentas === 1 ? 'venta' : 'ventas'}
           </span>
-          <span className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-800">
+          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
             {reporte.numeroComprasMes} compras
           </span>
-          <span className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-bold text-emerald-800">
+          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
             {reporte.numeroPerdidas} mermas
           </span>
         </div>
@@ -399,13 +399,13 @@ function ReporteResumen({ mes }: { mes: string }) {
           />
 
           <div className="border-t border-line pt-3">
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5">
-              <span className="text-sm font-black uppercase tracking-wide text-emerald-800">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-profit/25 bg-profit/10 px-4 py-3.5">
+              <span className="text-sm font-black uppercase tracking-wide text-profit">
                 GANANCIA LÍQUIDA REAL
               </span>
               <span
                 className={`text-xl font-black tracking-tighter tabular-nums ${
-                  reporte.gananciaLiquida >= 0 ? 'text-emerald-700' : 'text-loss'
+                  reporte.gananciaLiquida >= 0 ? 'text-profit' : 'text-loss'
                 }`}
               >
                 {formatMoney(reporte.gananciaLiquida)}
@@ -434,7 +434,7 @@ function ReporteResumen({ mes }: { mes: string }) {
                 className="flex items-center justify-between gap-4 rounded-2xl bg-surface-sub px-4 py-3"
               >
                 <span className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-400/40 bg-rose-400/15 text-loss">
                     <span className="text-xs font-black">−</span>
                   </span>
                   {perdida.motivo}

@@ -62,7 +62,7 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
                   </div>
                   <span
                     className={`text-[11px] font-black uppercase ${
-                      dia.esHoy ? 'text-emerald-700' : 'text-muted'
+                      dia.esHoy ? 'text-profit' : 'text-muted'
                     }`}
                   >
                     {dia.esHoy ? 'Hoy' : dia.etiqueta}

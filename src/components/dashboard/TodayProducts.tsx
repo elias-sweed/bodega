@@ -85,7 +85,7 @@ export function TodayProducts({
                         <span className="text-base font-black tabular-nums text-gold">
                           {formatMoney(p.cobrado)}
                         </span>
-                        <span className="rounded-full border border-emerald-200/40 bg-emerald-400/20 px-2.5 py-0.5 text-xs font-black tabular-nums text-emerald-700">
+                        <span className="rounded-full border border-emerald-200/40 bg-emerald-400/20 px-2.5 py-0.5 text-xs font-black tabular-nums text-profit">
                           +{formatMoney(p.ganancia)}
                         </span>
                         <ChevronDown
@@ -130,7 +130,7 @@ export function TodayProducts({
                           <span className="font-black text-ink">
                             Te quedaron ({margen}% de lo cobrado)
                           </span>
-                          <span className="text-base font-black tabular-nums text-emerald-700">
+                          <span className="text-base font-black tabular-nums text-profit">
                             {formatMoney(p.ganancia)}
                           </span>
                         </div>

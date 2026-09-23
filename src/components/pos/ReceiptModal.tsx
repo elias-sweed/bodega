@@ -135,7 +135,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-100 text-emerald-700">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-profit/40 bg-profit/15 text-profit">
               <CheckCircle2 size={22} aria-hidden="true" />
             </span>
             <div>
@@ -161,7 +161,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <p className="mb-1 flex items-center justify-between gap-2">
             <span className="font-bold">Bodega POS</span>
           </p>
-          <p className="text-xs text-muted/70">
+          <p className="text-xs text-slate-500">
             Recibo <strong>{shortId(sale.venta_id)}</strong> · {sale.metodo_pago} ·{' '}
             {new Date(sale.fecha).toLocaleDateString('es-PE')}{' '}
             {new Date(sale.fecha).toLocaleTimeString('es-PE', {

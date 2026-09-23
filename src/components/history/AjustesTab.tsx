@@ -114,7 +114,7 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
   if (error && ingresos.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-loss">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>
@@ -182,8 +182,8 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
             <div className="min-w-0">
               <span className={`mb-1 inline-block rounded-full border px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide backdrop-blur-xl ${
                 entry.salida
-                  ? 'border-rose-200/30 bg-rose-400/20 text-rose-700'
-                  : 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700'
+                  ? 'border-rose-200/30 bg-rose-400/20 text-loss'
+                  : 'border-emerald-200/30 bg-emerald-400/20 text-profit'
               }`}>
                 {entry.salida ? 'Salió del inventario' : 'Entró al inventario'}
               </span>
@@ -208,7 +208,7 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
               </span>
               <span
                 className={`text-lg font-black tracking-tight ${
-                  entry.salida ? 'text-rose-700' : 'text-emerald-700'
+                  entry.salida ? 'text-loss' : 'text-profit'
                 }`}
               >
                 {entry.salida ? '−' : '+'}

@@ -62,7 +62,7 @@ export function ProveedorSelect({
         id="proveedor"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
       >
         <option value={PROVEEDOR_GENERICO}>
           Proveedor Varios / Sin Comprobante
@@ -117,7 +117,7 @@ export function ProveedorSelect({
             />
           </div>
           {error && (
-            <p className="rounded-xl border border-rose-200 bg-rose-100 px-4 py-2 text-sm font-bold text-rose-700">
+            <p className="rounded-xl border border-rose-400/40 bg-rose-400/15 px-4 py-2 text-sm font-bold text-loss">
               {error}
             </p>
           )}

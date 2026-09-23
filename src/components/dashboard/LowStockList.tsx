@@ -9,7 +9,7 @@ export function LowStockList({ products }: LowStockListProps) {
   if (products.length === 0) {
     return (
       <div className="flex items-center gap-4 rounded-[28px] border border-emerald-200/30 bg-emerald-400/15 p-6 shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/25 text-emerald-700">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/25 text-profit">
           <CheckCircle2 size={22} aria-hidden="true" />
         </span>
         <div>
@@ -35,8 +35,8 @@ export function LowStockList({ products }: LowStockListProps) {
               <span
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
                   agotado
-                    ? 'border-rose-200 bg-rose-100 text-rose-700'
-                    : 'border-amber-200 bg-amber-100 text-amber-700'
+                    ? 'border-rose-400/40 bg-rose-400/15 text-loss'
+                    : 'border-gold/40 bg-gold/15 text-gold'
                 }`}
               >
                 <TriangleAlert size={18} aria-hidden="true" />
@@ -54,8 +54,8 @@ export function LowStockList({ products }: LowStockListProps) {
               <span
                 className={`inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase tracking-wider ${
                   agotado
-                    ? 'border-rose-200 bg-rose-100 text-rose-700'
-                    : 'border-amber-200 bg-amber-100 text-amber-700'
+                    ? 'border-rose-400/40 bg-rose-400/15 text-loss'
+                    : 'border-gold/40 bg-gold/15 text-gold'
                 }`}
               >
                 {agotado ? 'Agotado' : 'Por agotarse'}

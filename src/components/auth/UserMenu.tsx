@@ -57,7 +57,7 @@ export function UserMenu() {
         )}
         <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-ink lg:block">
           {displayName}
-          <span className="ml-2 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-700">
+          <span className="ml-2 rounded-full bg-sky-400/20 px-2 py-0.5 text-xs font-bold text-sky-200">
             {rolLabel}
           </span>
         </span>

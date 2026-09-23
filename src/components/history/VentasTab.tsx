@@ -61,8 +61,8 @@ function writeSummariesCache(summaries: Record<string, VentaSummary>): void {
 }
 
 const METODO_BADGES: Record<string, string> = {
-  Efectivo: 'border border-emerald-200 bg-emerald-100 text-emerald-700',
-  Yape: 'border border-sky-200 bg-sky-100 text-sky-700',
+  Efectivo: 'border border-profit/40 bg-profit/15 text-profit',
+  Yape: 'border border-sky-400/40 bg-sky-400/15 text-sky-200',
   Plin: 'border border-violet-200 bg-violet-100 text-violet-700',
 }
 
@@ -201,8 +201,8 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   if (error && ventas.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>
@@ -316,8 +316,8 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                       <span
                         className={`rounded-full border px-2 py-px text-[11px] font-black tabular-nums ${
                           summaries[venta.id].ganancia >= 0
-                            ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                            : 'border-rose-200 bg-rose-100 text-rose-700'
+                            ? 'border-profit/40 bg-profit/15 text-profit'
+                            : 'border-rose-400/40 bg-rose-400/15 text-loss'
                         }`}
                         title="Lo que ganaste en esta venta"
                       >
@@ -389,7 +389,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                           </span>
                           <span
                             className={`text-base font-black tabular-nums ${
-                              ganancia >= 0 ? 'text-emerald-600' : 'text-rose-700'
+                              ganancia >= 0 ? 'text-profit' : 'text-loss'
                             }`}
                           >
                             {formatMoney(ganancia)}

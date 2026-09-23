@@ -227,9 +227,9 @@ export function UsersPage() {
         </div>
       </header>
 
-      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-200 bg-sky-100 px-5 py-4 backdrop-blur-2xl">
-        <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-700" />
-        <p className="text-sm font-medium leading-relaxed text-sky-700">
+      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-400/40 bg-sky-400/15 px-5 py-4 backdrop-blur-2xl">
+        <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-200" />
+        <p className="text-sm font-medium leading-relaxed text-sky-200">
           <strong className="font-extrabold">Todo se hace aquí:</strong> escribe el
           correo, elige el rol y pulsa el botón: la cuenta se crea sola. Después
           dile a la persona que en el login use{' '}
@@ -264,7 +264,7 @@ export function UsersPage() {
                 id="usuario-rol"
                 value={nuevoRol}
                 onChange={(e) => setNuevoRol(e.target.value as UsuarioRol)}
-                className={`${inputClass} cursor-pointer [&>option]:bg-white [&>option]:text-slate-900`}
+                className={`${inputClass} cursor-pointer [&>option]:bg-[#241b66] [&>option]:text-slate-100`}
               >
                 <option value="cajero">Cajero</option>
                 <option value="admin">Admin</option>
@@ -294,8 +294,8 @@ export function UsersPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="m-5 flex flex-col items-center gap-4 rounded-[20px] border border-rose-200 bg-rose-100 p-8 text-center backdrop-blur-xl">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+          <div className="m-5 flex flex-col items-center gap-4 rounded-[20px] border border-rose-400/30 bg-rose-400/10 p-8 text-center backdrop-blur-xl">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
               <ShieldAlert size={22} aria-hidden="true" />
             </span>
             <p className="text-base font-extrabold tracking-tight text-ink">
@@ -334,7 +334,7 @@ export function UsersPage() {
                   <p className="truncate font-bold text-ink">
                     {usuario.email}
                     {usuario.email === user?.email && (
-                      <span className="ml-2 text-xs font-extrabold text-emerald-700">
+                      <span className="ml-2 text-xs font-extrabold text-profit">
                         (tú)
                       </span>
                     )}
@@ -364,7 +364,7 @@ export function UsersPage() {
                   <button
                     type="button"
                     onClick={() => handleRemove(usuario)}
-                    className="rounded-xl border border-rose-200 bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-200/60 active:translate-y-0 active:scale-95"
+                    className="rounded-xl border border-rose-400/40 bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-loss backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-400/30 active:translate-y-0 active:scale-95"
                   >
                     Quitar acceso
                   </button>

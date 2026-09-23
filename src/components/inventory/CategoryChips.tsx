@@ -48,7 +48,7 @@ export function CategoryChips({
                 className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                   activo
                     ? 'bg-surface-3 text-ink'
-                    : 'border border-amber-200 bg-amber-100 text-amber-700'
+                    : 'border-gold/40 bg-gold/15 text-gold'
                 }`}
               >
                 {activo ? 'Elegida' : 'Sugerida'}

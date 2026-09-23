@@ -139,7 +139,7 @@ export function HistoryPage() {
               aria-pressed={tab === item.id}
               className={`rounded-xl px-5 py-2 text-base font-black tracking-tight transition-all duration-300 active:scale-95 ${
                 tab === item.id
-                  ? 'bg-white text-[#2a1568] shadow'
+                  ? 'bg-gold text-amber-950 shadow-md shadow-gold/30'
                   : 'text-muted hover:bg-surface hover:text-ink'
               }`}
             >
@@ -183,7 +183,7 @@ export function HistoryPage() {
                   if (e.target.value) setRange('dia')
                 }}
                 aria-label="Elegir cualquier día del calendario"
-                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:light]"
+                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:dark]"
               />
             </span>
           </div>
@@ -198,7 +198,7 @@ export function HistoryPage() {
                 title={item.hint || 'Sin filtro de horario'}
                 className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold transition-all duration-300 active:scale-95 ${
                   franja === item.id
-                    ? 'border border-amber-200 bg-amber-100 text-amber-700 shadow'
+                    ? 'border border-gold/40 bg-gold/15 text-gold shadow'
                     : 'border border-transparent text-muted hover:bg-surface hover:text-ink'
                 }`}
               >

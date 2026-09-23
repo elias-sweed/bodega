@@ -51,18 +51,18 @@ export function DashboardHero({
       <div className="relative flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-muted">
-            <Sparkles size={12} aria-hidden="true" className="text-amber-700" />
+            <Sparkles size={12} aria-hidden="true" className="text-gold" />
             Bodega · Panel
           </p>
 
           <h1 className="mt-3 text-3xl font-black tracking-tighter text-ink  sm:text-4xl">
             {saludoPorHora()}
-            {nombre && <span className="text-indigo-600">, {nombre}</span>}
+            {nombre && <span className="text-indigo-300">, {nombre}</span>}
           </h1>
 
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-muted">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold capitalize text-ink">
-              <CalendarDays size={13} aria-hidden="true" className="text-indigo-600" />
+              <CalendarDays size={13} aria-hidden="true" className="text-indigo-300" />
               {fechaLarga()}
             </span>
             <span>{subtitulo}</span>

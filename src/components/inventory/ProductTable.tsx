@@ -57,9 +57,9 @@ function marginPercent(product: ProductosRow): number | null {
 }
 
 function marginClass(margin: number): string {
-  if (margin < 0) return 'border-rose-200 bg-rose-100 text-rose-700'
-  if (margin < 20) return 'border-amber-200 bg-amber-100 text-amber-700'
-  return 'border-emerald-200 bg-emerald-100 text-emerald-700'
+  if (margin < 0) return 'border-rose-400/40 bg-rose-400/15 text-loss'
+  if (margin < 20) return 'border-gold/40 bg-gold/15 text-gold'
+  return 'border-profit/40 bg-profit/15 text-profit'
 }
 
 function marginLevel(margin: number | null): MargenFiltro | null {
@@ -359,7 +359,7 @@ export function ProductTable({
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             aria-label="Filtrar por categoría"
-            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             <option value="todas">Todas las categorías</option>
             {categories.map((name) => (
@@ -383,7 +383,7 @@ export function ProductTable({
           <SlidersHorizontal size={16} aria-hidden="true" />
           Filtros
           {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[11px] font-black text-[#2a1568]">
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[11px] font-black text-amber-950">
               {activeFilterCount}
             </span>
           )}
@@ -427,7 +427,7 @@ export function ProductTable({
                 id="filtro-margen"
                 value={margen}
                 onChange={(e) => setMargen(e.target.value as MargenFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
               >
                 <option value="todos">Todos</option>
                 <option value="alto">Alto (≥ 20%)</option>
@@ -443,7 +443,7 @@ export function ProductTable({
                 id="filtro-stock"
                 value={stockFiltro}
                 onChange={(e) => setStockFiltro(e.target.value as StockFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
               >
                 <option value="todos">Todos</option>
                 <option value="bajo">Bajo (≤ mín)</option>
@@ -671,7 +671,7 @@ export function ProductTable({
                       )}
                       <td
                         className={`px-5 py-3 text-right font-black tabular-nums ${
-                          lowStock ? 'text-rose-700' : 'text-ink'
+                          lowStock ? 'text-loss' : 'text-ink'
                         }`}
                       >
                         {product.stock_actual}
@@ -700,7 +700,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onEdit?.(product)}
                             title="Editar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-100 px-3 py-1.5 text-xs font-black text-sky-700 backdrop-blur-xl transition-all duration-200 hover:bg-sky-200/60 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/15 px-3 py-1.5 text-xs font-black text-sky-200 backdrop-blur-xl transition-all duration-200 hover:bg-sky-200/60 active:scale-95"
                           >
                             <Pencil size={13} strokeWidth={2.5} aria-hidden="true" />
                             Editar
@@ -709,7 +709,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onAdjustStock?.(product)}
                             title="Ajustar stock"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700 backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-black text-gold backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
                           >
                             <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
                             Stock
@@ -718,7 +718,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onDelete?.(product)}
                             title="Eliminar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-rose-700 backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-loss backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
                           >
                             <Trash2 size={13} strokeWidth={2.5} aria-hidden="true" />
                             Eliminar

@@ -143,7 +143,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             {MOTIVOS_ENTRADA.map((name) => (
               <option key={name} value={name}>
@@ -157,7 +157,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             {MOTIVOS_SALIDA.map((name) => (
               <option key={name} value={name}>
@@ -170,13 +170,13 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {delta !== 0 && (
           <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-muted backdrop-blur-xl">
             {movementType === 'entrada' ? (
-              <PackagePlus size={14} className="shrink-0 text-emerald-600" aria-hidden="true" />
+              <PackagePlus size={14} className="shrink-0 text-profit" aria-hidden="true" />
             ) : (
               <PackageMinus size={14} className="shrink-0 text-rose-600" aria-hidden="true" />
             )}
             <span>
               Movimiento de{' '}
-              <span className={delta > 0 ? 'font-black text-emerald-700' : 'font-black text-rose-700'}>
+              <span className={delta > 0 ? 'font-black text-profit' : 'font-black text-loss'}>
                 {movementType} {Math.abs(delta)}
               </span>{' '}
               · {motivo} · queda en {parsed}.
@@ -210,7 +210,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-2xl border border-rose-200 bg-rose-100 px-4 py-2 text-sm font-bold text-rose-700"
+            className="mt-3 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm font-bold text-loss"
           >
             {error}
           </p>

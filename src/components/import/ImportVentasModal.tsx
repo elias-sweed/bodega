@@ -436,7 +436,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               código = código de barras o nombre exacto del producto.
             </p>
             {fileError && (
-              <p className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-200/30 bg-rose-500/20 px-4 py-3 text-sm font-bold text-rose-700">
+              <p className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-200/30 bg-rose-500/20 px-4 py-3 text-sm font-bold text-loss">
                 <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
                 {fileError}
               </p>
@@ -450,7 +450,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               <span className="font-bold text-ink">{fileName || 'Archivo'}</span> —{' '}
               {groups.length} ticket(s), {rows.length} fila(s)
               {errorCount > 0 && (
-                <span className="font-bold text-rose-700">, {errorCount} con error</span>
+                <span className="font-bold text-loss">, {errorCount} con error</span>
               )}
               .
             </p>
@@ -474,7 +474,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                     </span>
                   </div>
                   {group.error && (
-                    <p className="mt-1 text-xs font-bold text-rose-700">{group.error}</p>
+                    <p className="mt-1 text-xs font-bold text-loss">{group.error}</p>
                   )}
                   <ul className="mt-2 flex flex-col gap-1">
                     {group.rows.map((row) => (
@@ -482,13 +482,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                         key={`${row.line}`}
                         className={`rounded-xl px-2.5 py-1.5 text-xs ${
                           row.error
-                            ? 'border border-rose-200/25 bg-rose-500/15 font-bold text-rose-700'
+                            ? 'border border-rose-200/25 bg-rose-500/15 font-bold text-loss'
                             : 'border border-line bg-surface-sub text-muted'
                         }`}
                       >
                         {row.error ?? (
                           <span className="flex items-center gap-1.5">
-                            <CheckCircle2 size={13} className="shrink-0 text-emerald-600" aria-hidden="true" />
+                            <CheckCircle2 size={13} className="shrink-0 text-profit" aria-hidden="true" />
                             {row.productoNombre} × {row.cantidad} @ S/ {(row.precio ?? 0).toFixed(2)}
                           </span>
                         )}
@@ -524,7 +524,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
             {validGroups.length === 0 && (
-              <p className="mt-2 text-xs font-bold text-rose-700">
+              <p className="mt-2 text-xs font-bold text-loss">
                 No hay tickets válidos para importar. Corrige el archivo e inténtalo de nuevo.
               </p>
             )}
@@ -535,7 +535,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
           <div className="mt-5">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-2xl border border-emerald-200/30 bg-emerald-400/15 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-emerald-700">{result.ok}</p>
+                <p className="text-2xl font-black text-profit">{result.ok}</p>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Importadas</p>
               </div>
               <div className="rounded-2xl border border-line bg-surface p-3 text-center backdrop-blur-xl">
@@ -547,7 +547,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Stock negat.</p>
               </div>
               <div className="rounded-2xl border border-rose-200/30 bg-rose-500/15 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-rose-700">{result.errores.length}</p>
+                <p className="text-2xl font-black text-loss">{result.errores.length}</p>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Errores</p>
               </div>
             </div>
@@ -559,7 +559,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               </p>
             )}
             {result.stockNegativo.length > 0 && (
-              <p className="mt-2 rounded-2xl border border-rose-200/30 bg-rose-500/15 px-4 py-2.5 text-xs font-bold text-rose-700">
+              <p className="mt-2 rounded-2xl border border-rose-200/30 bg-rose-500/15 px-4 py-2.5 text-xs font-bold text-loss">
                 <AlertTriangle size={13} className="mr-1.5 inline" aria-hidden="true" />
                 Stock en negativo, sincerar inventario: {result.stockNegativo.join(', ')}
               </p>
@@ -569,7 +569,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 {result.errores.map((e) => (
                   <li
                     key={e.ticket}
-                    className="rounded-xl border border-rose-200/25 bg-rose-500/15 px-3 py-2 text-xs font-bold text-rose-700"
+                    className="rounded-xl border border-rose-200/25 bg-rose-500/15 px-3 py-2 text-xs font-bold text-loss"
                   >
                     Ticket {e.ticket}: {e.motivo}
                   </li>

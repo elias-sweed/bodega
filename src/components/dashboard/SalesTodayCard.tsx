@@ -41,7 +41,7 @@ export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de h
           <p className="mt-3 text-5xl font-black tracking-tighter text-gold  sm:text-6xl">
             {formatMoney(cobrado)}
           </p>
-          <p className="mt-2 text-lg font-black tracking-tight tabular-nums text-emerald-700">
+          <p className="mt-2 text-lg font-black tracking-tight tabular-nums text-profit">
             De eso, ganaste {formatMoney(ganado)}
           </p>
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted">
@@ -53,8 +53,8 @@ export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de h
               <span
                 className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-black tabular-nums ${
                   comparativa >= 0
-                    ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
-                    : 'border-rose-200 bg-rose-100 text-rose-700'
+                    ? 'border-profit/40 bg-profit/15 text-profit'
+                    : 'border-rose-400/40 bg-rose-400/15 text-loss'
                 }`}
                 title={`Ayer: ${formatMoney(ayerTotal)}`}
               >
@@ -88,7 +88,7 @@ export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de h
               </span>
             </div>
             <div className="flex h-full flex-col items-center justify-end gap-1.5">
-              <span className="text-sm font-black tabular-nums text-emerald-700">
+              <span className="text-sm font-black tabular-nums text-profit">
                 {formatMoney(ganado)}
               </span>
               <div

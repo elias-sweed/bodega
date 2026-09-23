@@ -13,13 +13,13 @@ interface ToastProps {
 
 const STYLES = {
   success: {
-    iconWrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700',
+    iconWrap: 'border-emerald-200/30 bg-emerald-400/20 text-profit',
     bar: 'bg-emerald-300',
     title: 'Listo',
     Icon: CheckCircle2,
   },
   error: {
-    iconWrap: 'border-rose-200/30 bg-rose-400/20 text-rose-700',
+    iconWrap: 'border-rose-200/30 bg-rose-400/20 text-loss',
     bar: 'bg-rose-300',
     title: 'Ocurrió un problema',
     Icon: AlertTriangle,

@@ -200,8 +200,8 @@ export function PurchasesPage() {
       {isFirstLoad ? (
         <PurchasesSkeleton />
       ) : proveedoresError && proveedores.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -275,7 +275,7 @@ export function PurchasesPage() {
             </h2>
             <p className="mb-4 text-xs font-medium text-muted">
               Busca cada producto, di cuántas unidades llegaron y cuánto costó todo.
-              <span className="mt-0.5 block font-bold text-amber-700">
+              <span className="mt-0.5 block font-bold text-gold">
                 Cuenta uno por uno: si vino 1 caja con 24, escribe 24 (no 1).
               </span>
             </p>
@@ -401,7 +401,7 @@ export function PurchasesPage() {
                               Hay {item.producto.stock_actual}
                               {Number.isInteger(Number(item.cantidad)) &&
                                 Number(item.cantidad) >= 1 && (
-                                  <span className="font-black text-emerald-700">
+                                  <span className="font-black text-profit">
                                     {' '}
                                     → quedará en {item.producto.stock_actual + Number(item.cantidad)}
                                   </span>
@@ -442,7 +442,7 @@ export function PurchasesPage() {
                             {costoUnitario === null
                               ? <span className="text-sm font-bold text-muted">—</span>
                               : (
-                                <span className="inline-block rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-black tabular-nums text-emerald-700">
+                                <span className="inline-block rounded-full border border-profit/40 bg-profit/15 px-3 py-1.5 text-sm font-black tabular-nums text-profit">
                                   {formatMoney(costoUnitario)}
                                 </span>
                               )}
@@ -453,7 +453,7 @@ export function PurchasesPage() {
                               onClick={() => removeItem(item.producto.id)}
                               title="Quitar de la compra"
                               aria-label={`Quitar ${item.producto.nombre} de la compra`}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/40 bg-rose-400/15 text-loss transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
                             >
                               <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
                             </button>
@@ -463,7 +463,7 @@ export function PurchasesPage() {
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-emerald-200 bg-emerald-100">
+                    <tr className="border-t-2 border-profit/40 bg-profit/15">
                       <td colSpan={2} className="px-4 py-4 text-right text-sm font-bold uppercase tracking-widest text-muted">
                         Total de la compra
                       </td>

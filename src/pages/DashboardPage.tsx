@@ -86,7 +86,7 @@ export function DashboardPage() {
       <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
         <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-sm backdrop-blur-2xl">
           <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-ink">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-amber-100 text-amber-700">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold/40 bg-gold/15 text-gold">
               <CalendarDays size={18} aria-hidden="true" />
             </span>
             <span className="min-w-0">
@@ -166,7 +166,7 @@ export function DashboardPage() {
 
       {error && resumen === null ? (
         <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-loss">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">

@@ -37,10 +37,10 @@ export function PaymentQR({ method }: PaymentQRProps) {
         <p className="mb-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-muted">
           Pago por {method}
         </p>
-        <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-100 px-4 text-center backdrop-blur-xl">
-          <p className="text-sm font-bold text-amber-700">
+        <div className="flex h-44 items-center justify-center rounded-2xl border border-dashed border-gold/40 bg-gold/15 px-4 text-center backdrop-blur-xl">
+          <p className="text-sm font-bold text-gold">
             Tu código QR de {method} aparecerá aquí.
-            <span className="mt-1 block text-xs font-medium text-amber-700/70">
+            <span className="mt-1 block text-xs font-medium text-gold/70">
               Falta configurar el número en las variables del proyecto
               (VITE_{method.toUpperCase()}_NUMBER).
             </span>
@@ -58,7 +58,7 @@ export function PaymentQR({ method }: PaymentQRProps) {
       </p>
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl">
         {qrError ? (
-          <p className="py-10 text-sm font-bold text-rose-700">
+          <p className="py-10 text-sm font-bold text-loss">
             No se pudo generar el QR. Reinicia la página.
           </p>
         ) : dataUrl ? (

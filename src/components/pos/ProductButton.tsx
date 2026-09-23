@@ -58,7 +58,7 @@ export function ProductButton({
         <span
           key={`plus-${qtyInCart}`}
           aria-hidden="true"
-          className="float-plus pointer-events-none absolute right-3 top-7 z-10 text-lg font-black text-emerald-700"
+          className="float-plus pointer-events-none absolute right-3 top-7 z-10 text-lg font-black text-profit"
         >
           +1
         </span>
@@ -95,10 +95,10 @@ export function ProductButton({
           <span
             className={`shrink-0 text-xs font-black tabular-nums ${
               agotado
-                ? 'text-rose-700'
+                ? 'text-loss'
                 : product.stock_actual <= product.stock_minimo
-                  ? 'text-amber-700'
-                  : 'text-emerald-700'
+                  ? 'text-gold'
+                  : 'text-profit'
             }`}
           >
             {agotado ? 'Agotado' : `${product.stock_actual}`}
@@ -113,7 +113,7 @@ export function ProductButton({
             type="button"
             onClick={onDecrease}
             aria-label={`Quitar uno de ${product.nombre} (llevas ${qtyInCart})`}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-400/40 bg-rose-400/15 text-loss transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
           >
             <Minus size={14} aria-hidden="true" />
           </button>
@@ -126,7 +126,7 @@ export function ProductButton({
             disabled={atMax}
             aria-label={`Agregar otro ${product.nombre}`}
             title={atMax ? 'Llegaste al stock disponible' : `Agregar otro ${product.nombre}`}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-100 text-emerald-700 transition-all duration-200 hover:bg-emerald-200/60 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-profit/40 bg-profit/15 text-profit transition-all duration-200 hover:bg-emerald-200/60 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus size={14} aria-hidden="true" />
           </button>
