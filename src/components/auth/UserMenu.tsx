@@ -11,7 +11,7 @@ function getMetaString(user: User | null, key: string): string {
 }
 
 export function UserMenu() {
-  const { user, rol, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [signingOut, setSigningOut] = useState(false)
   const [notice, setNotice] = useState<{ type: 'error'; message: string } | null>(null)
@@ -21,9 +21,7 @@ export function UserMenu() {
     getMetaString(user, 'name') ||
     user?.email ||
     ''
-  const avatarUrl = getMetaString(user, 'avatar_url') || getMetaString(user, 'picture')
   const initial = displayName.trim().charAt(0).toUpperCase() || '?'
-  const rolLabel = rol === 'admin' ? 'Admin' : 'Cajero'
 
   const handleSignOut = async (): Promise<void> => {
     if (signingOut) return
@@ -43,29 +41,21 @@ export function UserMenu() {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt=""
-            className="h-9 w-9 rounded-full object-cover"
-          />
-        ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white">
-            {initial}
-          </span>
-        )}
-        <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-ink lg:block">
-          {displayName}
-          <span className="ml-2 rounded-full bg-sky-400/20 px-2 py-0.5 text-xs font-bold text-sky-200">
-            {rolLabel}
-          </span>
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <span
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-sm font-black text-slate-900 ring-2 ring-amber-200/25 sm:h-9 sm:w-9"
+          aria-label={`Usuario ${displayName}`}
+          title={displayName}
+        >
+          {initial}
         </span>
         <button
           type="button"
           onClick={() => void handleSignOut()}
           disabled={signingOut}
-          className="flex items-center gap-1.5 rounded-xl bg-surface px-3 py-2 text-sm font-semibold text-ink transition-colors hover:bg-surface-3 disabled:cursor-wait disabled:opacity-50"
+          aria-label={signingOut ? 'Cerrando sesión' : 'Cerrar sesión'}
+          title={signingOut ? 'Cerrando sesión' : 'Cerrar sesión'}
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-300/35 bg-rose-500/15 text-rose-200 transition-colors hover:border-rose-300/60 hover:bg-rose-500 hover:text-white disabled:cursor-wait disabled:opacity-50 sm:h-10 sm:w-10"
         >
           <svg
             viewBox="0 0 24 24"
@@ -81,9 +71,6 @@ export function UserMenu() {
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          <span className="hidden sm:inline">
-            {signingOut ? 'Cerrando…' : 'Cerrar sesión'}
-          </span>
         </button>
       </div>
       {notice && <Toast type={notice.type} message={notice.message} />}

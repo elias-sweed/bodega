@@ -17,6 +17,18 @@ export function getFriendlyError(
   if (message.includes('Solo el administrador puede editar productos')) {
     return 'Solo el administrador puede editar productos. Contacta al administrador.'
   }
+  if (message.includes('Solo el administrador puede cargar el inventario inicial')) {
+    return 'Solo el administrador puede cargar el inventario inicial. Contacta al administrador.'
+  }
+  if (message.includes('ya tiene movimientos') || message.includes('ya tiene stock')) {
+    return 'Ese producto ya tiene movimientos. Usa Ajustar stock para cambiar su cantidad.'
+  }
+  if (message.includes('Nombre y categoria son obligatorios')) {
+    return 'Completa el nombre y la categoría del producto nuevo.'
+  }
+  if (message.includes('codigo de barras ya esta asignado')) {
+    return 'Ese código de barras ya está asignado a otro producto.'
+  }
 
   const stockMatch = message.match(/disponible[:]?\s*(\d+)/i)
   if (lower.includes('stock insuficiente')) {
@@ -45,6 +57,12 @@ export function getFriendlyError(
   }
   if (lower.includes('el producto no existe')) {
     return 'El producto ya no existe. Refresca la lista e inténtalo de nuevo.'
+  }
+  if (
+    lower.includes('cargar_inventario_inicial') &&
+    (lower.includes('does not exist') || lower.includes('could not find a function'))
+  ) {
+    return 'La base de datos no está al día. Ejecuta solo supabase/fix_cargar_inventario_inicial.sql en Supabase y prueba de nuevo.'
   }
   if (lower.includes('does not exist') || lower.includes('could not find a function')) {
     return 'La base de datos no está al día. Ejecuta las migraciones SQL pendientes (mejoras.sql, usuarios.sql y mejoras_v2.sql, en ese orden) y vuelve a intentarlo.'

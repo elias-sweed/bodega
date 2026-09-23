@@ -18,7 +18,7 @@ const MOTIVOS_ENTRADA = ['Corrección de inventario'] as const
 const MOTIVOS_SALIDA = ['Producto vencido', 'Producto dañado/roto', 'Consumo interno'] as const
 
 const inputClass =
-  'h-12 w-full rounded-2xl border border-line bg-surface px-4 text-lg font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-lg font-bold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 const labelClass =
   'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
@@ -79,18 +79,18 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
       role="dialog"
       aria-modal="true"
       aria-labelledby="ajustar-stock-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
       >
         <div className="mb-1 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
               Inventario
             </p>
             <h2 id="ajustar-stock-title" className="text-xl font-black tracking-tighter text-ink">
@@ -101,7 +101,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <X size={16} aria-hidden="true" />
           </button>
@@ -138,7 +138,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none focus:border-amber-300/70 [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             {MOTIVOS_ENTRADA.map((name) => (
               <option key={name} value={name}>
@@ -152,7 +152,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none focus:border-amber-300/70 [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             {MOTIVOS_SALIDA.map((name) => (
               <option key={name} value={name}>
@@ -163,7 +163,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         )}
 
         {delta !== 0 && (
-          <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-muted backdrop-blur-xl">
+          <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-muted">
             {movementType === 'entrada' ? (
               <PackagePlus size={14} className="shrink-0 text-profit" aria-hidden="true" />
             ) : (
@@ -215,14 +215,14 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
           <button
             type="button"
             onClick={onClose}
-            className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
+            className="flex h-12 flex-1 items-center justify-center rounded-2xl border border-line bg-surface-2 text-sm font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-sky-500 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 flex-[2] rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Guardando…' : 'Ajustar stock'}
           </button>

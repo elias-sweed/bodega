@@ -1,5 +1,7 @@
 import type {
   ActualizarProductoResult,
+  CargarInventarioInicialItem,
+  CargarInventarioInicialResult,
   ProductosInsert,
   ProductosRow,
   RegistrarAjusteManualResult,
@@ -82,6 +84,33 @@ export async function insertProduct(
 
   if (!data) {
     throw new Error('No se pudo crear el producto. Verifica tus permisos e inténtalo de nuevo.')
+  }
+
+  return data
+}
+
+export async function cargarInventarioInicial(
+  items: CargarInventarioInicialItem[],
+): Promise<CargarInventarioInicialResult> {
+  if (items.length === 0) {
+    throw new Error('Agrega al menos un producto para cargar el inventario.')
+  }
+
+  const { data, error } = await supabase.rpc('cargar_inventario_inicial', {
+    p_items: items,
+  })
+
+  if (error) {
+    throw new Error(
+      getFriendlyError(
+        new Error(error.message),
+        'No se pudo cargar el inventario inicial. Inténtalo de nuevo.',
+      ),
+    )
+  }
+
+  if (!data) {
+    throw new Error('No se pudo cargar el inventario inicial. Inténtalo de nuevo.')
   }
 
   return data

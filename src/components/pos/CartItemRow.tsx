@@ -18,20 +18,20 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
 
   useEffect(() => {
     if (highlight) {
-      rowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      rowRef.current?.scrollIntoView({ behavior: 'auto', block: 'nearest' })
     }
   }, [highlight, quantity])
 
   return (
     <li
       ref={rowRef}
-      className={`flex items-center gap-3 rounded-xl border-b border-line py-3 last:border-none ${highlight ? 'row-flash border border-emerald-200/40 px-2' : ''}`}
+      className={`flex items-center gap-3 rounded-xl border-b border-line py-3 last:border-none ${highlight ? 'row-flash border border-amber-300/40 px-2' : ''}`}
     >
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-extrabold tracking-tight text-ink">
           {product.nombre}
         </p>
-        <p className="text-xs font-medium text-muted">
+        <p className="text-xs font-semibold text-amber-200/90">
           {formatMoney(product.precio_venta)} c/u
         </p>
       </div>
@@ -79,7 +79,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
 export function CartEmptyState() {
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-300/25 bg-surface-2 text-amber-300">
         <ShoppingCart size={24} aria-hidden="true" />
       </span>
       <p className="text-sm font-bold text-muted">

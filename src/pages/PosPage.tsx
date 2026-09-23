@@ -194,7 +194,7 @@ export function PosPage() {
     const count = cart.reduce((sum, item) => sum + item.quantity, 0)
     if (prevCartCount.current === 0 && count > 0) {
       if (window.matchMedia('(max-width: 1023px)').matches) {
-        cartSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        cartSectionRef.current?.scrollIntoView({ behavior: 'auto', block: 'nearest' })
       }
     }
     prevCartCount.current = count
@@ -520,7 +520,7 @@ export function PosPage() {
   )
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-4">
+    <div className="caja-pos mx-auto flex h-full w-full max-w-7xl flex-col gap-4 bg-transparent">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
@@ -539,7 +539,7 @@ export function PosPage() {
       </header>
 
       {suspendedSale && (
-        <div className="fade-up flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/30 bg-amber-400/15 px-5 py-3.5 shadow-sm backdrop-blur-2xl">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-300/30 bg-surface px-5 py-3.5 shadow-[0_22px_55px_-30_rgba(0,0,0,0.95)]">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gold/40 bg-gold/15 text-gold">
               <PauseCircle size={22} aria-hidden="true" />
@@ -558,14 +558,14 @@ export function PosPage() {
             <button
               type="button"
               onClick={handleResume}
-              className="rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-black text-amber-950 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0"
+              className="rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 py-2.5 text-sm font-black text-slate-900 shadow-lg transition-colors hover:brightness-105"
             >
               Retomar venta
             </button>
             <button
               type="button"
               onClick={handleDiscardSuspended}
-              className="rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm font-bold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3"
+              className="rounded-2xl border border-line bg-surface-2 px-4 py-2.5 text-sm font-bold text-ink transition-colors hover:bg-surface-3"
             >
               Descartar
             </button>

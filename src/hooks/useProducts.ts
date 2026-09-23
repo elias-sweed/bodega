@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
+  cargarInventarioInicial,
   deleteProduct as removeProduct,
   insertProduct,
   actualizarProducto,
@@ -11,6 +12,8 @@ import {
   subscribeToProducts,
 } from '../services/productsCache'
 import type {
+  CargarInventarioInicialItem,
+  CargarInventarioInicialResult,
   ProductosInsert,
   ProductosRow,
 } from '../types/database.types'
@@ -64,6 +67,15 @@ export function useProducts() {
     [],
   )
 
+  const loadInitialInventory = useCallback(
+    async (items: CargarInventarioInicialItem[]): Promise<CargarInventarioInicialResult> => {
+      const result = await cargarInventarioInicial(items)
+      await refreshProductsCache()
+      return result
+    },
+    [],
+  )
+
   const updateProduct = useCallback(
     async (id: string, input: {
       nombre: string
@@ -96,5 +108,14 @@ export function useProducts() {
     await refreshProductsCache()
   }, [])
 
-  return { products, loading, error, refresh, addProduct, updateProduct, deleteProduct }
+  return {
+    products,
+    loading,
+    error,
+    refresh,
+    addProduct,
+    loadInitialInventory,
+    updateProduct,
+    deleteProduct,
+  }
 }

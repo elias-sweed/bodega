@@ -87,6 +87,63 @@ describe('InventoryPage', () => {
     expect(mockState.createCalls).toBe(1)
   })
 
+  it('carga varias unidades existentes como inventario inicial', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Cargar inventario inicial' }))
+    await user.type(screen.getByLabelText('Buscar producto'), 'Gaseosa')
+    await user.click(
+      screen.getByRole('button', { name: 'Agregar Gaseosa Inca Kola al inventario inicial' }),
+    )
+    await user.type(
+      screen.getByLabelText('Unidades que tienes de Gaseosa Inca Kola'),
+      '3',
+    )
+    await user.click(screen.getByRole('button', { name: 'Guardar inventario inicial' }))
+
+    await waitFor(() => expect(mockState.initialInventoryCalls).toBe(1))
+    expect(mockState.products.find((item) => item.id === 'producto-gaseosa')).toMatchObject({
+      stock_actual: 3,
+    })
+    expect(mockState.incomes.some((item) => item.motivo === 'Stock inicial')).toBe(true)
+    expect(await screen.findByText(/Inventario inicial guardado: 1 producto y 3 unidades/)).toBeInTheDocument()
+  })
+
+  it('crea un producto nuevo dentro de la carga de inventario inicial', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Cargar inventario inicial' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar producto nuevo' }))
+    expect(screen.queryByLabelText('Costo por unidad (S/)')).not.toBeInTheDocument()
+    await user.type(screen.getByLabelText('Nombre del producto'), 'Agua de prueba')
+    await user.type(screen.getByLabelText('Categoría'), 'Bebidas')
+    await user.type(screen.getByLabelText('Unidades que tienes'), '3')
+    await user.type(screen.getByLabelText('Precio de venta (S/)'), '2.50')
+    await user.click(screen.getByRole('button', { name: 'Guardar inventario inicial' }))
+
+    await waitFor(() => expect(mockState.initialInventoryCalls).toBe(1))
+    expect(mockState.lastInitialInventoryPayload).toEqual([
+      {
+        tipo: 'nuevo',
+        nombre: 'Agua De Prueba',
+        categoria: 'Bebidas',
+        codigo_barras: null,
+        precio_venta: 2.5,
+        stock_minimo: 5,
+        cantidad: 3,
+      },
+    ])
+    expect(mockState.products.find((item) => item.nombre === 'Agua De Prueba')).toMatchObject({
+      stock_actual: 3,
+      precio_venta: 2.5,
+      costo: 0,
+    })
+  })
+
   it('ajusta stock usando la única RPC transaccional', async () => {
     const user = userEvent.setup()
     renderInventory()
@@ -108,6 +165,9 @@ describe('InventoryPage', () => {
     await screen.findByText('Gaseosa Inca Kola')
 
     expect(screen.queryByRole('button', { name: 'Nuevo producto' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Cargar inventario inicial' }),
+    ).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
     expect(screen.queryByTitle('Ajustar stock')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument()

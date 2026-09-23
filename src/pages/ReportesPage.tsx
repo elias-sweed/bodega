@@ -45,7 +45,7 @@ function rango(periodo: Periodo, fecha: Date): { desde: Date; hasta: Date } {
 function MetricCard({ label, value, tone = 'normal' }: { label: string; value: string; tone?: 'normal' | 'profit' | 'loss' }) {
   const color = tone === 'profit' ? 'text-profit' : tone === 'loss' ? 'text-loss' : 'text-ink'
   return (
-    <div className="rounded-[24px] border border-line bg-surface p-5 shadow-sm backdrop-blur-2xl">
+    <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_24px_60px_-32_rgba(0,0,0,0.95)]">
       <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-black tracking-tight ${color}`}>{value}</p>
     </div>
@@ -93,7 +93,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         <button
           type="button"
           onClick={refresh}
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-black text-rose-700"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl border border-rose-300/40 bg-rose-500 px-4 py-2 text-sm font-black text-white"
         >
           <RotateCcw size={15} aria-hidden="true" /> Reintentar
         </button>
@@ -116,7 +116,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         <button
           type="button"
           onClick={exportar}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink shadow-sm hover:bg-surface-2"
+          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
         >
           <Download size={16} aria-hidden="true" /> Exportar para Excel
         </button>
@@ -133,7 +133,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         <MetricCard label="Operaciones de venta" value={String(reporte.numeroVentas)} />
       </div>
 
-      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
+      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted">Resumen</p>
@@ -174,7 +174,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         </p>
       </section>
 
-      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
+      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         <h2 className="text-sm font-extrabold uppercase tracking-[0.18em] text-muted">Productos más vendidos</h2>
         {reporte.productosMasVendidos.length === 0 ? (
           <p className="mt-4 text-sm text-muted">No hay productos vendidos en este periodo.</p>
@@ -217,7 +217,7 @@ export function ReportesPage() {
   const periodLabel = periodo === 'dia' ? 'Día' : periodo === 'semana' ? 'Semana' : 'Mes'
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5 pb-10">
+    <div className="reportes-pos mx-auto flex h-full w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Finanzas</p>
@@ -230,7 +230,7 @@ export function ReportesPage() {
               key={item}
               type="button"
               onClick={() => setPeriodo(item)}
-              className={`rounded-xl px-4 py-2 text-sm font-black ${periodo === item ? 'bg-gold text-amber-950' : 'text-muted hover:bg-surface-2'}`}
+              className={`rounded-xl px-4 py-2 text-sm font-black ${periodo === item ? 'border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
             >
               {item === 'dia' ? 'Día' : item === 'semana' ? 'Semana' : 'Mes'}
             </button>
@@ -239,7 +239,7 @@ export function ReportesPage() {
       </header>
 
       <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-line bg-surface p-3">
-        <CalendarDays size={18} className="text-muted" aria-hidden="true" />
+        <CalendarDays size={18} className="text-amber-300" aria-hidden="true" />
         <label htmlFor="fecha-reporte" className="text-sm font-bold text-muted">Fecha del {periodLabel.toLowerCase()}</label>
         <input
           id="fecha-reporte"
@@ -247,7 +247,7 @@ export function ReportesPage() {
           max={inputDate(new Date())}
           value={fecha}
           onChange={(event) => setFecha(event.target.value || inputDate(new Date()))}
-          className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-sm font-bold text-ink"
+          className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-sm font-bold text-ink outline-none focus:border-amber-300/70"
         />
         <BarChart3 size={18} className="ml-auto text-gold" aria-hidden="true" />
       </div>

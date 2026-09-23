@@ -14,7 +14,7 @@ interface ProveedorSelectProps {
 }
 
 const inputClass =
-  'h-12 w-full rounded-xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-12 w-full rounded-xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 
 export function ProveedorSelect({
   proveedores,
@@ -62,7 +62,7 @@ export function ProveedorSelect({
         id="proveedor"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
+        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink shadow-sm outline-none focus:border-amber-300/70 [&>option]:bg-[#241b66] [&>option]:text-slate-100"
       >
         <option value={PROVEEDOR_GENERICO}>
           Proveedor Varios / Sin Comprobante
@@ -78,7 +78,7 @@ export function ProveedorSelect({
       <button
         type="button"
         onClick={() => setShowForm((open) => !open)}
-        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95"
+        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2 text-sm font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-95"
       >
         <Plus size={15} strokeWidth={3} aria-hidden="true" />
         {showForm ? 'Cerrar' : 'Registrar un proveedor nuevo'}
@@ -87,7 +87,7 @@ export function ProveedorSelect({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="fade-in mt-3 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 backdrop-blur-xl"
+          className="mt-3 flex flex-col gap-3 rounded-2xl border border-line bg-surface-2 p-4"
         >
           <div>
             <label htmlFor="nuevo-proveedor-nombre" className="mb-1 block text-xs font-extrabold uppercase tracking-widest text-muted">
@@ -124,7 +124,7 @@ export function ProveedorSelect({
           <button
             type="submit"
             disabled={saving}
-            className="h-12 rounded-2xl border border-sky-200/30 bg-sky-500 text-base font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-base font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? 'Guardando…' : 'Guardar y usar este proveedor'}
           </button>

@@ -113,7 +113,7 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
         <button
           type="button"
           onClick={() => refresh()}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/40 bg-rose-500 px-5 py-2.5 text-sm font-black text-white shadow-lg transition-colors hover:bg-rose-400 active:scale-95"
         >
           <RotateCcw size={15} aria-hidden="true" />
           Reintentar

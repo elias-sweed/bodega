@@ -20,7 +20,7 @@ export function SearchBar({ value, onChange, onEnter }: SearchBarProps) {
 
   return (
     <div className="relative shrink-0">
-      <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted">
+      <span className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-amber-200/80">
         <Search size={22} aria-hidden="true" />
       </span>
       <input
@@ -31,7 +31,7 @@ export function SearchBar({ value, onChange, onEnter }: SearchBarProps) {
         onKeyDown={handleKeyDown}
         placeholder="Buscar producto o escanear código de barras…"
         enterKeyHint="search"
-        className="h-16 w-full rounded-2xl border border-line bg-surface pl-14 pr-6 text-lg font-semibold tracking-tight text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
+        className="h-16 w-full rounded-2xl border border-line bg-surface-sub pl-14 pr-6 text-lg font-semibold tracking-tight text-ink shadow-[0_18px_45px_-28px_rgba(0,0,0,0.95)] outline-none placeholder:text-muted focus:border-amber-300/70 focus:bg-surface-2 focus:ring-4 focus:ring-amber-400/10"
       />
     </div>
   )

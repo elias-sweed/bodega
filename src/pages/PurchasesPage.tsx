@@ -189,14 +189,14 @@ export function PurchasesPage() {
   }
 
   const inputClass =
-    'h-12 w-full rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+    'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
   const labelClass =
     'mb-1 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
   const isFirstLoad = proveedoresLoading && proveedores.length === 0
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5">
+    <div className="compras-pos mx-auto flex h-full w-full max-w-6xl flex-col gap-5 bg-transparent">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
@@ -210,7 +210,7 @@ export function PurchasesPage() {
           </p>
         </div>
         {items.length > 0 && (
-          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink backdrop-blur-xl">
+          <span className="rounded-full border border-amber-300/25 bg-surface-2 px-3 py-1 text-xs font-black text-ink">
             {items.length} {items.length === 1 ? 'ítem' : 'ítems'} · {formatMoney(totalCompra)}
           </span>
         )}
@@ -230,7 +230,7 @@ export function PurchasesPage() {
           <button
             type="button"
             onClick={() => refreshProveedores()}
-            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/40 bg-rose-500 px-5 py-2.5 text-sm font-black text-white shadow-sm transition-colors hover:bg-rose-400"
           >
             <RotateCcw size={15} aria-hidden="true" />
             Reintentar
@@ -306,7 +306,7 @@ export function PurchasesPage() {
                 <div className="relative">
                   <Search
                     size={18}
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-amber-200/80"
                     aria-hidden="true"
                   />
                   <input
@@ -325,7 +325,7 @@ export function PurchasesPage() {
                   />
 
                   {searchOpen && (
-                    <ul className="fade-in absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-line bg-surface py-1.5 shadow-sm backdrop-blur-2xl">
+                    <ul className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-line bg-surface py-1.5 shadow-[0_24px_60px_-24_rgba(0,0,0,0.95)]">
                       {suggestedProducts.length === 0 ? (
                         <li className="px-4 py-3 text-sm font-medium text-muted">
                           Sin coincidencias en el inventario.
@@ -339,7 +339,7 @@ export function PurchasesPage() {
                                 event.preventDefault()
                                 addItem(producto)
                               }}
-                              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface"
+                              className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-2"
                             >
                               <span className="truncate text-sm font-extrabold tracking-tight text-ink">
                                 {producto.nombre}
@@ -369,7 +369,7 @@ export function PurchasesPage() {
                 </p>
               </div>
               {items.length > 0 && (
-                <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink backdrop-blur-xl">
+                <span className="rounded-full border border-amber-300/25 bg-surface-2 px-3 py-1 text-xs font-black text-ink">
                   {items.length} {items.length === 1 ? 'producto' : 'productos'}
                 </span>
               )}
@@ -511,7 +511,7 @@ export function PurchasesPage() {
                 type="button"
                 disabled={!isValid || saving}
                 onClick={() => void handleSave()}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-8 text-base font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-8 text-base font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
               >
                 <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
                 {saving ? 'Guardando…' : 'Guardar compra'}

@@ -123,11 +123,11 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
 
   return (
     <div
-      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-[#080315]/90 p-4"
       onClick={onClose}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
+        className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -150,7 +150,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
             aria-label="Cerrar"
           >
             <X size={15} aria-hidden="true" />
@@ -194,7 +194,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
           <button
             type="button"
             onClick={() => printReceipt(sale)}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface-2 text-sm font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-[0.99]"
           >
             <Printer size={16} aria-hidden="true" />
             Imprimir recibo

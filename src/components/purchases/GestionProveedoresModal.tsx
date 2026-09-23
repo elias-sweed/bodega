@@ -38,17 +38,17 @@ export function GestionProveedoresModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="gestion-proveedores-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose()
         }
       }}
     >
-      <div className="fade-up max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
               Compras
             </p>
             <h2
@@ -66,7 +66,7 @@ export function GestionProveedoresModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <X size={16} strokeWidth={2.5} aria-hidden="true" />
           </button>
@@ -90,7 +90,7 @@ export function GestionProveedoresModal({
               return (
                 <li
                   key={proveedor.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3 backdrop-blur-xl"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface-2 px-4 py-3"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-extrabold tracking-tight text-ink">

@@ -57,12 +57,12 @@ export function DashboardHero({
 
           <h1 className="mt-3 text-3xl font-black tracking-tighter text-ink  sm:text-4xl">
             {saludoPorHora()}
-            {nombre && <span className="text-indigo-300">, {nombre}</span>}
+            {nombre && <span className="text-amber-300">, {nombre}</span>}
           </h1>
 
           <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-muted">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-bold capitalize text-ink">
-              <CalendarDays size={13} aria-hidden="true" className="text-indigo-300" />
+              <CalendarDays size={13} aria-hidden="true" className="text-amber-300" />
               {fechaLarga()}
             </span>
             <span>{subtitulo}</span>
@@ -82,7 +82,7 @@ export function DashboardHero({
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-5 text-sm font-extrabold tracking-tight text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 disabled:cursor-wait disabled:opacity-70"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-5 text-sm font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.99] disabled:cursor-wait disabled:opacity-70"
           >
             <RefreshCw
               size={16}

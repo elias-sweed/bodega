@@ -34,12 +34,12 @@ export function ConfirmDeleteModal({
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="confirmar-eliminar-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onCancel()
       }}
     >
-      <div className="fade-up w-full max-w-sm rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
+      <div className="w-full max-w-sm rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-rose-400/40 bg-rose-400/15 text-loss">
             <Trash2 size={22} strokeWidth={2.5} aria-hidden="true" />
@@ -48,7 +48,7 @@ export function ConfirmDeleteModal({
             type="button"
             onClick={onCancel}
             aria-label="Cerrar"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <X size={15} aria-hidden="true" />
           </button>
@@ -82,7 +82,7 @@ export function ConfirmDeleteModal({
             type="button"
             onClick={onCancel}
             disabled={submitting}
-            className="h-12 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-12 rounded-2xl border border-line bg-surface-2 text-sm font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancelar
           </button>

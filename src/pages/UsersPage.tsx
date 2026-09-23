@@ -21,7 +21,7 @@ type Notice = {
 }
 
 const inputClass =
-  'h-12 w-full rounded-2xl border border-line bg-surface px-4 text-base font-medium text-ink outline-none transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base font-medium text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 const labelClass =
   'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted'
 
@@ -79,7 +79,7 @@ export function UsersPage() {
 
   if (!isAdmin) {
     return (
-      <div className="fade-in mx-auto flex h-full w-full max-w-md flex-col items-center justify-center p-4">
+      <div className="usuarios-pos mx-auto flex h-full w-full max-w-md flex-col items-center justify-center bg-transparent p-4">
         <div className="fade-up w-full rounded-[28px] border border-line bg-surface p-8 text-center shadow-sm backdrop-blur-2xl">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-ink">
             <ShieldAlert size={26} aria-hidden="true" />
@@ -209,9 +209,9 @@ export function UsersPage() {
   }
 
   return (
-    <div className="fade-in mx-auto flex h-full w-full max-w-4xl flex-col gap-6">
+    <div className="usuarios-pos mx-auto flex h-full w-full max-w-4xl flex-col gap-6 bg-transparent">
       <header className="flex shrink-0 items-center gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-ink backdrop-blur-xl">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-300/25 bg-surface-2 text-amber-300">
           <Users size={22} aria-hidden="true" />
         </span>
         <div>
@@ -227,7 +227,7 @@ export function UsersPage() {
         </div>
       </header>
 
-      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-400/40 bg-sky-400/15 px-5 py-4 backdrop-blur-2xl">
+      <div className="flex items-start gap-3 rounded-[28px] border border-sky-300/25 bg-surface-2 px-5 py-4">
         <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-200" />
         <p className="text-sm font-medium leading-relaxed text-sky-200">
           <strong className="font-extrabold">Todo se hace aquí:</strong> escribe el
@@ -274,7 +274,7 @@ export function UsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-base font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
           >
             <UserPlus size={18} strokeWidth={2.5} aria-hidden="true" />
             {saving ? 'Creando…' : 'Crear cuenta y dar acceso'}
@@ -282,7 +282,7 @@ export function UsersPage() {
         </form>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
+      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-line bg-surface shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         {loading ? (
           <div className="flex flex-col gap-3 p-5" aria-label="Cargando usuarios">
             {[0, 1, 2].map((i) => (
@@ -305,7 +305,7 @@ export function UsersPage() {
             <button
               type="button"
               onClick={() => void loadList()}
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/40 bg-rose-500 px-5 py-2.5 text-sm font-black text-white shadow-sm transition-colors hover:bg-rose-400 active:scale-95"
             >
               <RefreshCw size={15} strokeWidth={2.5} aria-hidden="true" />
               Reintentar
@@ -348,7 +348,7 @@ export function UsersPage() {
                   <span
                     className={`rounded-full border px-3 py-1 text-xs font-extrabold ${
                       usuario.rol === 'admin'
-                        ? 'border-violet-200 bg-violet-100 text-violet-700'
+                        ? 'border-violet-300/40 bg-violet-400/15 text-violet-200'
                         : 'border-line bg-surface text-muted'
                     }`}
                   >

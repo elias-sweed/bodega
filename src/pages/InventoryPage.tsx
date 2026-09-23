@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { AlertTriangle, PackagePlus, RotateCcw } from 'lucide-react'
+import { AlertTriangle, ClipboardList, PackagePlus, RotateCcw } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
+import { InitialStockModal } from '../components/inventory/InitialStockModal'
 import { InventorySkeleton } from '../components/inventory/InventorySkeleton'
 import { KardexModal } from '../components/inventory/KardexModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
@@ -14,14 +15,26 @@ import {
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
 import { ajustarStock } from '../services/products'
-import type { ProductosInsert, ProductosRow } from '../types/database.types'
+import type {
+  CargarInventarioInicialItem,
+  ProductosInsert,
+  ProductosRow,
+} from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
 
 export function InventoryPage() {
   const { rol } = useAuth()
   const isAdmin = rol === 'admin'
-  const { products, loading, error, refresh, addProduct, updateProduct, deleteProduct } =
-    useProducts()
+  const {
+    products,
+    loading,
+    error,
+    refresh,
+    addProduct,
+    loadInitialInventory,
+    updateProduct,
+    deleteProduct,
+  } = useProducts()
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const recentIds = useMemo<string[]>(
@@ -35,6 +48,7 @@ export function InventoryPage() {
   )
   const initialNewName = searchParams.get('nuevo')
   const [modalOpen, setModalOpen] = useState(initialNewName !== null)
+  const [initialStockOpen, setInitialStockOpen] = useState(false)
   const [prefill, setPrefill] = useState<{
     nombre: string
     categoria: string
@@ -87,6 +101,19 @@ export function InventoryPage() {
     await addProduct(product)
     setModalOpen(false)
     showNotice('success', `Producto "${product.nombre}" agregado correctamente`)
+  }
+
+  const handleLoadInitialInventory = async (
+    items: CargarInventarioInicialItem[],
+  ): Promise<void> => {
+    const result = await loadInitialInventory(items)
+    setInitialStockOpen(false)
+    showNotice(
+      'success',
+      `Inventario inicial guardado: ${result.productos} ${
+        result.productos === 1 ? 'producto' : 'productos'
+      } y ${result.unidades} ${result.unidades === 1 ? 'unidad' : 'unidades'}.`,
+    )
   }
 
   const handleEditProduct = async (product: ProductosInsert): Promise<void> => {
@@ -160,7 +187,7 @@ export function InventoryPage() {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-5">
+    <div className="inventario-pos mx-auto flex h-full w-full max-w-7xl flex-col gap-5 bg-transparent">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
@@ -187,17 +214,27 @@ export function InventoryPage() {
           </div>
         </div>
         {isAdmin && (
-          <button
-            type="button"
-            onClick={() => {
-              setPrefill(null)
-              setModalOpen(true)
-            }}
-            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-6 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
-          >
-            <PackagePlus size={19} aria-hidden="true" />
-            Nuevo producto
-          </button>
+          <div className="flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              onClick={() => setInitialStockOpen(true)}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-[0.1em] text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
+            >
+              <ClipboardList size={19} aria-hidden="true" />
+              Cargar inventario inicial
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPrefill(null)
+                setModalOpen(true)
+              }}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
+            >
+              <PackagePlus size={19} aria-hidden="true" />
+              Nuevo producto
+            </button>
+          </div>
         )}
       </header>
 
@@ -227,9 +264,32 @@ export function InventoryPage() {
             <PackagePlus size={26} aria-hidden="true" />
           </span>
           <p className="text-lg font-black tracking-tight text-ink">Aún no hay productos</p>
-          <p className="text-sm font-medium text-muted">
-            Agrega el primero con el botón Nuevo producto.
+          <p className="max-w-md text-sm font-medium text-muted">
+            Carga lo que ya tienes en la bodega o crea el primer producto del catálogo.
           </p>
+          {isAdmin && (
+            <div className="mt-3 flex flex-wrap justify-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setInitialStockOpen(true)}
+                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-4 text-sm font-black text-ink transition-colors hover:bg-sky-400/25"
+              >
+                <ClipboardList size={17} aria-hidden="true" />
+                Cargar inventario inicial
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrefill(null)
+                  setModalOpen(true)
+                }}
+                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 transition-colors hover:brightness-105"
+              >
+                <PackagePlus size={17} aria-hidden="true" />
+                Nuevo producto
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="fade-in">
@@ -243,6 +303,14 @@ export function InventoryPage() {
             pinnedIds={recentIds}
           />
         </div>
+      )}
+
+      {initialStockOpen && (
+        <InitialStockModal
+          products={products}
+          onClose={() => setInitialStockOpen(false)}
+          onSubmit={handleLoadInitialInventory}
+        />
       )}
 
       {modalOpen && (

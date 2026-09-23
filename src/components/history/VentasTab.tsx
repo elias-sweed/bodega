@@ -32,7 +32,7 @@ interface VentaSummary {
 const METODO_BADGES: Record<string, string> = {
   Efectivo: 'border border-profit/40 bg-profit/15 text-profit',
   Yape: 'border border-sky-400/40 bg-sky-400/15 text-sky-200',
-  Plin: 'border border-violet-200 bg-violet-100 text-violet-700',
+  Plin: 'border border-violet-300/40 bg-violet-400/15 text-violet-200',
 }
 
 function matchesFilter(venta: VentasRow, filter: HistoryFilter, numero: number): boolean {
@@ -175,7 +175,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
         <button
           type="button"
           onClick={() => refresh()}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/40 bg-rose-500 px-5 py-2.5 text-sm font-black text-white shadow-sm transition-colors hover:bg-rose-400 active:scale-95"
         >
           <RotateCcw size={15} aria-hidden="true" />
           Reintentar

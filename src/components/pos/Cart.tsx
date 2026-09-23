@@ -34,16 +34,16 @@ export function Cart({
 
   return (
     <aside
-      className={`h-full min-h-0 flex-col rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl ${
+      className={`h-full min-h-0 flex-col rounded-[28px] border border-line bg-surface shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)] ${
         items.length === 0 ? 'hidden lg:flex' : 'flex'
       }`}
     >
       <header className="flex items-center justify-between border-b border-line px-5 py-4">
         <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-ink">
-          <ShoppingCart size={19} aria-hidden="true" className="text-muted" />
+          <ShoppingCart size={19} aria-hidden="true" className="text-amber-300" />
           Carrito
         </h2>
-        <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink">
+        <span className="rounded-full border border-amber-300/25 bg-surface-2 px-3 py-1 text-xs font-black text-ink">
           {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}
         </span>
       </header>
@@ -79,7 +79,7 @@ export function Cart({
           type="button"
           disabled={!canCharge}
           onClick={onCharge}
-          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 text-xl font-black tracking-[0.2em] text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-xl font-black tracking-[0.2em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
         >
           {charging ? 'COBRANDO…' : 'COBRAR'}
         </button>
@@ -88,7 +88,7 @@ export function Cart({
           type="button"
           disabled={items.length === 0 || charging}
           onClick={onSuspend}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-line bg-surface-2 text-sm font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Pause size={15} aria-hidden="true" />
           Suspender venta

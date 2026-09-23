@@ -108,7 +108,7 @@ export function HistoryPage() {
   )
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5 overflow-y-auto px-4 pb-10">
+    <div className="historial-pos mx-auto flex h-full w-full max-w-6xl flex-col gap-5 overflow-y-auto bg-transparent px-4 pb-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
@@ -125,7 +125,7 @@ export function HistoryPage() {
           <button
             type="button"
             onClick={() => setShowImport(true)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
           >
             <Upload size={16} aria-hidden="true" />
             Importar ventas
@@ -143,7 +143,7 @@ export function HistoryPage() {
               aria-pressed={tab === item.id}
               className={`rounded-xl px-5 py-2 text-base font-black tracking-tight transition-all duration-300 active:scale-95 ${
                 tab === item.id
-                  ? 'bg-gold text-amber-950 shadow-md shadow-gold/30'
+                  ? 'border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-md'
                   : 'text-muted hover:bg-surface hover:text-ink'
               }`}
             >
@@ -223,7 +223,7 @@ export function HistoryPage() {
             <div className="relative w-full">
             <Search
               size={17}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 shrink-0 text-muted"
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 shrink-0 text-amber-300"
               aria-hidden="true"
             />
             <input
@@ -231,7 +231,7 @@ export function HistoryPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-12 w-full rounded-2xl border border-line bg-surface pl-12 pr-4 text-base font-semibold text-ink outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
+              className="h-12 w-full rounded-2xl border border-line bg-surface-sub pl-12 pr-4 text-base font-semibold text-ink outline-none placeholder:text-muted focus:border-amber-300/70 focus:bg-surface-2 focus:ring-4 focus:ring-amber-400/10"
               placeholder={
                 tab === 'ventas'
                   ? 'Ej. 12/05/2026, 5, ticket…'

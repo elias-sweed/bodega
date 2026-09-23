@@ -1,5 +1,6 @@
 import { delay, http, HttpResponse } from 'msw'
 import type {
+  CargarInventarioInicialItem,
   IngresosMercaderiaRow,
   ProveedoresRow,
   ProductosRow,
@@ -17,12 +18,15 @@ type MockState = {
   createFailure: string | null
   adjustFailure: string | null
   purchaseFailure: string | null
+  initialInventoryFailure: string | null
   productLookupCalls: number
   createCalls: number
   adjustCalls: number
   purchaseCalls: number
+  initialInventoryCalls: number
   purchaseKeys: string[]
   lastPurchasePayload: unknown
+  lastInitialInventoryPayload: CargarInventarioInicialItem[] | null
 }
 
 const initialProducts: ProductosRow[] = [
@@ -69,12 +73,15 @@ export const mockState: MockState = {
   createFailure: null,
   adjustFailure: null,
   purchaseFailure: null,
+  initialInventoryFailure: null,
   productLookupCalls: 0,
   createCalls: 0,
   adjustCalls: 0,
   purchaseCalls: 0,
+  initialInventoryCalls: 0,
   purchaseKeys: [],
   lastPurchasePayload: null,
+  lastInitialInventoryPayload: null,
 }
 
 export function resetMockState(): void {
@@ -87,12 +94,15 @@ export function resetMockState(): void {
   mockState.createFailure = null
   mockState.adjustFailure = null
   mockState.purchaseFailure = null
+  mockState.initialInventoryFailure = null
   mockState.productLookupCalls = 0
   mockState.createCalls = 0
   mockState.adjustCalls = 0
   mockState.purchaseCalls = 0
+  mockState.initialInventoryCalls = 0
   mockState.purchaseKeys = []
   mockState.lastPurchasePayload = null
+  mockState.lastInitialInventoryPayload = null
 }
 
 resetMockState()
@@ -193,6 +203,114 @@ const createProductHandler = http.post(
       })
     }
     return HttpResponse.json(product, { status: 201 })
+  },
+)
+
+const initialInventoryHandler = http.post(
+  `${SUPABASE_URL}/rest/v1/rpc/cargar_inventario_inicial`,
+  async ({ request }) => {
+    mockState.initialInventoryCalls += 1
+    if (mockState.initialInventoryFailure) {
+      return HttpResponse.json({ message: mockState.initialInventoryFailure }, { status: 400 })
+    }
+
+    const body = (await request.json()) as {
+      p_items: CargarInventarioInicialItem[]
+    }
+    mockState.lastInitialInventoryPayload = body.p_items
+
+    let creados = 0
+    let actualizados = 0
+    let unidades = 0
+    const seenIds = new Set<string>()
+
+    for (const item of body.p_items) {
+      unidades += item.cantidad
+
+      if (item.tipo === 'existente') {
+        if (seenIds.has(item.producto_id)) {
+          return HttpResponse.json({ message: 'Producto duplicado' }, { status: 400 })
+        }
+        seenIds.add(item.producto_id)
+        const product = mockState.products.find((row) => row.id === item.producto_id)
+        if (!product) {
+          return HttpResponse.json({ message: 'Producto no encontrado' }, { status: 404 })
+        }
+        if (mockState.incomes.some((income) => income.producto_id === product.id)) {
+          return HttpResponse.json(
+            { message: 'El producto ya tiene movimientos; usa Ajustar stock' },
+            { status: 400 },
+          )
+        }
+        const delta = item.cantidad - product.stock_actual
+        product.stock_actual = item.cantidad
+        if (delta !== 0) {
+          mockState.incomes.push({
+            id: `ingreso-inicial-${product.id}-${mockState.initialInventoryCalls}`,
+            compra_id: null,
+            proveedor_id: null,
+            nombre_proveedor: 'Ajuste Manual de Inventario',
+            producto_id: product.id,
+            cantidad_ingresada: delta,
+            costo_total: delta * product.costo,
+            comprobante: null,
+            motivo: 'Stock inicial',
+            fecha: new Date().toISOString(),
+            creado_por: 'admin@test.local',
+          })
+        }
+        actualizados += 1
+        continue
+      }
+
+      if (item.tipo !== 'nuevo') {
+        return HttpResponse.json({ message: 'Tipo de producto no válido' }, { status: 400 })
+      }
+      if (
+        mockState.products.some(
+          (product) => product.nombre.toLowerCase() === item.nombre.toLowerCase(),
+        )
+      ) {
+        return HttpResponse.json({ message: 'Producto duplicado' }, { status: 400 })
+      }
+
+      const product: ProductosRow = {
+        id: `producto-inicial-${mockState.products.length + 1}`,
+        nombre: item.nombre,
+        categoria: item.categoria,
+        codigo_barras: item.codigo_barras,
+        precio_venta: item.precio_venta,
+        costo: 0,
+        stock_actual: 0,
+        stock_minimo: item.stock_minimo,
+        created_at: new Date().toISOString(),
+      }
+      mockState.products.push(product)
+      if (item.cantidad > 0) {
+        mockState.incomes.push({
+          id: `ingreso-inicial-${product.id}`,
+          compra_id: null,
+          proveedor_id: null,
+          nombre_proveedor: 'Ajuste Manual de Inventario',
+          producto_id: product.id,
+          cantidad_ingresada: item.cantidad,
+          costo_total: 0,
+          comprobante: null,
+          motivo: 'Stock inicial',
+          fecha: new Date().toISOString(),
+          creado_por: 'admin@test.local',
+        })
+      }
+      product.stock_actual = item.cantidad
+      creados += 1
+    }
+
+    return HttpResponse.json({
+      productos: creados + actualizados,
+      creados,
+      actualizados,
+      unidades,
+    })
   },
 )
 
@@ -331,6 +449,7 @@ export const handlers = [
   providersHandler,
   createProviderHandler,
   createProductHandler,
+  initialInventoryHandler,
   adjustProductHandler,
   updateProductHandler,
   registerPurchaseHandler,

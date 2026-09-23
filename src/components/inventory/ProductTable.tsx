@@ -103,7 +103,7 @@ const thClass =
   'px-5 py-3 font-extrabold uppercase tracking-widest text-[11px] text-muted'
 
 const filterInputClass =
-  'h-11 w-full rounded-xl border border-line bg-surface px-3 text-sm font-bold tabular-nums text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm font-bold tabular-nums text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 const filterLabelClass =
   'mb-1 block text-[11px] font-extrabold uppercase tracking-widest text-muted'
 
@@ -135,12 +135,12 @@ export function ProductTable({
     while (el) {
       const overflowY = window.getComputedStyle(el).overflowY
       if (overflowY === 'auto' || overflowY === 'scroll') {
-        el.scrollTo({ top: 0, behavior: 'smooth' })
+        el.scrollTo({ top: 0, behavior: 'auto' })
         return
       }
       el = el.parentElement
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
   const toggleSort = (key: SortKey): void => {
@@ -338,7 +338,7 @@ export function ProductTable({
         <label className="relative block w-full max-w-xs">
           <Search
             size={18}
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-amber-200/80"
             aria-hidden="true"
           />
           <input
@@ -346,21 +346,21 @@ export function ProductTable({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por nombre o código…"
-            className="h-11 w-full rounded-2xl border border-line bg-surface pl-11 pr-4 text-sm font-semibold text-ink outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
+            className="h-11 w-full rounded-2xl border border-line bg-surface-sub pl-11 pr-4 text-sm font-semibold text-ink outline-none placeholder:text-muted focus:border-amber-300/70 focus:bg-surface-2 focus:ring-4 focus:ring-amber-400/10"
           />
         </label>
 
         <label className="relative block">
           <Tags
             size={16}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-200/80"
             aria-hidden="true"
           />
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             aria-label="Filtrar por categoría"
-            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
+            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface-sub pl-9 pr-8 text-sm font-bold text-ink outline-none focus:border-amber-300/70 [&>option]:bg-[#241b66] [&>option]:text-slate-100"
           >
             <option value="todas">Todas las categorías</option>
             {categories.map((name) => (
@@ -512,7 +512,7 @@ export function ProductTable({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         {sortedProducts.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-5 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
@@ -623,9 +623,9 @@ export function ProductTable({
                   return (
                     <tr
                       key={product.id}
-                      className={`border-b border-line transition-colors duration-200 last:border-none hover:bg-surface ${
+                      className={`border-b border-line transition-colors duration-200 last:border-none hover:bg-surface-2 ${
                         lowStock ? 'bg-rose-400/10' : ''
-                      } ${pinned ? 'row-flash border border-emerald-200/40 bg-emerald-400/10' : ''}`}
+                      } ${pinned ? 'row-flash border border-amber-300/40 bg-amber-400/10' : ''}`}
                     >
                       <td className="px-5 py-3 font-mono text-xs tabular-nums text-muted">
                         {start + i + 1}
@@ -643,7 +643,7 @@ export function ProductTable({
                           ? '—'
                           : toTitleCase(product.categoria)}
                       </td>
-                      <td className="px-5 py-3 text-right font-black tabular-nums text-ink">
+                      <td className="px-5 py-3 text-right font-black tabular-nums text-amber-200">
                         {formatMoney(product.precio_venta)}
                       </td>
                       <td className="px-5 py-3 text-right">
@@ -736,7 +736,7 @@ export function ProductTable({
       </div>
 
       {sortedProducts.length > 0 && (
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] border border-line bg-surface px-5 py-4 backdrop-blur-2xl">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] border border-line bg-surface px-5 py-4">
           <p className="text-xs font-bold tabular-nums text-muted">
             {sortedProducts.length === 0
               ? 'Sin resultados'

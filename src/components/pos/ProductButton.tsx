@@ -36,11 +36,11 @@ export function ProductButton({
 
   return (
     <div
-      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-surface shadow-sm backdrop-blur-2xl transition-all duration-300 ${
+      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-surface shadow-[0_20px_50px_-30_rgba(0,0,0,0.95)] transition-colors ${
         highlight
-          ? 'border-emerald-200/60 bg-surface-3 shadow-sm'
+          ? 'border-amber-300/60 bg-surface-3'
           : 'border-line'
-      } ${agotado ? 'opacity-50' : ''}`}
+      } ${agotado ? 'opacity-70' : ''}`}
     >
       {/* Contador visible: cuántos llevas en el carrito */}
       {qtyInCart > 0 && (
@@ -69,14 +69,14 @@ export function ProductButton({
         disabled={agotado}
         onClick={onAdd}
         aria-label={`Agregar ${product.nombre} al carrito${qtyInCart > 0 ? ` (llevas ${qtyInCart})` : ''}`}
-        className={`flex flex-1 flex-col items-start justify-center gap-1.5 rounded-t-[22px] px-5 pb-2 pt-4 text-left transition-all duration-300 active:scale-[0.98] ${
-          agotado ? 'cursor-not-allowed' : 'hover:bg-surface'
+        className={`flex flex-1 flex-col items-start justify-center gap-1.5 rounded-t-[22px] px-5 pb-2 pt-4 text-left transition-colors active:scale-[0.98] ${
+          agotado ? 'cursor-not-allowed' : 'hover:bg-surface-2'
         }`}
       >
         <span className="line-clamp-2 text-base font-extrabold leading-tight tracking-tight text-ink">
           {product.nombre}
         </span>
-        <span className="text-xl font-black tracking-tight text-ink">
+        <span className="text-xl font-black tracking-tight text-amber-200">
           {formatMoney(product.precio_venta)}
         </span>
 

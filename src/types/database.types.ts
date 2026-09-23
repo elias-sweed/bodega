@@ -103,6 +103,29 @@ export type RegistrarCompraResult = {
   items: number
 }
 
+export type CargarInventarioInicialItem =
+  | {
+      tipo: 'existente'
+      producto_id: string
+      cantidad: number
+    }
+  | {
+      tipo: 'nuevo'
+      nombre: string
+      categoria: string
+      codigo_barras: string | null
+      precio_venta: number
+      stock_minimo: number
+      cantidad: number
+    }
+
+export type CargarInventarioInicialResult = {
+  productos: number
+  creados: number
+  actualizados: number
+  unidades: number
+}
+
 export type ActualizarProductoResult = {
   producto_id: string
   stock_actual: number | null
@@ -249,6 +272,10 @@ export type Database = {
           p_stock_minimo: number
         }
         Returns: ProductosRow
+      }
+      cargar_inventario_inicial: {
+        Args: { p_items: Json[] }
+        Returns: CargarInventarioInicialResult
       }
       cambiar_rol_usuario: {
         Args: { p_email: string; p_rol: UsuarioRol }

@@ -338,13 +338,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fade-in fixed inset-0 z-30 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-30 flex items-center justify-center bg-[#080315]/90 p-4"
       onClick={() => {
         if (!importing) onClose()
       }}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -352,7 +352,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
               Regularizar ventas sin internet
             </p>
             <h2 className="mt-0.5 text-xl font-black tracking-tighter text-ink">
@@ -363,7 +363,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={onClose}
             disabled={importing}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink disabled:opacity-40"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink disabled:opacity-40"
             aria-label="Cerrar"
           >
             <X size={15} aria-hidden="true" />
@@ -382,7 +382,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                     done
                       ? 'border border-emerald-200/40 bg-emerald-400/80 text-ink'
                       : active
-                        ? 'border border-line-strong bg-surface-3 text-ink'
+                        ? 'border border-amber-300/40 bg-amber-400 text-amber-950'
                         : 'border border-line bg-surface-sub text-muted'
                   }`}
                 >
@@ -408,13 +408,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={downloadTemplate}
-                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-black text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-black text-ink transition-colors hover:bg-surface-3 active:scale-[0.98]"
               >
                 <Download size={16} aria-hidden="true" />
                 Descargar plantilla
               </button>
               <label
-                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] ${
+                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.98] ${
                   catalogLoading ? 'cursor-wait opacity-60' : ''
                 }`}
               >
@@ -505,7 +505,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={reset}
                 disabled={importing}
-                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-black text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98] disabled:opacity-40"
+                className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-black text-ink transition-colors hover:bg-surface-3 active:scale-[0.98] disabled:opacity-40"
               >
                 Atrás
               </button>
@@ -513,7 +513,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => void handleConfirm()}
                 disabled={validGroups.length === 0 || importing}
-                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-4 text-sm font-black tracking-widest text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
               >
                 {importing ? (
                   <>
@@ -585,7 +585,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="mt-4 h-12 w-full rounded-2xl border border-emerald-200/30 bg-emerald-500 text-sm font-black tracking-[0.2em] text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+              className="mt-4 h-12 w-full rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-sm font-black tracking-[0.2em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.98]"
             >
               CERRAR
             </button>

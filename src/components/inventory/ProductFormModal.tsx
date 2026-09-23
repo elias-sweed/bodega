@@ -165,10 +165,10 @@ interface CategoriaSugerida {
 }
 
 const moneyInputClass =
-  'h-14 w-full rounded-2xl border border-line bg-surface pl-10 pr-4 text-xl font-bold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-14 w-full rounded-2xl border border-line bg-surface-2 pl-10 pr-4 text-xl font-bold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 
 const plainInputClass =
-  'h-14 w-full rounded-2xl border border-line bg-surface px-4 text-lg font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 placeholder:text-muted/70 focus:border-line-strong focus:bg-surface-2'
+  'h-14 w-full rounded-2xl border border-line bg-surface-2 px-4 text-lg font-semibold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 
 function SectionTitle({ children }: { children: string }) {
   return (
@@ -403,18 +403,18 @@ export function ProductFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="nuevo-producto-title"
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
       <form
         onSubmit={handleSubmit}
-        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
       >
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
               Inventario
             </p>
             <h2 id="nuevo-producto-title" className="text-2xl font-black tracking-tighter text-ink">
@@ -425,7 +425,7 @@ export function ProductFormModal({
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <X size={18} strokeWidth={2.5} />
           </button>
@@ -733,14 +733,14 @@ export function ProductFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-line bg-surface px-6 py-3 text-base font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:bg-surface-3 active:scale-[0.98]"
+            className="rounded-2xl border border-line bg-surface-2 px-6 py-3 text-base font-extrabold text-ink transition-colors hover:bg-surface-3 active:scale-[0.98]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-8 py-3 text-base font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="flex items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-8 py-3 text-base font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check size={18} strokeWidth={3} aria-hidden="true" />
             {submitting

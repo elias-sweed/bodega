@@ -31,10 +31,10 @@ export function CategoryChips({
             type="button"
             onClick={() => onSelect(categoria.nombre)}
             aria-pressed={activo}
-            className={`flex items-center gap-2 rounded-2xl border px-3.5 py-2.5 text-sm font-extrabold tracking-tight backdrop-blur-xl transition-all duration-300 active:scale-95 ${
+            className={`flex items-center gap-2 rounded-2xl border px-3.5 py-2.5 text-sm font-extrabold tracking-tight transition-colors active:scale-95 ${
               activo
-                ? 'border-emerald-200/50 bg-emerald-500 text-white shadow-sm'
-                : 'border-line bg-surface text-ink hover:-translate-y-0.5 hover:bg-surface-3 hover:text-ink'
+                ? 'border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-sm'
+                : 'border-line bg-surface-2 text-ink hover:bg-surface-3 hover:text-ink'
             }`}
           >
             {activo ? (

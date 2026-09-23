@@ -8,7 +8,7 @@ interface LowStockListProps {
 export function LowStockList({ products }: LowStockListProps) {
   if (products.length === 0) {
     return (
-      <div className="flex items-center gap-4 rounded-[28px] border border-emerald-200/30 bg-emerald-400/15 p-6 shadow-sm backdrop-blur-2xl">
+      <div className="flex items-center gap-4 rounded-[28px] border border-emerald-300/30 bg-surface-2 p-6 shadow-sm">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/25 text-profit">
           <CheckCircle2 size={22} aria-hidden="true" />
         </span>

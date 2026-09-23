@@ -83,8 +83,8 @@ export function DashboardPage() {
       ganancia_estimada_hoy: dia.ganancia,
     }
     return (
-      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
-        <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-sm backdrop-blur-2xl">
+      <div className="dashboard-resumen mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 bg-transparent pb-10">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-gold/40 bg-surface px-5 py-3.5 shadow-sm">
           <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-ink">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold/40 bg-gold/15 text-gold">
               <CalendarDays size={18} aria-hidden="true" />
@@ -148,7 +148,7 @@ export function DashboardPage() {
   // Primera vez (sin caché): skeletons premium
   if (loading && resumen === null) {
     return (
-      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
+      <div className="dashboard-resumen mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 bg-transparent pb-10">
         <DashboardHero subtitulo="Preparando tu resumen premium…" />
         <DashboardSkeleton />
       </div>
@@ -156,7 +156,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
+    <div className="dashboard-resumen mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 bg-transparent pb-10">
       <DashboardHero
         subtitulo="Todo lo que necesitas saber de tu bodega hoy."
         freshness={freshness}
@@ -165,7 +165,7 @@ export function DashboardPage() {
       />
 
       {error && resumen === null ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-300/30 bg-surface p-8 text-center shadow-sm">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-loss">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
@@ -187,7 +187,7 @@ export function DashboardPage() {
             <button
               type="button"
               onClick={retry}
-              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform hover:-translate-y-0.5"
+              className="rounded-2xl border border-rose-300/40 bg-rose-500 px-5 py-2.5 text-sm font-black text-white shadow-lg transition-colors hover:bg-rose-400"
             >
               Reintentar
             </button>
@@ -198,7 +198,7 @@ export function DashboardPage() {
       ) : (
         <div className="fade-in flex flex-col gap-6">
           {resumen.ventas_hoy_count === 0 && resumen.ventas_hoy_total === 0 && (
-            <section className="relative shrink-0 overflow-hidden rounded-[28px] border border-gold/40 bg-gold/10 p-6 shadow-sm backdrop-blur-2xl sm:p-7">
+            <section className="relative shrink-0 overflow-hidden rounded-[28px] border border-gold/40 bg-surface p-6 shadow-sm sm:p-7">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="min-w-0">
                   <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-gold">
@@ -213,7 +213,7 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/caja')}
-                  className="inline-flex h-12 shrink-0 items-center gap-2 rounded-2xl border border-gold/40 bg-gold px-6 text-sm font-black tracking-tight text-amber-950 shadow-[0_10px_30px_-12px_rgba(251,191,36,0.6)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 active:scale-[0.98]"
+                  className="inline-flex h-12 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-sm font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.99]"
                 >
                   <ShoppingCart size={17} aria-hidden="true" />
                   Registrar mi primera venta

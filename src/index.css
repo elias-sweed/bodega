@@ -103,10 +103,9 @@
 }
 
 /* ---------------------------------------------------------------------------
-   App (dashboard + todas las secciones): mismo fondo Silk del login sobre
-   índigo noche. Se redefinen los tokens a la paleta oscura "índigo noche"
-   para TODO el sub-árbol de PosLayout: los paneles de cristal premium
-   (bg-surface, border-line, text-ink…) contrastan de lleno con el fondo.
+   App: las secciones operativas conservan el fondo Silk y la paleta índigo.
+   Resumen y Caja reciben arriba una variante estática del login mediante
+   .dashboard-route, .caja-route y sus wrappers.
    ------------------------------------------------------------------------- */
 .app-shell {
   --color-surface-sub: rgba(18, 13, 56, 0.6);
@@ -123,6 +122,180 @@
   --color-gold: #fbbf24;
   --color-profit: #34d399;
   --color-loss: #fb7185;
+}
+
+/* Las vistas operativas reutilizan la paleta índigo/ámbar del Login, pero sin
+   Silk
+   ni animaciones. El fondo es estático y los paneles usan capas moradas más
+   oscuras para mantener contraste sin volverse transparentes. */
+.app-shell.dashboard-route,
+.dashboard-resumen,
+.app-shell.caja-route,
+.caja-pos,
+.app-shell.inventario-route,
+.inventario-pos,
+.app-shell.compras-route,
+.compras-pos,
+.app-shell.reportes-route,
+.reportes-pos,
+.app-shell.historial-route,
+.historial-pos,
+.app-shell.usuarios-route,
+.usuarios-pos {
+  --color-surface-sub: rgba(23, 18, 66, 0.55);
+  --color-surface: rgba(23, 18, 66, 0.9);
+  --color-surface-2: rgba(34, 26, 99, 0.94);
+  --color-surface-3: rgba(44, 34, 119, 0.98);
+  --color-line: rgba(255, 255, 255, 0.16);
+  --color-line-strong: rgba(255, 255, 255, 0.42);
+  --color-ink: #f5f3ff;
+  --color-muted: #a5a0d0;
+  --color-gold: #fbbf24;
+  --color-profit: #34d399;
+  --color-loss: #fb7185;
+}
+
+.app-shell.dashboard-route,
+.app-shell.caja-route,
+.app-shell.inventario-route,
+.app-shell.compras-route,
+.app-shell.reportes-route,
+.app-shell.historial-route,
+.app-shell.usuarios-route {
+  color: #f5f3ff;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(82, 39, 255, 0.24), transparent 44%),
+    #1a0b3d;
+}
+
+.dashboard-route input,
+.dashboard-route select,
+.dashboard-route textarea,
+.dashboard-resumen input,
+.dashboard-resumen select,
+.dashboard-resumen textarea,
+.caja-route input,
+.caja-route select,
+.caja-route textarea,
+.caja-pos input,
+.caja-pos select,
+.caja-pos textarea,
+.inventario-route input,
+.inventario-route select,
+.inventario-route textarea,
+.inventario-pos input,
+.inventario-pos select,
+.inventario-pos textarea,
+.compras-route input,
+.compras-route select,
+.compras-route textarea,
+.compras-pos input,
+.compras-pos select,
+.compras-pos textarea,
+.reportes-route input,
+.reportes-route select,
+.reportes-route textarea,
+.reportes-pos input,
+.reportes-pos select,
+.reportes-pos textarea,
+.historial-route input,
+.historial-route select,
+.historial-route textarea,
+.historial-pos input,
+.historial-pos select,
+.historial-pos textarea,
+.usuarios-route input,
+.usuarios-route select,
+.usuarios-route textarea,
+.usuarios-pos input,
+.usuarios-pos select,
+.usuarios-pos textarea {
+  color-scheme: dark;
+}
+
+.dashboard-route .fade-in,
+.dashboard-route .fade-up,
+.dashboard-route .animate-spin,
+.dashboard-route .animate-pulse,
+.dashboard-resumen .fade-in,
+.dashboard-resumen .fade-up,
+.dashboard-resumen .animate-spin,
+.dashboard-resumen .animate-pulse,
+.caja-route .fade-in,
+.caja-route .fade-up,
+.caja-route .animate-spin,
+.caja-route .animate-pulse,
+.caja-pos .fade-in,
+.caja-pos .fade-up,
+.caja-pos .animate-pop,
+.caja-pos .animate-pulse,
+.caja-pos .float-plus,
+.caja-pos .row-flash,
+.caja-pos .toast-enter,
+.inventario-route .fade-in,
+.inventario-route .fade-up,
+.inventario-route .animate-slide-left,
+.inventario-route .animate-slide-right,
+.inventario-route .row-flash,
+.inventario-route .toast-enter,
+.inventario-pos .fade-in,
+.inventario-pos .fade-up,
+.inventario-pos .row-flash,
+.inventario-pos .toast-enter,
+.compras-route .fade-in,
+.compras-route .fade-up,
+.compras-route .toast-enter,
+.compras-pos .fade-in,
+.compras-pos .fade-up,
+.compras-pos .toast-enter,
+.reportes-route .fade-in,
+.reportes-route .animate-pulse,
+.reportes-pos .fade-in,
+.reportes-pos .animate-pulse,
+.historial-route .fade-in,
+.historial-route .toast-enter,
+.historial-pos .fade-in,
+.historial-pos .animate-spin,
+.historial-pos .toast-enter,
+.usuarios-route .fade-in,
+.usuarios-route .fade-up,
+.usuarios-route .toast-enter,
+.usuarios-pos .fade-in,
+.usuarios-pos .fade-up,
+.usuarios-pos .toast-enter {
+  animation: none !important;
+}
+
+.dashboard-resumen .skeleton-shimmer,
+.caja-pos .skeleton-shimmer,
+.inventario-pos .skeleton-shimmer,
+.compras-pos .skeleton-shimmer,
+.reportes-pos .skeleton-shimmer,
+.historial-pos .skeleton-shimmer,
+.usuarios-pos .skeleton-shimmer {
+  animation: none !important;
+  background: #2a1568;
+}
+
+.dashboard-resumen [class*='backdrop-blur'],
+.caja-pos [class*='backdrop-blur'],
+.inventario-pos [class*='backdrop-blur'],
+.compras-pos [class*='backdrop-blur'],
+.reportes-pos [class*='backdrop-blur'],
+.historial-pos [class*='backdrop-blur'],
+.usuarios-pos [class*='backdrop-blur'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.dashboard-route [class*='transition-'],
+.caja-route [class*='transition-'],
+.inventario-route [class*='transition-'],
+.compras-route [class*='transition-'],
+.reportes-route [class*='transition-'],
+.historial-route [class*='transition-'],
+.usuarios-route [class*='transition-'] {
+  transition: none !important;
 }
 
 .app-shell input,

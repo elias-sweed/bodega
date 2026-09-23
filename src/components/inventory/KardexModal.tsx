@@ -69,19 +69,19 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
       role="dialog"
       aria-modal="true"
       aria-label={`Movimientos de ${product.nombre}`}
-      className="fade-in fixed inset-0 z-50 flex items-center justify-center bg-[#0b0420]/85 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="fade-up flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-white/15 bg-surface shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]">
         <div className="flex items-start justify-between gap-3 p-6 pb-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 text-ink">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-300/25 bg-surface-2 text-amber-300">
               <History size={20} aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
                 Movimientos
               </p>
               <h2 className="truncate text-lg font-black tracking-tighter text-ink">
@@ -93,7 +93,7 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition-all duration-200 hover:bg-surface-3 hover:text-ink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-surface-2 text-muted transition-colors hover:bg-surface-3 hover:text-ink"
           >
             <X size={16} aria-hidden="true" />
           </button>
@@ -108,7 +108,7 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-line bg-surface px-3 py-2.5 text-center backdrop-blur-xl"
+                className="rounded-2xl border border-line bg-surface-2 px-3 py-2.5 text-center"
               >
                 <p className={`text-2xl font-black tabular-nums ${stat.tone}`}>
                   {stat.value}
@@ -128,7 +128,7 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
               <button
                 type="button"
                 onClick={() => setReloadToken((t) => t + 1)}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-xs font-black text-rose-700 shadow transition-transform hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 rounded-2xl border border-rose-300/40 bg-rose-500 px-4 py-2 text-xs font-black text-white shadow transition-colors hover:bg-rose-400"
               >
                 <RotateCcw size={13} aria-hidden="true" />
                 Reintentar

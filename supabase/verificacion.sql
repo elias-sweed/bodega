@@ -48,6 +48,11 @@ select * from (
              then 'OK' else 'FALTA' end
 
   union all
+  select 'RPC inventario inicial',
+         case when to_regprocedure('public.cargar_inventario_inicial(json)') is not null
+             then 'OK' else 'FALTA' end
+
+  union all
   select 'Ajuste legacy eliminado',
          case when to_regclass('public.ajustes_stock') is null
              then 'OK' else 'AÚN EXISTE' end
@@ -73,7 +78,8 @@ select
   has_function_privilege('anon', 'public.registrar_venta_caja(json,text,uuid)', 'EXECUTE') as anon_puede_vender,
   has_function_privilege('anon', 'public.registrar_compra(uuid,text,text,json,uuid)', 'EXECUTE') as anon_puede_comprar,
   has_function_privilege('anon', 'public.registrar_ajuste_manual(uuid,integer,boolean,text)', 'EXECUTE') as anon_puede_ajustar,
-  has_function_privilege('anon', 'public.crear_producto(text,text,text,numeric,numeric,integer,integer)', 'EXECUTE') as anon_puede_crear_producto;
+  has_function_privilege('anon', 'public.crear_producto(text,text,text,numeric,numeric,integer,integer)', 'EXECUTE') as anon_puede_crear_producto,
+  has_function_privilege('anon', 'public.cargar_inventario_inicial(json)', 'EXECUTE') as anon_puede_cargar_inventario;
 
 -- Deben existir solo las firmas finales de las funciones principales.
 select p.proname, pg_get_function_identity_arguments(p.oid) as argumentos
@@ -82,6 +88,6 @@ join pg_namespace n on n.oid = p.pronamespace
 where n.nspname = 'public'
   and p.proname in (
     'registrar_venta_caja', 'registrar_compra', 'registrar_ajuste_manual',
-    'crear_producto', 'actualizar_producto', 'dashboard_resumen'
+    'crear_producto', 'cargar_inventario_inicial', 'actualizar_producto', 'dashboard_resumen'
   )
 order by p.proname, argumentos;
