@@ -1,7 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell, CalendarDays, History, LayoutDashboard, Package, ShoppingBag, Users, Wallet } from 'lucide-react'
+import { BarChart3, Bell, CalendarDays, History, LayoutDashboard, Package, ShoppingBag, Users, Wallet } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Silk from '../components/Silk'
 import { UserMenu } from '../components/auth/UserMenu'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
@@ -17,8 +16,8 @@ function todayLabel(): string {
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return `flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
     isActive
-      ? 'bg-surface-2 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
-      : 'text-muted hover:bg-surface hover:text-ink'
+      ? 'bg-emerald-600 text-white shadow-sm'
+      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
   }`
 }
 
@@ -27,6 +26,7 @@ const NAV_ITEMS: { to: string; label: string; icon: typeof Bell; end?: boolean }
   { to: '/caja', label: 'Caja', icon: Wallet },
   { to: '/inventario', label: 'Inventario', icon: Package },
   { to: '/compras', label: 'Compras', icon: ShoppingBag },
+  { to: '/reportes', label: 'Reportes', icon: BarChart3 },
   { to: '/historial', label: 'Historial', icon: History },
   { to: '/usuarios', label: 'Usuarios', icon: Users },
 ]
@@ -75,20 +75,15 @@ export function PosLayout() {
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), [])
 
-  return (
+return (
     <div className="flex h-screen flex-col bg-slate-100">
-      <header className="relative z-40 shrink-0 border-b border-line bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950">
-        {/* brillo inferior de la barra */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400/70 to-transparent"
-        />
+      <header className="relative z-40 shrink-0 border-b border-slate-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 lg:px-6">
           {/* marca */}
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden="true"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-base shadow-lg shadow-indigo-500/30"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-base shadow-sm"
             >
               🛒
             </span>
@@ -103,7 +98,7 @@ export function PosLayout() {
           </div>
 
           {/* navegación */}
-          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-line bg-surface-sub p-1 lg:order-none lg:w-auto lg:justify-center">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-1 lg:order-none lg:w-auto lg:justify-center">
             {NAV_ITEMS.map((item) => {
               if (item.to === '/usuarios' && rol !== 'admin') return null
               const Icon = item.icon
@@ -118,18 +113,18 @@ export function PosLayout() {
 
           {/* acciones */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden items-center gap-2 rounded-2xl border border-line bg-surface-sub px-3 py-2 text-xs font-bold capitalize text-muted xl:inline-flex">
-              <CalendarDays size={14} aria-hidden="true" className="text-indigo-300" />
+            <span className="hidden items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold capitalize text-muted xl:inline-flex">
+              <CalendarDays size={14} aria-hidden="true" className="text-slate-400" />
               {todayLabel()}
             </span>
             <NavLink
               to="/notificaciones"
               aria-label="Notificaciones de productos agotados"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-surface-sub text-ink transition-all duration-200 hover:border-line hover:bg-surface hover:text-ink"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all duration-200 hover:bg-slate-50 hover:text-slate-900"
             >
               <Bell size={20} aria-hidden="true" />
               {agotados.length > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-ink">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-black text-white">
                   {agotados.length}
                 </span>
               )}
@@ -144,9 +139,9 @@ export function PosLayout() {
           to="/notificaciones"
           onClick={() => setNotifToast(null)}
           role="status"
-          className="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl"
+          className="fixed right-4 top-16 z-50 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg"
         >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-500 text-ink shadow-lg">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm">
             <Bell size={20} fill="currentColor" aria-hidden="true" />
           </span>
           <span>
@@ -162,15 +157,6 @@ export function PosLayout() {
       )}
 
       <main className="relative min-h-0 flex-1 overflow-hidden">
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          <Silk
-            speed={5}
-            scale={1}
-            color="#5227FF"
-            noiseIntensity={0.95}
-            rotation={0}
-          />
-        </div>
         <div className="relative z-10 h-full overflow-y-auto p-4 lg:p-6">
           <Outlet />
         </div>

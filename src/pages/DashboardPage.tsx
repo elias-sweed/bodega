@@ -84,9 +84,9 @@ export function DashboardPage() {
     }
     return (
       <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col gap-6 pb-10">
-        <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/40 bg-amber-400/15 px-5 py-3.5 shadow-sm backdrop-blur-2xl">
           <p className="flex min-w-0 items-center gap-2.5 text-sm font-bold text-ink">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-amber-100 text-amber-700">
               <CalendarDays size={18} aria-hidden="true" />
             </span>
             <span className="min-w-0">
@@ -165,8 +165,8 @@ export function DashboardPage() {
       />
 
       {error && resumen === null ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -213,7 +213,7 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-ink">

@@ -75,7 +75,7 @@ export function PaymentModal({
       }}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -106,7 +106,7 @@ export function PaymentModal({
             <Wallet size={14} aria-hidden="true" />
             Total a cobrar
           </span>
-          <span className="text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+          <span className="text-3xl font-black tracking-tighter text-ink ">
             {formatMoney(total)}
           </span>
         </div>
@@ -125,7 +125,7 @@ export function PaymentModal({
                 disabled={charging}
                 className={`h-12 rounded-2xl text-sm font-black tracking-tight transition-all duration-300 active:scale-[0.97] disabled:opacity-40 ${
                   metodoPago === metodo
-                    ? 'border border-emerald-200/40 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-ink shadow-[0_12px_30px_-12px_rgba(16,185,129,0.8)]'
+                    ? 'border border-emerald-200/40 bg-emerald-500 text-white shadow-sm'
                     : 'border border-line bg-surface text-muted backdrop-blur-xl hover:bg-surface-3 hover:text-ink'
                 }`}
               >
@@ -163,7 +163,7 @@ export function PaymentModal({
                 type="button"
                 onClick={() => setRecibido(total)}
                 disabled={charging}
-                className="h-12 rounded-2xl border border-emerald-200/30 bg-emerald-400/25 px-2 text-xs font-black text-emerald-50 backdrop-blur-xl transition-all duration-300 hover:bg-emerald-400/40 active:scale-[0.98] disabled:opacity-40"
+                className="h-12 rounded-2xl border border-emerald-200 bg-emerald-100 px-2 text-xs font-black text-emerald-700 backdrop-blur-xl transition-all duration-300 hover:bg-emerald-200/60 active:scale-[0.98] disabled:opacity-40"
               >
                 Completo ({formatMoney(total)})
               </button>
@@ -198,14 +198,14 @@ export function PaymentModal({
               </span>
               <span
                 className={`text-2xl font-black tracking-tight ${
-                  vuelto >= 0 ? 'text-emerald-300' : 'text-rose-300'
+                  vuelto >= 0 ? 'text-emerald-600' : 'text-rose-700'
                 }`}
               >
                 {formatMoney(Math.max(vuelto, 0))}
               </span>
             </div>
             {vuelto < 0 && (
-              <p className="mt-2 text-xs font-bold text-rose-200">
+              <p className="mt-2 text-xs font-bold text-rose-700">
                 Falta {formatMoney(-vuelto)} para completar el pago.
               </p>
             )}
@@ -218,7 +218,7 @@ export function PaymentModal({
           type="button"
           disabled={!canCharge}
           onClick={onConfirm}
-          className="mt-6 h-14 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-lg font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+          className="mt-6 h-14 w-full rounded-2xl border border-emerald-200/30 bg-emerald-500 text-lg font-black tracking-[0.2em] text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
         >
           {charging ? 'PROCESANDO…' : 'CONFIRMAR COBRO'}
         </button>

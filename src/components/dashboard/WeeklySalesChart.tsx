@@ -13,7 +13,7 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
   const mejor = dias.reduce((a, b) => (b.total > a.total ? b : a), dias[0])
 
   return (
-    <section className="fade-up rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+    <section className="fade-up rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
           <BarChart3 size={16} aria-hidden="true" className="text-ink" />
@@ -52,9 +52,9 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
                     <div
                       className={`w-full rounded-t-xl transition-all duration-500 ${
                         dia.esHoy
-                          ? 'border border-emerald-200/50 bg-gradient-to-t from-emerald-500/80 to-emerald-300/90 shadow-[0_0_20px_-4px_rgba(52,211,153,0.7)]'
+                          ? 'border border-emerald-200/50 bg-emerald-400 shadow-sm'
                           : dia.total > 0
-                            ? 'border border-gold/40 bg-gradient-to-t from-gold/45 to-gold/85'
+                            ? 'border border-gold/40 bg-gold/70'
                             : 'border border-line bg-surface-sub'
                       }`}
                       style={{ height: `${alto}%` }}
@@ -62,7 +62,7 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
                   </div>
                   <span
                     className={`text-[11px] font-black uppercase ${
-                      dia.esHoy ? 'text-emerald-200' : 'text-muted'
+                      dia.esHoy ? 'text-emerald-700' : 'text-muted'
                     }`}
                   >
                     {dia.esHoy ? 'Hoy' : dia.etiqueta}

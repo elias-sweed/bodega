@@ -31,7 +31,7 @@ export function SearchBar({ value, onChange, onEnter }: SearchBarProps) {
         onKeyDown={handleKeyDown}
         placeholder="Buscar producto o escanear código de barras…"
         enterKeyHint="search"
-        className="h-16 w-full rounded-2xl border border-line bg-surface pl-14 pr-6 text-lg font-semibold tracking-tight text-ink shadow-[0_16px_40px_-18px_rgba(0,0,0,0.6)] outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
+        className="h-16 w-full rounded-2xl border border-line bg-surface pl-14 pr-6 text-lg font-semibold tracking-tight text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 placeholder:text-muted/70 hover:bg-surface-2 focus:border-line-strong focus:bg-surface-2"
       />
     </div>
   )

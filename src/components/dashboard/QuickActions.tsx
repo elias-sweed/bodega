@@ -8,7 +8,7 @@ const ACCIONES = [
     detalle: 'Vender ahora',
     Icon: ShoppingCart,
     clases: 'border-emerald-200/30 bg-emerald-400/15 hover:bg-emerald-400/25',
-    iconoClases: 'border-emerald-200/30 bg-emerald-400/25 text-emerald-100',
+    iconoClases: 'border-emerald-200/30 bg-emerald-400/25 text-emerald-700',
   },
   {
     to: '/compras',
@@ -16,7 +16,7 @@ const ACCIONES = [
     detalle: 'Entró mercadería',
     Icon: ShoppingBag,
     clases: 'border-sky-200/30 bg-sky-400/15 hover:bg-sky-400/25',
-    iconoClases: 'border-sky-200/30 bg-sky-400/25 text-sky-100',
+    iconoClases: 'border-sky-200 bg-sky-100 text-sky-700',
   },
   {
     to: '/inventario',
@@ -24,15 +24,15 @@ const ACCIONES = [
     detalle: 'Stock y precios',
     Icon: Boxes,
     clases: 'border-violet-200/30 bg-violet-400/15 hover:bg-violet-400/25',
-    iconoClases: 'border-violet-200/30 bg-violet-400/25 text-violet-100',
+    iconoClases: 'border-violet-200/30 bg-violet-400/25 text-violet-700',
   },
 ]
 
 export function QuickActions({ layout = 'grid' }: { layout?: 'grid' | 'stack' }) {
   return (
-    <section className="fade-up h-full rounded-[28px] border border-line bg-surface p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+    <section className="fade-up h-full rounded-[28px] border border-line bg-surface p-5 shadow-sm backdrop-blur-2xl">
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
-        <Zap size={15} aria-hidden="true" className="text-amber-200" />
+        <Zap size={15} aria-hidden="true" className="text-amber-700" />
         Accesos rápidos
       </p>
       <div className={layout === 'stack' ? 'mt-3 flex flex-col gap-2.5' : 'mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3'}>

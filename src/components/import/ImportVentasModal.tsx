@@ -342,7 +342,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
       }}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -412,7 +412,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 Descargar plantilla
               </button>
               <label
-                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] ${
+                className={`inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-4 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] ${
                   catalogLoading ? 'cursor-wait opacity-60' : ''
                 }`}
               >
@@ -436,7 +436,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               código = código de barras o nombre exacto del producto.
             </p>
             {fileError && (
-              <p className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-200/30 bg-rose-500/20 px-4 py-3 text-sm font-bold text-rose-100">
+              <p className="mt-3 flex items-start gap-2 rounded-2xl border border-rose-200/30 bg-rose-500/20 px-4 py-3 text-sm font-bold text-rose-700">
                 <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
                 {fileError}
               </p>
@@ -450,7 +450,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               <span className="font-bold text-ink">{fileName || 'Archivo'}</span> —{' '}
               {groups.length} ticket(s), {rows.length} fila(s)
               {errorCount > 0 && (
-                <span className="font-bold text-rose-200">, {errorCount} con error</span>
+                <span className="font-bold text-rose-700">, {errorCount} con error</span>
               )}
               .
             </p>
@@ -474,7 +474,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                     </span>
                   </div>
                   {group.error && (
-                    <p className="mt-1 text-xs font-bold text-rose-200">{group.error}</p>
+                    <p className="mt-1 text-xs font-bold text-rose-700">{group.error}</p>
                   )}
                   <ul className="mt-2 flex flex-col gap-1">
                     {group.rows.map((row) => (
@@ -482,13 +482,13 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                         key={`${row.line}`}
                         className={`rounded-xl px-2.5 py-1.5 text-xs ${
                           row.error
-                            ? 'border border-rose-200/25 bg-rose-500/15 font-bold text-rose-100'
+                            ? 'border border-rose-200/25 bg-rose-500/15 font-bold text-rose-700'
                             : 'border border-line bg-surface-sub text-muted'
                         }`}
                       >
                         {row.error ?? (
                           <span className="flex items-center gap-1.5">
-                            <CheckCircle2 size={13} className="shrink-0 text-emerald-300" aria-hidden="true" />
+                            <CheckCircle2 size={13} className="shrink-0 text-emerald-600" aria-hidden="true" />
                             {row.productoNombre} × {row.cantidad} @ S/ {(row.precio ?? 0).toFixed(2)}
                           </span>
                         )}
@@ -511,7 +511,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => void handleConfirm()}
                 disabled={validGroups.length === 0 || importing}
-                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-4 text-sm font-black tracking-widest text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+                className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-4 text-sm font-black tracking-widest text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
               >
                 {importing ? (
                   <>
@@ -524,7 +524,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               </button>
             </div>
             {validGroups.length === 0 && (
-              <p className="mt-2 text-xs font-bold text-rose-200">
+              <p className="mt-2 text-xs font-bold text-rose-700">
                 No hay tickets válidos para importar. Corrige el archivo e inténtalo de nuevo.
               </p>
             )}
@@ -535,7 +535,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
           <div className="mt-5">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <div className="rounded-2xl border border-emerald-200/30 bg-emerald-400/15 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-emerald-200">{result.ok}</p>
+                <p className="text-2xl font-black text-emerald-700">{result.ok}</p>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Importadas</p>
               </div>
               <div className="rounded-2xl border border-line bg-surface p-3 text-center backdrop-blur-xl">
@@ -547,7 +547,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Stock negat.</p>
               </div>
               <div className="rounded-2xl border border-rose-200/30 bg-rose-500/15 p-3 text-center backdrop-blur-xl">
-                <p className="text-2xl font-black text-rose-200">{result.errores.length}</p>
+                <p className="text-2xl font-black text-rose-700">{result.errores.length}</p>
                 <p className="text-[11px] font-bold uppercase tracking-widest text-muted">Errores</p>
               </div>
             </div>
@@ -559,7 +559,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
               </p>
             )}
             {result.stockNegativo.length > 0 && (
-              <p className="mt-2 rounded-2xl border border-rose-200/30 bg-rose-500/15 px-4 py-2.5 text-xs font-bold text-rose-100">
+              <p className="mt-2 rounded-2xl border border-rose-200/30 bg-rose-500/15 px-4 py-2.5 text-xs font-bold text-rose-700">
                 <AlertTriangle size={13} className="mr-1.5 inline" aria-hidden="true" />
                 Stock en negativo, sincerar inventario: {result.stockNegativo.join(', ')}
               </p>
@@ -569,7 +569,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
                 {result.errores.map((e) => (
                   <li
                     key={e.ticket}
-                    className="rounded-xl border border-rose-200/25 bg-rose-500/15 px-3 py-2 text-xs font-bold text-rose-100"
+                    className="rounded-xl border border-rose-200/25 bg-rose-500/15 px-3 py-2 text-xs font-bold text-rose-700"
                   >
                     Ticket {e.ticket}: {e.motivo}
                   </li>
@@ -583,7 +583,7 @@ export function ImportVentasModal({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="mt-4 h-12 w-full rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+              className="mt-4 h-12 w-full rounded-2xl border border-emerald-200/30 bg-emerald-500 text-sm font-black tracking-[0.2em] text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
             >
               CERRAR
             </button>

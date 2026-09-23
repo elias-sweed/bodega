@@ -18,17 +18,17 @@ interface KardexModalProps {
 
 const TIPO_STYLE = {
   venta: {
-    wrap: 'border-rose-200/30 bg-rose-400/20 text-rose-200',
+    wrap: 'border-rose-200/30 bg-rose-400/20 text-rose-700',
     Icon: ArrowDownLeft,
     label: 'Salida',
   },
   compra: {
-    wrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-200',
+    wrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700',
     Icon: ArrowUpRight,
     label: 'Entrada',
   },
   ajuste: {
-    wrap: 'border-amber-200/30 bg-amber-400/20 text-amber-200',
+    wrap: 'border-amber-200/30 bg-amber-400/20 text-amber-700',
     Icon: Wrench,
     label: 'Ajuste',
   },
@@ -76,7 +76,7 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="fade-up flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+      <div className="fade-up flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
         <div className="flex items-start justify-between gap-3 p-6 pb-4">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 text-ink">
@@ -104,8 +104,8 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
         {data && (
           <div className="grid shrink-0 grid-cols-3 gap-2 px-6 pb-4">
             {[
-              { label: 'Entradas', value: data.totalEntradas, tone: 'text-emerald-200' },
-              { label: 'Salidas', value: data.totalSalidas, tone: 'text-rose-200' },
+              { label: 'Entradas', value: data.totalEntradas, tone: 'text-emerald-700' },
+              { label: 'Salidas', value: data.totalSalidas, tone: 'text-rose-700' },
               { label: 'Stock actual', value: product.stock_actual, tone: 'text-ink' },
             ].map((stat) => (
               <div
@@ -191,8 +191,8 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
                     <span
                       className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-black tabular-nums ${
                         entrada
-                          ? 'border-emerald-200/30 bg-emerald-400/20 text-emerald-100'
-                          : 'border-rose-200/30 bg-rose-400/20 text-rose-100'
+                          ? 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700'
+                          : 'border-rose-200/30 bg-rose-400/20 text-rose-700'
                       }`}
                     >
                       {entrada ? `+${m.cantidad}` : m.cantidad}

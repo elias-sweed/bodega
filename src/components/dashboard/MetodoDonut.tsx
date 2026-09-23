@@ -40,7 +40,7 @@ export function MetodoDonut({
   })
 
   return (
-    <section className="fade-up flex h-full flex-col rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+    <section className="fade-up flex h-full flex-col rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
         <PieChart size={16} aria-hidden="true" className="text-ink" />
         {titulo}

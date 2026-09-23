@@ -127,7 +127,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
       onClick={onClose}
     >
       <div
-        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -135,7 +135,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200/30 bg-emerald-400/20 text-emerald-200">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-100 text-emerald-700">
               <CheckCircle2 size={22} aria-hidden="true" />
             </span>
             <div>
@@ -208,7 +208,7 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
                 'noopener,noreferrer',
               )
             }
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(16,185,129,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.99]"
           >
             <MessageCircle size={16} aria-hidden="true" />
             Enviar por WhatsApp

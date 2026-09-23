@@ -33,7 +33,7 @@ export function CategoryChips({
             aria-pressed={activo}
             className={`flex items-center gap-2 rounded-2xl border px-3.5 py-2.5 text-sm font-extrabold tracking-tight backdrop-blur-xl transition-all duration-300 active:scale-95 ${
               activo
-                ? 'border-emerald-200/50 bg-gradient-to-br from-emerald-400/80 to-emerald-600/80 text-ink shadow-[0_12px_30px_-12px_rgba(16,185,129,0.8)]'
+                ? 'border-emerald-200/50 bg-emerald-500 text-white shadow-sm'
                 : 'border-line bg-surface text-ink hover:-translate-y-0.5 hover:bg-surface-3 hover:text-ink'
             }`}
           >
@@ -48,7 +48,7 @@ export function CategoryChips({
                 className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                   activo
                     ? 'bg-surface-3 text-ink'
-                    : 'border border-amber-200/30 bg-amber-400/20 text-amber-100'
+                    : 'border border-amber-200 bg-amber-100 text-amber-700'
                 }`}
               >
                 {activo ? 'Elegida' : 'Sugerida'}

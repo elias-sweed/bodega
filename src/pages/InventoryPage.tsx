@@ -126,6 +126,7 @@ export function InventoryPage() {
         nuevoStock,
         payload.esRegalo,
         payload.motivo,
+        payload.usuarioId,
       )
       setAdjustingProduct(null)
       showNotice(
@@ -143,29 +144,6 @@ export function InventoryPage() {
 
   const handleDeleteRequest = (product: ProductosRow): void => {
     setDeletingProduct(product)
-  }
-
-  const handleQuickAdjust = async (product: ProductosRow, delta: 1 | -1): Promise<void> => {
-    const nuevoStock = product.stock_actual + delta
-    if (nuevoStock < 0) {
-      showNotice('error', 'El stock no puede ser negativo.')
-      return
-    }
-    try {
-      const updated = await ajustarStock(
-        product.id,
-        nuevoStock,
-        false,
-        'Ajuste rápido desde inventario',
-      )
-      showNotice('success', `Stock de "${product.nombre}" ajustado a ${updated.stock_actual}`)
-      refresh(true)
-    } catch (cause) {
-      showNotice(
-        'error',
-        getFriendlyError(cause, 'No se pudo ajustar el stock. Inténtalo de nuevo.'),
-      )
-    }
   }
 
   const confirmDelete = async (): Promise<void> => {
@@ -189,7 +167,7 @@ export function InventoryPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Catálogo
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink">
             Inventario
           </h1>
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm font-semibold">
@@ -197,7 +175,7 @@ export function InventoryPage() {
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
             {lowStockCount > 0 && (
-              <span className="rounded-full border border-rose-200/30 bg-rose-400/25 px-3 py-0.5 text-xs font-black text-rose-50 backdrop-blur-xl">
+              <span className="rounded-full border border-rose-200 bg-rose-100 px-3 py-0.5 text-xs font-black text-rose-700 backdrop-blur-xl">
                 {lowStockCount} con stock bajo
               </span>
             )}
@@ -215,7 +193,7 @@ export function InventoryPage() {
             setPrefill(null)
             setModalOpen(true)
           }}
-          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-6 text-base font-black tracking-tight text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-6 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
         >
           <PackagePlus size={19} aria-hidden="true" />
           Nuevo producto
@@ -225,8 +203,8 @@ export function InventoryPage() {
       {loading && products.length === 0 ? (
         <InventorySkeleton />
       ) : error && products.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -236,7 +214,7 @@ export function InventoryPage() {
           <button
             type="button"
             onClick={() => refresh()}
-            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
           >
             <RotateCcw size={15} aria-hidden="true" />
             Reintentar
@@ -260,7 +238,6 @@ export function InventoryPage() {
             onEdit={(product) => setEditingProduct(product)}
             onAdjustStock={(product) => setAdjustingProduct(product)}
             onDelete={(product) => handleDeleteRequest(product)}
-            onQuickAdjust={(product, delta) => handleQuickAdjust(product, delta)}
             onKardex={(product) => setKardexProduct(product)}
             pinnedIds={recentIds}
           />

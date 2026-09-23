@@ -112,7 +112,7 @@ export function HistoryPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Registro
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)] sm:text-4xl">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink  sm:text-4xl">
             Historial
           </h1>
           <p className="mt-1 text-sm font-medium text-muted">
@@ -122,7 +122,7 @@ export function HistoryPage() {
         <button
           type="button"
           onClick={() => setShowImport(true)}
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
         >
           <Upload size={16} aria-hidden="true" />
           Importar Excel
@@ -183,7 +183,7 @@ export function HistoryPage() {
                   if (e.target.value) setRange('dia')
                 }}
                 aria-label="Elegir cualquier día del calendario"
-                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:dark]"
+                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:light]"
               />
             </span>
           </div>
@@ -198,7 +198,7 @@ export function HistoryPage() {
                 title={item.hint || 'Sin filtro de horario'}
                 className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-extrabold transition-all duration-300 active:scale-95 ${
                   franja === item.id
-                    ? 'border border-amber-200/50 bg-amber-400/25 text-amber-50 shadow'
+                    ? 'border border-amber-200 bg-amber-100 text-amber-700 shadow'
                     : 'border border-transparent text-muted hover:bg-surface hover:text-ink'
                 }`}
               >
@@ -241,7 +241,7 @@ export function HistoryPage() {
         </div>
 
         {(range !== 'todo' || franja !== 'todo') && (
-          <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-2 px-4 py-3 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <div className="fade-in flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface-2 px-4 py-3 shadow-sm backdrop-blur-2xl">
             <p className="flex min-w-0 items-center gap-2 text-sm font-bold text-muted">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-2 text-ink">
                 <CalendarDays size={16} aria-hidden="true" />
@@ -275,7 +275,7 @@ export function HistoryPage() {
                 setRange('todo')
                 setFranja('todo')
               }}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-sm backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
             >
               <X size={17} strokeWidth={3} aria-hidden="true" />
               Quitar filtros

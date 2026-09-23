@@ -13,13 +13,13 @@ interface ToastProps {
 
 const STYLES = {
   success: {
-    iconWrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-200',
+    iconWrap: 'border-emerald-200/30 bg-emerald-400/20 text-emerald-700',
     bar: 'bg-emerald-300',
     title: 'Listo',
     Icon: CheckCircle2,
   },
   error: {
-    iconWrap: 'border-rose-200/30 bg-rose-400/20 text-rose-200',
+    iconWrap: 'border-rose-200/30 bg-rose-400/20 text-rose-700',
     bar: 'bg-rose-300',
     title: 'Ocurrió un problema',
     Icon: AlertTriangle,
@@ -33,7 +33,7 @@ export function Toast({ type, message, action }: ToastProps) {
   return (
     <div
       role="status"
-      className="toast-enter fixed right-4 top-4 z-[60] flex w-[min(92vw,22rem)] items-start gap-3 overflow-hidden rounded-[20px] border border-line bg-surface p-4 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+      className="toast-enter fixed right-4 top-4 z-[60] flex w-[min(92vw,22rem)] items-start gap-3 overflow-hidden rounded-[20px] border border-line bg-surface p-4 shadow-sm backdrop-blur-2xl"
     >
       <span
         className={`w-1.5 shrink-0 self-stretch rounded-full ${style.bar}`}

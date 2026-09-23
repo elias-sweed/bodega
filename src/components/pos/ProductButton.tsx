@@ -36,9 +36,9 @@ export function ProductButton({
 
   return (
     <div
-      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-surface shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300 ${
+      className={`relative flex min-h-32 flex-col rounded-[22px] border bg-surface shadow-sm backdrop-blur-2xl transition-all duration-300 ${
         highlight
-          ? 'border-emerald-200/60 bg-surface-3 shadow-[0_20px_50px_-18px_rgba(52,211,153,0.5)]'
+          ? 'border-emerald-200/60 bg-surface-3 shadow-sm'
           : 'border-line'
       } ${agotado ? 'opacity-50' : ''}`}
     >
@@ -46,7 +46,7 @@ export function ProductButton({
       {qtyInCart > 0 && (
         <span
           key={qtyInCart}
-          className="animate-pop absolute -right-2 -top-2 z-10 flex h-8 min-w-8 items-center justify-center rounded-full border border-emerald-200/50 bg-gradient-to-br from-emerald-400 to-emerald-600 px-2 text-sm font-black tabular-nums text-ink shadow-lg"
+          className="animate-pop absolute -right-2 -top-2 z-10 flex h-8 min-w-8 items-center justify-center rounded-full border border-emerald-200/50 bg-emerald-500 px-2 text-sm font-black tabular-nums text-white shadow-sm"
           aria-label={`${qtyInCart} en el carrito`}
         >
           ×{qtyInCart}
@@ -58,7 +58,7 @@ export function ProductButton({
         <span
           key={`plus-${qtyInCart}`}
           aria-hidden="true"
-          className="float-plus pointer-events-none absolute right-3 top-7 z-10 text-lg font-black text-emerald-200 drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]"
+          className="float-plus pointer-events-none absolute right-3 top-7 z-10 text-lg font-black text-emerald-700"
         >
           +1
         </span>
@@ -76,7 +76,7 @@ export function ProductButton({
         <span className="line-clamp-2 text-base font-extrabold leading-tight tracking-tight text-ink">
           {product.nombre}
         </span>
-        <span className="text-xl font-black tracking-tight text-ink drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+        <span className="text-xl font-black tracking-tight text-ink">
           {formatMoney(product.precio_venta)}
         </span>
 
@@ -95,10 +95,10 @@ export function ProductButton({
           <span
             className={`shrink-0 text-xs font-black tabular-nums ${
               agotado
-                ? 'text-rose-200'
+                ? 'text-rose-700'
                 : product.stock_actual <= product.stock_minimo
-                  ? 'text-amber-200'
-                  : 'text-emerald-200'
+                  ? 'text-amber-700'
+                  : 'text-emerald-700'
             }`}
           >
             {agotado ? 'Agotado' : `${product.stock_actual}`}
@@ -113,7 +113,7 @@ export function ProductButton({
             type="button"
             onClick={onDecrease}
             aria-label={`Quitar uno de ${product.nombre} (llevas ${qtyInCart})`}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-100 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
           >
             <Minus size={14} aria-hidden="true" />
           </button>
@@ -126,7 +126,7 @@ export function ProductButton({
             disabled={atMax}
             aria-label={`Agregar otro ${product.nombre}`}
             title={atMax ? 'Llegaste al stock disponible' : `Agregar otro ${product.nombre}`}
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-200/25 bg-emerald-400/20 text-emerald-100 transition-all duration-200 hover:bg-emerald-400/35 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-100 text-emerald-700 transition-all duration-200 hover:bg-emerald-200/60 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Plus size={14} aria-hidden="true" />
           </button>

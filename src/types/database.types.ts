@@ -66,15 +66,29 @@ export type IngresosMercaderiaRow = {
   proveedor_id: string | null
   nombre_proveedor: string | null
   producto_id: string | null
+  cantidad: number | null
   cantidad_ingresada: number
+  costo_unitario?: number | null
   costo_total: number
   comprobante: string | null
   motivo: string | null
   fecha: string
+  created_at?: string | null
   creado_por: string | null
+  productos?: { nombre: string | null } | null
 }
 
 export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
+
+export type AjustesStockRow = {
+  id: string
+  producto_id: string | null
+  tipo: 'entrada' | 'salida'
+  cantidad: number
+  motivo: string
+  stock_resultante: number
+  fecha: string
+}
 
 export type RegistrarIngresoArgs = {
   p_compra_id: string
@@ -188,6 +202,20 @@ export type Database = {
         Row: IngresosMercaderiaRow
         Insert: IngresosMercaderiaInsert
         Update: Partial<IngresosMercaderiaInsert>
+        Relationships: [
+          {
+            foreignKeyName: 'ingresos_mercaderia_producto_id_fkey',
+            columns: ['producto_id'],
+            isOneToOne: false,
+            referencedRelation: 'productos',
+            referencedColumns: ['id'],
+          },
+        ]
+      }
+      ajustes_stock: {
+        Row: AjustesStockRow
+        Insert: Omit<AjustesStockRow, 'id' | 'fecha'>
+        Update: Partial<Omit<AjustesStockRow, 'id' | 'fecha'>>
         Relationships: []
       }
       usuarios_autorizados: {
@@ -212,6 +240,15 @@ export type Database = {
       registrar_ajuste_manual: {
         Args: RegistrarAjusteManualArgs
         Returns: RegistrarAjusteManualResult
+      }
+      registrar_ajuste_stock: {
+        Args: {
+          p_producto_id: string
+          p_tipo: string
+          p_cantidad: number
+          p_motivo?: string
+        }
+        Returns: { ajuste_id: string; stock_resultante: number }
       }
       registrar_compra: {
         Args: { p_proveedor_id: string | null; p_nombre_proveedor: string | null; p_comprobante: string | null; p_items: Json[] }

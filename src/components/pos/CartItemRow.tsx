@@ -41,7 +41,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
           type="button"
           onClick={() => onDecrease(product.id)}
           aria-label={`Quitar uno de ${product.nombre}`}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-100 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-700 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
         >
           <Minus size={15} aria-hidden="true" />
         </button>
@@ -53,7 +53,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
           disabled={atMaxStock}
           onClick={() => onIncrease(product.id)}
           aria-label={`Agregar uno de ${product.nombre}`}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-200/25 bg-emerald-400/20 text-emerald-100 transition-all duration-200 hover:bg-emerald-400/35 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-200/25 bg-emerald-400/20 text-emerald-700 transition-all duration-200 hover:bg-emerald-400/35 active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus size={15} aria-hidden="true" />
         </button>
@@ -68,7 +68,7 @@ export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, o
         onClick={() => onRemove(product.id)}
         aria-label={`Eliminar ${product.nombre} del carrito (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
         title={`Eliminar línea (${quantity} ${quantity === 1 ? 'unidad' : 'unidades'})`}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-sub text-muted transition-all duration-200 hover:border-rose-200/40 hover:bg-rose-400/25 hover:text-rose-100 active:scale-90"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line bg-surface-sub text-muted transition-all duration-200 hover:border-rose-200/40 hover:bg-rose-400/25 hover:text-rose-700 active:scale-90"
       >
         <Trash2 size={15} aria-hidden="true" />
       </button>

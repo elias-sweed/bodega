@@ -22,6 +22,19 @@ const PALABRAS_AJUSTE = [
   'bonificacion',
 ]
 
+const PALABRAS_MOTIVO = [
+  'correccion',
+  'consumo',
+  'regalo',
+  'bonificacion',
+  'merma',
+  'vencido',
+  'danado',
+  'roto',
+  'sobrante',
+  'ajuste',
+]
+
 const CONCEPTO_PROVEEDOR_VARIOS = 'proveedor varios / sin comprobante'
 
 function sinAcentos(value: string): string {
@@ -37,12 +50,19 @@ function sinAcentos(value: string): string {
  * "Proveedor Varios / Sin Comprobante" SIEMPRE se trata como compra.
  */
 export function esAjusteIngreso(item: IngresosMercaderiaRow): boolean {
-  if (item.cantidad_ingresada < 0) return true
+  if ((item.cantidad ?? 0) < 0) return true
+  if ((item.cantidad_ingresada ?? 0) < 0) return true
+  const motivo = sinAcentos((item.motivo ?? '').trim().toLowerCase())
+  if (PALABRAS_MOTIVO.some((palabra) => motivo.includes(palabra))) return true
   const nombre = sinAcentos(
     (item.nombre_proveedor ?? '').trim().toLowerCase(),
   )
   if (nombre === '' || nombre === CONCEPTO_PROVEEDOR_VARIOS) return false
   return PALABRAS_AJUSTE.some((palabra) => nombre.includes(palabra))
+}
+
+export function fechaDeIngreso(item: IngresosMercaderiaRow): string {
+  return item.created_at ?? item.fecha ?? ''
 }
 
 export function proveedorDeCompra(
@@ -71,14 +91,14 @@ export function groupByCompra(ingresos: IngresosMercaderiaRow[]): CompraGroup[] 
 
   const compras: CompraGroup[] = []
   for (const [key, items] of groups) {
-    items.sort((a, b) => a.fecha.localeCompare(b.fecha))
+    items.sort((a, b) => fechaDeIngreso(a).localeCompare(fechaDeIngreso(b)))
     compras.push({
       key,
       proveedorId: items.find((item) => item.proveedor_id)?.proveedor_id ?? null,
       nombreProveedor:
         items.find((item) => item.nombre_proveedor)?.nombre_proveedor ?? null,
       comprobante: items.find((item) => item.comprobante)?.comprobante ?? null,
-      fecha: items[0].fecha,
+      fecha: fechaDeIngreso(items[0]) || items[0].fecha,
       total: items.reduce((sum, item) => sum + item.costo_total, 0),
       items,
     })

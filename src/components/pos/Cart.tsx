@@ -34,7 +34,7 @@ export function Cart({
 
   return (
     <aside
-      className={`h-full min-h-0 flex-col rounded-[28px] border border-line bg-surface shadow-[0_24px_70px_-20px_rgba(0,0,0,0.65)] backdrop-blur-2xl ${
+      className={`h-full min-h-0 flex-col rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl ${
         items.length === 0 ? 'hidden lg:flex' : 'flex'
       }`}
     >
@@ -70,7 +70,7 @@ export function Cart({
           <span className="text-sm font-bold uppercase tracking-widest text-muted">
             Total
           </span>
-          <span className="text-3xl font-black tracking-tighter text-gold drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+          <span className="text-3xl font-black tracking-tighter text-gold">
             {formatMoney(total)}
           </span>
         </div>
@@ -79,7 +79,7 @@ export function Cart({
           type="button"
           disabled={!canCharge}
           onClick={onCharge}
-          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-xl font-black tracking-[0.2em] text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+          className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 text-xl font-black tracking-[0.2em] text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
         >
           {charging ? 'COBRANDO…' : 'COBRAR'}
         </button>

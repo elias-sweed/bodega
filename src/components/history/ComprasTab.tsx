@@ -47,8 +47,8 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
 
   if (error && ingresos.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>
@@ -66,7 +66,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
 
   if (ingresos.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-sm backdrop-blur-2xl">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <ShoppingBag size={26} aria-hidden="true" />
         </span>
@@ -83,7 +83,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
   if (filteredCompras.length === 0) {
     const detalle = describeFilter(filter)
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-sm backdrop-blur-2xl">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <SearchX size={26} aria-hidden="true" />
         </span>
@@ -101,11 +101,11 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-gradient-to-br from-surface-3 via-surface-2 to-surface px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-surface px-5 py-4 shadow-sm backdrop-blur-2xl">
         <span className="text-sm font-bold text-muted">
           Total mercadería comprada
         </span>
-        <span className="text-xl font-black tracking-tighter text-ink drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)]">{formatMoney(totalComprado)}</span>
+        <span className="text-xl font-black tracking-tighter text-ink ">{formatMoney(totalComprado)}</span>
       </div>
 
       <ul className="flex flex-col gap-2">
@@ -114,7 +114,7 @@ export function ComprasTab({ filter }: { filter: HistoryFilter }) {
           const proveedor = proveedorDeCompra(compra, proveedorMap)
 
           return (
-            <li key={compra.key} className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+            <li key={compra.key} className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
               <button
                 type="button"
                 aria-expanded={expanded}

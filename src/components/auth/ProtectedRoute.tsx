@@ -22,7 +22,7 @@ export function ProtectedRoute() {
         />
       </div>
       <div className="absolute inset-0 bg-[#0b0420]/85 backdrop-blur-[2px]" aria-hidden="true" />
-      <div className="fade-in relative flex flex-col items-center gap-4 rounded-[28px] border border-line bg-surface px-12 py-10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+      <div className="fade-in relative flex flex-col items-center gap-4 rounded-[28px] border border-line bg-surface px-12 py-10 shadow-sm backdrop-blur-2xl">
         <Loader2 size={44} className="animate-spin text-ink" aria-hidden="true" />
         <p className="text-lg font-black tracking-tight text-ink">Cargando…</p>
       </div>
@@ -70,7 +70,7 @@ export function ProtectedRoute() {
                 navigate('/login', { replace: true })
               }
             }}
-            className="mt-6 h-14 w-full rounded-2xl bg-slate-900 text-lg font-bold text-ink transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 h-14 w-full rounded-2xl bg-slate-900 text-lg font-bold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {signingOut ? 'Cerrando…' : 'Cerrar sesión'}
           </button>

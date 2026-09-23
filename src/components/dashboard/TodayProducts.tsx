@@ -23,7 +23,7 @@ export function TodayProducts({
   const maxCobrado = Math.max(1, ...productos.map((p) => p.cobrado))
 
   return (
-    <section className="fade-up rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+    <section className="fade-up rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-ink">
@@ -85,7 +85,7 @@ export function TodayProducts({
                         <span className="text-base font-black tabular-nums text-gold">
                           {formatMoney(p.cobrado)}
                         </span>
-                        <span className="rounded-full border border-emerald-200/40 bg-emerald-400/20 px-2.5 py-0.5 text-xs font-black tabular-nums text-emerald-100">
+                        <span className="rounded-full border border-emerald-200/40 bg-emerald-400/20 px-2.5 py-0.5 text-xs font-black tabular-nums text-emerald-700">
                           +{formatMoney(p.ganancia)}
                         </span>
                         <ChevronDown
@@ -130,7 +130,7 @@ export function TodayProducts({
                           <span className="font-black text-ink">
                             Te quedaron ({margen}% de lo cobrado)
                           </span>
-                          <span className="text-base font-black tabular-nums text-emerald-200">
+                          <span className="text-base font-black tabular-nums text-emerald-700">
                             {formatMoney(p.ganancia)}
                           </span>
                         </div>

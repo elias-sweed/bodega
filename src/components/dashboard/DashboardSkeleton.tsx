@@ -2,7 +2,7 @@ export function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6" aria-label="Cargando resumen" aria-busy="true">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-[28px] border border-line bg-surface p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
+      <section className="relative overflow-hidden rounded-[28px] border border-line bg-surface p-8 shadow-sm backdrop-blur-2xl">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="min-w-52 flex-1">
             <div className="skeleton-shimmer h-4 w-32 rounded-full" />
@@ -23,7 +23,7 @@ export function DashboardSkeleton() {
         {[0, 1].map((i) => (
           <section
             key={i}
-            className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
+            className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
           >
             <div className="skeleton-shimmer h-4 w-28 rounded-full" />
             <div className="skeleton-shimmer mt-4 h-10 w-48 rounded-xl" />

@@ -8,8 +8,8 @@ interface LowStockListProps {
 export function LowStockList({ products }: LowStockListProps) {
   if (products.length === 0) {
     return (
-      <div className="flex items-center gap-4 rounded-[28px] border border-emerald-200/30 bg-emerald-400/15 p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/25 text-emerald-100">
+      <div className="flex items-center gap-4 rounded-[28px] border border-emerald-200/30 bg-emerald-400/15 p-6 shadow-sm backdrop-blur-2xl">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/25 text-emerald-700">
           <CheckCircle2 size={22} aria-hidden="true" />
         </span>
         <div>
@@ -29,14 +29,14 @@ export function LowStockList({ products }: LowStockListProps) {
         return (
           <li
             key={product.id}
-            className="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-2"
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-2"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
                   agotado
-                    ? 'border-rose-200/30 bg-rose-400/20 text-rose-100'
-                    : 'border-amber-200/30 bg-amber-400/20 text-amber-100'
+                    ? 'border-rose-200 bg-rose-100 text-rose-700'
+                    : 'border-amber-200 bg-amber-100 text-amber-700'
                 }`}
               >
                 <TriangleAlert size={18} aria-hidden="true" />
@@ -54,8 +54,8 @@ export function LowStockList({ products }: LowStockListProps) {
               <span
                 className={`inline-flex rounded-full border px-3 py-1 text-xs font-black uppercase tracking-wider ${
                   agotado
-                    ? 'border-rose-200/30 bg-rose-400/25 text-rose-50'
-                    : 'border-amber-200/30 bg-amber-400/25 text-amber-50'
+                    ? 'border-rose-200 bg-rose-100 text-rose-700'
+                    : 'border-amber-200 bg-amber-100 text-amber-700'
                 }`}
               >
                 {agotado ? 'Agotado' : 'Por agotarse'}

@@ -1,12 +1,21 @@
 import { useCallback, useEffect, useState } from 'react'
 import { subscribeToDataChanges } from '../services/dataEvents'
-import { fetchIngresosHistory, fetchVentasHistory } from '../services/history'
+import {
+  fetchAjustesLegacy,
+  fetchIngresosHistory,
+  fetchVentasHistory,
+} from '../services/history'
 import { fetchProducts } from '../services/products'
 import { fetchProveedores } from '../services/purchases'
-import type { IngresosMercaderiaRow, VentasRow } from '../types/database.types'
+import type {
+  AjustesStockRow,
+  IngresosMercaderiaRow,
+  VentasRow,
+} from '../types/database.types'
 
 const VENTAS_CACHE_KEY = 'bodega:ventas-cache:v1'
 const INGRESOS_CACHE_KEY = 'bodega:ingresos-cache:v1'
+const AJUSTES_LEGACY_CACHE_KEY = 'bodega:ajustes-stock-cache:v1'
 
 interface IngresosCache {
   ingresos: IngresosMercaderiaRow[]
@@ -207,4 +216,57 @@ export function useIngresosHistory() {
   }, [refresh])
 
   return { ingresos, proveedorMap, productoMap, loading, error, refresh }
+}
+
+export function useLegacyAjustes() {
+  const [cached] = useState<AjustesStockRow[] | null>(() => {
+    try {
+      const raw = localStorage.getItem(AJUSTES_LEGACY_CACHE_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as unknown
+      return Array.isArray(parsed) ? (parsed as AjustesStockRow[]) : null
+    } catch {
+      return null
+    }
+  })
+  const [ajustes, setAjustes] = useState<AjustesStockRow[]>(() => cached ?? [])
+  const [ready, setReady] = useState(() => cached !== null)
+  const [reloadToken, setReloadToken] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const data = await fetchAjustesLegacy()
+        if (!cancelled) {
+          setAjustes(data)
+          localStorage.setItem(AJUSTES_LEGACY_CACHE_KEY, JSON.stringify(data))
+        }
+      } catch {
+        if (!cancelled) {
+          setAjustes([])
+        }
+      } finally {
+        if (!cancelled) {
+          setReady(true)
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reloadToken])
+
+  const refresh = useCallback((): void => {
+    setReloadToken((token) => token + 1)
+  }, [])
+
+  useEffect(() => {
+    return subscribeToDataChanges(() => refresh())
+  }, [refresh])
+
+  return { ajustes, ready, refresh }
 }

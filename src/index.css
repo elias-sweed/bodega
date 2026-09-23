@@ -1,23 +1,24 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Paleta "índigo noche + ámbar".
-     Los paneles son MÁS OSCUROS y más opacos que el fondo morado, para que el
-     contenido se separe en vez de fundirse con la animación de atrás. */
-  --color-surface-sub: rgba(23, 18, 66, 0.45);
-  --color-surface: rgba(23, 18, 66, 0.88);
-  --color-surface-2: rgba(34, 26, 99, 0.92);
-  --color-surface-3: rgba(44, 34, 119, 0.96);
+  /* Tema claro plano: fondo gris claro, paneles blancos, borde sutil y texto
+     oscuro de alto contraste. El Login conserva su variante oscura original:
+     en el bloque base se le devuelven los tokens "índigo noche" a todo el
+     sub-árbol de AuthLayout (ver regla anidada bajo .bg-[#1a0b3d]). */
+  --color-surface-sub: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #ffffff;
+  --color-surface-3: #f1f5f9;
 
-  --color-line: rgba(255, 255, 255, 0.15);
-  --color-line-strong: rgba(255, 255, 255, 0.42);
+  --color-line: #e2e8f0;
+  --color-line-strong: #cbd5e1;
 
-  --color-ink: #f5f3ff;
-  --color-muted: #a5a0d0;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
 
-  --color-gold: #fbbf24;
-  --color-profit: #34d399;
-  --color-loss: #fb7185;
+  --color-gold: #d97706;
+  --color-profit: #059669;
+  --color-loss: #e11d48;
 }
 
 @layer base {
@@ -35,13 +36,13 @@
     @apply bg-slate-100 text-slate-900 antialiased;
   }
 
-  /* Autocompletado del navegador: que no pinte los campos de blanco.
-     color-scheme: dark obliga al navegador a mostrar su lista de
-     sugerencias y su relleno en variante oscura. */
+  /* Autocompletado del navegador: variante CLARA por defecto (fondo blanco,
+     texto oscuro). El Login obliga a su variante oscura en la regla anidada
+     de AuthLayout, preservando su aspecto actual. */
   input,
   select,
   textarea {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   input:-webkit-autofill,
@@ -50,13 +51,55 @@
   input:-webkit-autofill:active,
   input:autofill,
   input:-moz-autofill {
-    -webkit-text-fill-color: #fff;
-    color: #fff;
-    -webkit-box-shadow: 0 0 0 1000px #2a1568 inset;
-    box-shadow: 0 0 0 1000px #2a1568 inset;
-    caret-color: #fff;
+    -webkit-text-fill-color: #0f172a;
+    color: #0f172a;
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    caret-color: #0f172a;
     transition: background-color 9999s ease-in-out 0s;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Login intacto: AuthLayout (bg-[#1a0b3d] + Silk) y sus páginas conservan la
+   paleta oscura "índigo noche" original. Se redefinen aquí los tokens para
+   TODO su sub-árbol, sin tocar ningún archivo de auth.
+   ------------------------------------------------------------------------- */
+.bg-\[\#1a0b3d\] {
+  --color-surface-sub: rgba(23, 18, 66, 0.45);
+  --color-surface: rgba(23, 18, 66, 0.88);
+  --color-surface-2: rgba(34, 26, 99, 0.92);
+  --color-surface-3: rgba(44, 34, 119, 0.96);
+
+  --color-line: rgba(255, 255, 255, 0.15);
+  --color-line-strong: rgba(255, 255, 255, 0.42);
+
+  --color-ink: #f5f3ff;
+  --color-muted: #a5a0d0;
+
+  --color-gold: #fbbf24;
+  --color-profit: #34d399;
+  --color-loss: #fb7185;
+}
+
+.bg-\[\#1a0b3d\] input,
+.bg-\[\#1a0b3d\] select,
+.bg-\[\#1a0b3d\] textarea {
+  color-scheme: dark;
+}
+
+.bg-\[\#1a0b3d\] input:-webkit-autofill,
+.bg-\[\#1a0b3d\] input:-webkit-autofill:hover,
+.bg-\[\#1a0b3d\] input:-webkit-autofill:focus,
+.bg-\[\#1a0b3d\] input:-webkit-autofill:active,
+.bg-\[\#1a0b3d\] input:autofill,
+.bg-\[\#1a0b3d\] input:-moz-autofill {
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px #2a1568 inset;
+  box-shadow: 0 0 0 1000px #2a1568 inset;
+  caret-color: #fff;
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 @layer utilities {
@@ -77,9 +120,9 @@
     overflow: hidden;
     background: linear-gradient(
       100deg,
-      rgb(255 255 255 / 0.08) 30%,
-      rgb(255 255 255 / 0.22) 50%,
-      rgb(255 255 255 / 0.08) 70%
+      rgb(148 163 184 / 0.14) 30%,
+      rgb(148 163 184 / 0.3) 50%,
+      rgb(148 163 184 / 0.14) 70%
     );
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.4s ease-in-out infinite;

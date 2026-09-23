@@ -80,11 +80,11 @@ export function UsersPage() {
   if (!isAdmin) {
     return (
       <div className="fade-in mx-auto flex h-full w-full max-w-md flex-col items-center justify-center p-4">
-        <div className="fade-up w-full rounded-[28px] border border-line bg-surface p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <div className="fade-up w-full rounded-[28px] border border-line bg-surface p-8 text-center shadow-sm backdrop-blur-2xl">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-ink">
             <ShieldAlert size={26} aria-hidden="true" />
           </span>
-          <h1 className="mt-4 text-xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-4 text-xl font-black tracking-tighter text-ink">
             Acceso no autorizado
           </h1>
           <p className="mt-2 text-sm font-medium text-muted">
@@ -218,7 +218,7 @@ export function UsersPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Acceso
           </p>
-          <h1 className="mt-0.5 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-0.5 text-3xl font-black tracking-tighter text-ink">
             Usuarios
           </h1>
           <p className="mt-1 text-sm font-medium text-muted">
@@ -227,9 +227,9 @@ export function UsersPage() {
         </div>
       </header>
 
-      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-200/30 bg-sky-400/15 px-5 py-4 backdrop-blur-2xl">
-        <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-200" />
-        <p className="text-sm font-medium leading-relaxed text-sky-100">
+      <div className="fade-up flex items-start gap-3 rounded-[28px] border border-sky-200 bg-sky-100 px-5 py-4 backdrop-blur-2xl">
+        <Info size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-sky-700" />
+        <p className="text-sm font-medium leading-relaxed text-sky-700">
           <strong className="font-extrabold">Todo se hace aquí:</strong> escribe el
           correo, elige el rol y pulsa el botón: la cuenta se crea sola. Después
           dile a la persona que en el login use{' '}
@@ -238,7 +238,7 @@ export function UsersPage() {
         </p>
       </div>
 
-      <section className="fade-up shrink-0 rounded-[28px] border border-line bg-surface p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl sm:p-6">
+      <section className="fade-up shrink-0 rounded-[28px] border border-line bg-surface p-5 shadow-sm backdrop-blur-2xl sm:p-6">
         <form onSubmit={handleAdd} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto]">
             <div>
@@ -264,7 +264,7 @@ export function UsersPage() {
                 id="usuario-rol"
                 value={nuevoRol}
                 onChange={(e) => setNuevoRol(e.target.value as UsuarioRol)}
-                className={`${inputClass} cursor-pointer [&>option]:bg-[#171242] [&>option]:text-ink`}
+                className={`${inputClass} cursor-pointer [&>option]:bg-white [&>option]:text-slate-900`}
               >
                 <option value="cajero">Cajero</option>
                 <option value="admin">Admin</option>
@@ -274,7 +274,7 @@ export function UsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 text-base font-black tracking-tight text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
           >
             <UserPlus size={18} strokeWidth={2.5} aria-hidden="true" />
             {saving ? 'Creando…' : 'Crear cuenta y dar acceso'}
@@ -282,7 +282,7 @@ export function UsersPage() {
         </form>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <section className="min-h-0 flex-1 overflow-y-auto rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
         {loading ? (
           <div className="flex flex-col gap-3 p-5" aria-label="Cargando usuarios">
             {[0, 1, 2].map((i) => (
@@ -294,8 +294,8 @@ export function UsersPage() {
             ))}
           </div>
         ) : error ? (
-          <div className="m-5 flex flex-col items-center gap-4 rounded-[20px] border border-rose-200/25 bg-rose-500/15 p-8 text-center backdrop-blur-xl">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+          <div className="m-5 flex flex-col items-center gap-4 rounded-[20px] border border-rose-200 bg-rose-100 p-8 text-center backdrop-blur-xl">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
               <ShieldAlert size={22} aria-hidden="true" />
             </span>
             <p className="text-base font-extrabold tracking-tight text-ink">
@@ -305,7 +305,7 @@ export function UsersPage() {
             <button
               type="button"
               onClick={() => void loadList()}
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
             >
               <RefreshCw size={15} strokeWidth={2.5} aria-hidden="true" />
               Reintentar
@@ -334,7 +334,7 @@ export function UsersPage() {
                   <p className="truncate font-bold text-ink">
                     {usuario.email}
                     {usuario.email === user?.email && (
-                      <span className="ml-2 text-xs font-extrabold text-emerald-200">
+                      <span className="ml-2 text-xs font-extrabold text-emerald-700">
                         (tú)
                       </span>
                     )}
@@ -348,7 +348,7 @@ export function UsersPage() {
                   <span
                     className={`rounded-full border px-3 py-1 text-xs font-extrabold ${
                       usuario.rol === 'admin'
-                        ? 'border-violet-200/30 bg-violet-400/25 text-violet-100'
+                        ? 'border-violet-200 bg-violet-100 text-violet-700'
                         : 'border-line bg-surface text-muted'
                     }`}
                   >
@@ -364,7 +364,7 @@ export function UsersPage() {
                   <button
                     type="button"
                     onClick={() => handleRemove(usuario)}
-                    className="rounded-xl border border-rose-200/30 bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-rose-100 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-400/25 active:translate-y-0 active:scale-95"
+                    className="rounded-xl border border-rose-200 bg-rose-100 px-3 py-1.5 text-xs font-bold text-rose-700 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-rose-200/60 active:translate-y-0 active:scale-95"
                   >
                     Quitar acceso
                   </button>

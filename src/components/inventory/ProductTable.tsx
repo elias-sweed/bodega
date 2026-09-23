@@ -7,10 +7,8 @@ import {
   ChevronRight,
   Download,
   History,
-  Minus,
   PackagePlus,
   Pencil,
-  Plus,
   Search,
   SlidersHorizontal,
   Tags,
@@ -29,7 +27,6 @@ interface ProductTableProps {
   onEdit?: (product: ProductosRow) => void
   onAdjustStock?: (product: ProductosRow) => void
   onDelete?: (product: ProductosRow) => void
-  onQuickAdjust?: (product: ProductosRow, delta: 1 | -1) => Promise<void>
   onKardex?: (product: ProductosRow) => void
   /** Ids recién llegados (ej. desde Compras): van primero y parpadean */
   pinnedIds?: string[]
@@ -60,9 +57,9 @@ function marginPercent(product: ProductosRow): number | null {
 }
 
 function marginClass(margin: number): string {
-  if (margin < 0) return 'border-rose-200/30 bg-rose-400/20 text-rose-100'
-  if (margin < 20) return 'border-amber-200/30 bg-amber-400/20 text-amber-100'
-  return 'border-emerald-200/30 bg-emerald-400/20 text-emerald-100'
+  if (margin < 0) return 'border-rose-200 bg-rose-100 text-rose-700'
+  if (margin < 20) return 'border-amber-200 bg-amber-100 text-amber-700'
+  return 'border-emerald-200 bg-emerald-100 text-emerald-700'
 }
 
 function marginLevel(margin: number | null): MargenFiltro | null {
@@ -115,7 +112,6 @@ export function ProductTable({
   onEdit,
   onAdjustStock,
   onDelete,
-  onQuickAdjust,
   onKardex,
   pinnedIds = [],
 }: ProductTableProps) {
@@ -131,7 +127,6 @@ export function ProductTable({
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
   const [sort, setSort] = useState<SortState | null>(null)
-  const [busyIds, setBusyIds] = useState<Set<string>>(new Set())
   const topRef = useRef<HTMLDivElement>(null)
 
   const scrollToTop = (): void => {
@@ -298,20 +293,6 @@ export function ProductTable({
     scrollToTop()
   }
 
-  const handleQuickAdjust = async (product: ProductosRow, delta: 1 | -1): Promise<void> => {
-    if (!onQuickAdjust || busyIds.has(product.id)) return
-    setBusyIds((prev) => new Set(prev).add(product.id))
-    try {
-      await onQuickAdjust(product, delta)
-    } finally {
-      setBusyIds((prev) => {
-        const next = new Set(prev)
-        next.delete(product.id)
-        return next
-      })
-    }
-  }
-
   const handleExport = (): void => {
     const now = new Date()
     const pad = (n: number): string => String(n).padStart(2, '0')
@@ -378,7 +359,7 @@ export function ProductTable({
             value={category}
             onChange={(event) => setCategory(event.target.value)}
             aria-label="Filtrar por categoría"
-            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+            className="h-11 cursor-pointer appearance-none rounded-2xl border border-line bg-surface pl-9 pr-8 text-sm font-bold text-ink outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
           >
             <option value="todas">Todas las categorías</option>
             {categories.map((name) => (
@@ -427,7 +408,7 @@ export function ProductTable({
             type="button"
             onClick={clearFilters}
             title="Quitar todos los filtros aplicados"
-            className="inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-[0_10px_30px_-12px_rgba(244,63,94,0.8)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
+            className="inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-sm backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
           >
             <X size={17} strokeWidth={3} aria-hidden="true" />
             Limpiar ({activeFilterCount})
@@ -446,7 +427,7 @@ export function ProductTable({
                 id="filtro-margen"
                 value={margen}
                 onChange={(e) => setMargen(e.target.value as MargenFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
               >
                 <option value="todos">Todos</option>
                 <option value="alto">Alto (≥ 20%)</option>
@@ -462,7 +443,7 @@ export function ProductTable({
                 id="filtro-stock"
                 value={stockFiltro}
                 onChange={(e) => setStockFiltro(e.target.value as StockFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
               >
                 <option value="todos">Todos</option>
                 <option value="bajo">Bajo (≤ mín)</option>
@@ -530,7 +511,7 @@ export function ProductTable({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
         {sortedProducts.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-5 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
@@ -639,7 +620,6 @@ export function ProductTable({
                 {pageItems.map((product, i) => {
                   const lowStock = product.stock_actual <= product.stock_minimo
                   const margin = marginPercent(product)
-                  const busy = busyIds.has(product.id)
                   const pinned = pinnedIds.includes(product.id)
                   return (
                     <tr
@@ -691,32 +671,10 @@ export function ProductTable({
                       )}
                       <td
                         className={`px-5 py-3 text-right font-black tabular-nums ${
-                          lowStock ? 'text-rose-200' : 'text-ink'
+                          lowStock ? 'text-rose-700' : 'text-ink'
                         }`}
                       >
-                        <span className="inline-flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => void handleQuickAdjust(product, -1)}
-                            disabled={busy || product.stock_actual <= 0}
-                            title="Quitar 1 unidad"
-                            aria-label={`Quitar 1 unidad a ${product.nombre}`}
-                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
-                          >
-                            <Minus size={12} strokeWidth={3} aria-hidden="true" />
-                          </button>
-                          <span className="min-w-7 text-center">{product.stock_actual}</span>
-                          <button
-                            type="button"
-                            onClick={() => void handleQuickAdjust(product, 1)}
-                            disabled={busy}
-                            title="Agregar 1 unidad"
-                            aria-label={`Agregar 1 unidad a ${product.nombre}`}
-                            className="flex h-6 w-6 items-center justify-center rounded-lg border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
-                          >
-                            <Plus size={12} strokeWidth={3} aria-hidden="true" />
-                          </button>
-                        </span>
+                        {product.stock_actual}
                       </td>
                       <td className="px-5 py-3 text-right tabular-nums text-muted">
                         {product.stock_minimo}
@@ -742,7 +700,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onEdit?.(product)}
                             title="Editar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200/25 bg-sky-400/20 px-3 py-1.5 text-xs font-black text-sky-100 backdrop-blur-xl transition-all duration-200 hover:bg-sky-400/35 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-100 px-3 py-1.5 text-xs font-black text-sky-700 backdrop-blur-xl transition-all duration-200 hover:bg-sky-200/60 active:scale-95"
                           >
                             <Pencil size={13} strokeWidth={2.5} aria-hidden="true" />
                             Editar
@@ -751,7 +709,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onAdjustStock?.(product)}
                             title="Ajustar stock"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200/25 bg-amber-400/20 px-3 py-1.5 text-xs font-black text-amber-100 backdrop-blur-xl transition-all duration-200 hover:bg-amber-400/35 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-100 px-3 py-1.5 text-xs font-black text-amber-700 backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
                           >
                             <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
                             Stock
@@ -760,7 +718,7 @@ export function ProductTable({
                             type="button"
                             onClick={() => onDelete?.(product)}
                             title="Eliminar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-rose-100 backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-rose-700 backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
                           >
                             <Trash2 size={13} strokeWidth={2.5} aria-hidden="true" />
                             Eliminar

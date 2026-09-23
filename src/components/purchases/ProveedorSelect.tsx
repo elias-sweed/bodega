@@ -62,7 +62,7 @@ export function ProveedorSelect({
         id="proveedor"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+        className="h-14 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink shadow-sm outline-none backdrop-blur-2xl transition-all duration-300 hover:bg-surface-2 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
       >
         <option value={PROVEEDOR_GENERICO}>
           Proveedor Varios / Sin Comprobante
@@ -117,14 +117,14 @@ export function ProveedorSelect({
             />
           </div>
           {error && (
-            <p className="rounded-xl border border-rose-200/30 bg-rose-400/20 px-4 py-2 text-sm font-bold text-rose-100">
+            <p className="rounded-xl border border-rose-200 bg-rose-100 px-4 py-2 text-sm font-bold text-rose-700">
               {error}
             </p>
           )}
           <button
             type="submit"
             disabled={saving}
-            className="h-12 rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-base font-black text-ink shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 rounded-2xl border border-sky-200/30 bg-sky-500 text-base font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {saving ? 'Guardando…' : 'Guardar y usar este proveedor'}
           </button>

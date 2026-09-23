@@ -183,7 +183,7 @@ export function PurchasesPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Mercadería
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink">
             Compras
           </h1>
           <p className="mt-1 text-sm font-medium text-muted">
@@ -200,8 +200,8 @@ export function PurchasesPage() {
       {isFirstLoad ? (
         <PurchasesSkeleton />
       ) : proveedoresError && proveedores.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+        <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -211,7 +211,7 @@ export function PurchasesPage() {
           <button
             type="button"
             onClick={() => refreshProveedores()}
-            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
           >
             <RotateCcw size={15} aria-hidden="true" />
             Reintentar
@@ -219,7 +219,7 @@ export function PurchasesPage() {
         </div>
       ) : (
         <div className="fade-in flex flex-col gap-5">
-          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
             <h2 className="mb-1 flex items-center gap-2 text-base font-black tracking-tight text-ink">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-3 text-xs font-black text-ink">
                 1
@@ -266,7 +266,7 @@ export function PurchasesPage() {
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
             <h2 className="mb-1 flex items-center gap-2 text-base font-black tracking-tight text-ink">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-3 text-xs font-black text-ink">
                 2
@@ -275,7 +275,7 @@ export function PurchasesPage() {
             </h2>
             <p className="mb-4 text-xs font-medium text-muted">
               Busca cada producto, di cuántas unidades llegaron y cuánto costó todo.
-              <span className="mt-0.5 block font-bold text-amber-200/90">
+              <span className="mt-0.5 block font-bold text-amber-700">
                 Cuenta uno por uno: si vino 1 caja con 24, escribe 24 (no 1).
               </span>
             </p>
@@ -306,7 +306,7 @@ export function PurchasesPage() {
                   />
 
                   {searchOpen && (
-                    <ul className="fade-in absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-line bg-[#171242]/95 py-1.5 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+                    <ul className="fade-in absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-line bg-surface py-1.5 shadow-sm backdrop-blur-2xl">
                       {suggestedProducts.length === 0 ? (
                         <li className="px-4 py-3 text-sm font-medium text-muted">
                           Sin coincidencias en el inventario.
@@ -401,7 +401,7 @@ export function PurchasesPage() {
                               Hay {item.producto.stock_actual}
                               {Number.isInteger(Number(item.cantidad)) &&
                                 Number(item.cantidad) >= 1 && (
-                                  <span className="font-black text-emerald-200">
+                                  <span className="font-black text-emerald-700">
                                     {' '}
                                     → quedará en {item.producto.stock_actual + Number(item.cantidad)}
                                   </span>
@@ -442,7 +442,7 @@ export function PurchasesPage() {
                             {costoUnitario === null
                               ? <span className="text-sm font-bold text-muted">—</span>
                               : (
-                                <span className="inline-block rounded-full border border-emerald-200/40 bg-emerald-400/20 px-3 py-1.5 text-sm font-black tabular-nums text-emerald-100">
+                                <span className="inline-block rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-black tabular-nums text-emerald-700">
                                   {formatMoney(costoUnitario)}
                                 </span>
                               )}
@@ -453,7 +453,7 @@ export function PurchasesPage() {
                               onClick={() => removeItem(item.producto.id)}
                               title="Quitar de la compra"
                               aria-label={`Quitar ${item.producto.nombre} de la compra`}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/25 bg-rose-400/20 text-rose-100 transition-all duration-200 hover:bg-rose-400/35 active:scale-90"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 transition-all duration-200 hover:bg-rose-200/60 active:scale-90"
                             >
                               <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
                             </button>
@@ -463,11 +463,11 @@ export function PurchasesPage() {
                     })}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t-2 border-emerald-200/30 bg-emerald-400/10">
+                    <tr className="border-t-2 border-emerald-200 bg-emerald-100">
                       <td colSpan={2} className="px-4 py-4 text-right text-sm font-bold uppercase tracking-widest text-muted">
                         Total de la compra
                       </td>
-                      <td className="px-4 py-4 text-xl font-black tracking-tight text-ink drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]">
+                      <td className="px-4 py-4 text-xl font-black tracking-tight text-ink">
                         {formatMoney(totalCompra)}
                       </td>
                       <td colSpan={2} />
@@ -492,7 +492,7 @@ export function PurchasesPage() {
                 type="button"
                 disabled={!isValid || saving}
                 onClick={() => void handleSave()}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-gradient-to-br from-emerald-400/90 to-emerald-600/90 px-8 text-base font-black text-ink shadow-[0_16px_40px_-14px_rgba(16,185,129,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
+                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-8 text-base font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface disabled:text-muted disabled:shadow-none disabled:hover:translate-y-0"
               >
                 <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
                 {saving ? 'Guardando…' : 'Guardar compra'}

@@ -61,9 +61,9 @@ function writeSummariesCache(summaries: Record<string, VentaSummary>): void {
 }
 
 const METODO_BADGES: Record<string, string> = {
-  Efectivo: 'border border-emerald-200/30 bg-emerald-400/20 text-emerald-100',
-  Yape: 'border border-sky-200/30 bg-sky-400/20 text-sky-100',
-  Plin: 'border border-violet-200/30 bg-violet-400/20 text-violet-100',
+  Efectivo: 'border border-emerald-200 bg-emerald-100 text-emerald-700',
+  Yape: 'border border-sky-200 bg-sky-100 text-sky-700',
+  Plin: 'border border-violet-200 bg-violet-100 text-violet-700',
 }
 
 function matchesFilter(venta: VentasRow, filter: HistoryFilter, numero: number): boolean {
@@ -201,15 +201,15 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   if (error && ventas.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200 bg-rose-100 p-8 text-center shadow-sm backdrop-blur-2xl">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-200/60 text-rose-700">
           <TriangleAlert size={22} aria-hidden="true" />
         </span>
         <p className="text-lg font-extrabold tracking-tight text-ink">{error}</p>
         <button
           type="button"
           onClick={() => refresh()}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
         >
           <RotateCcw size={15} aria-hidden="true" />
           Reintentar
@@ -220,7 +220,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   if (ventas.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-sm backdrop-blur-2xl">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <ReceiptText size={26} aria-hidden="true" />
         </span>
@@ -237,7 +237,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
   if (filteredVentas.length === 0) {
     const detalle = describeFilter(filter)
     return (
-      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-sm backdrop-blur-2xl">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
           <SearchX size={26} aria-hidden="true" />
         </span>
@@ -255,11 +255,11 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-gradient-to-br from-surface-3 via-surface-2 to-surface px-5 py-4 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+      <div className="flex items-center justify-between gap-4 rounded-[28px] border border-line bg-surface px-5 py-4 shadow-sm backdrop-blur-2xl">
         <span className="text-sm font-bold text-muted">
           Total ventas registradas
         </span>
-        <span className="text-xl font-black tracking-tighter text-ink drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)]">{formatMoney(totalVendido)}</span>
+        <span className="text-xl font-black tracking-tighter text-ink ">{formatMoney(totalVendido)}</span>
       </div>
 
       <ul className="flex flex-col gap-2">
@@ -278,7 +278,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
           const ganancia = venta.total - costoTotal
 
           return (
-            <li key={venta.id} className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-[0_20px_60px_-24px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+            <li key={venta.id} className="overflow-hidden rounded-[28px] border border-line bg-surface shadow-sm backdrop-blur-2xl">
               <button
                 type="button"
                 aria-expanded={expanded}
@@ -316,8 +316,8 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                       <span
                         className={`rounded-full border px-2 py-px text-[11px] font-black tabular-nums ${
                           summaries[venta.id].ganancia >= 0
-                            ? 'border-emerald-200/40 bg-emerald-400/20 text-emerald-100'
-                            : 'border-rose-200/40 bg-rose-400/20 text-rose-100'
+                            ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                            : 'border-rose-200 bg-rose-100 text-rose-700'
                         }`}
                         title="Lo que ganaste en esta venta"
                       >
@@ -389,7 +389,7 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
                           </span>
                           <span
                             className={`text-base font-black tabular-nums ${
-                              ganancia >= 0 ? 'text-emerald-300' : 'text-rose-300'
+                              ganancia >= 0 ? 'text-emerald-600' : 'text-rose-700'
                             }`}
                           >
                             {formatMoney(ganancia)}

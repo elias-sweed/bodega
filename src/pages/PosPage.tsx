@@ -404,8 +404,8 @@ export function PosPage() {
   const content = isFirstLoad ? (
     <PosSkeleton />
   ) : error && products.length === 0 ? (
-    <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-xl backdrop-blur-2xl">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-100">
+    <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-rose-700">
         <AlertTriangle size={22} aria-hidden="true" />
       </span>
       <p className="text-lg font-extrabold tracking-tight text-ink">
@@ -468,7 +468,7 @@ export function PosPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
             Punto de venta
           </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink drop-shadow-[0_2px_14px_rgba(0,0,0,0.4)]">
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink ">
             Caja
           </h1>
         </div>
@@ -481,9 +481,9 @@ export function PosPage() {
       </header>
 
       {suspendedSale && (
-        <div className="fade-up flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/30 bg-amber-400/15 px-5 py-3.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <div className="fade-up flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200/30 bg-amber-400/15 px-5 py-3.5 shadow-sm backdrop-blur-2xl">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-200/30 bg-amber-400/25 text-amber-100">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-200 bg-amber-100 text-amber-700">
               <PauseCircle size={22} aria-hidden="true" />
             </span>
             <div>

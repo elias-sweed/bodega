@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
+import { ReportesPage } from './pages/ReportesPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { UsersPage } from './pages/UsersPage'
 import { useAuth } from './hooks/useAuth'
@@ -53,6 +54,7 @@ function App() {
             <Route path="/caja" element={<PosPage />} />
             <Route path="/inventario" element={<InventoryPage />} />
             <Route path="/compras" element={<PurchasesPage />} />
+            <Route path="/reportes" element={<ReportesPage />} />
             <Route path="/historial" element={<HistoryPage />} />
             <Route path="/notificaciones" element={<NotificationsPage />} />
             <Route path="/usuarios" element={<UsersPage />} />

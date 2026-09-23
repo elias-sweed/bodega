@@ -40,11 +40,11 @@ export function ConfirmDialog({
       onClick={onCancel}
     >
       <div
-        className="fade-up w-full max-w-sm rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up w-full max-w-sm rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200/30 bg-amber-400/20 text-amber-200">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-amber-100 text-amber-700">
             <AlertTriangle size={22} aria-hidden="true" />
           </span>
           <button
@@ -73,7 +73,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="h-12 rounded-2xl border border-rose-200/30 bg-gradient-to-br from-rose-400/90 to-rose-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(244,63,94,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+            className="h-12 rounded-2xl border border-rose-200/30 bg-rose-500 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
           >
             {confirmLabel}
           </button>

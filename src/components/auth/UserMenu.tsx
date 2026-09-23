@@ -51,13 +51,13 @@ export function UserMenu() {
             className="h-9 w-9 rounded-full object-cover"
           />
         ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-ink">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white">
             {initial}
           </span>
         )}
         <span className="hidden max-w-[10rem] truncate text-sm font-semibold text-ink lg:block">
           {displayName}
-          <span className="ml-2 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-bold text-sky-300">
+          <span className="ml-2 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-700">
             {rolLabel}
           </span>
         </span>

@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { PackageMinus, PackagePlus, X } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 import type { ProductosRow } from '../../types/database.types'
 
 export interface StockAdjustPayload {
   stock: number
   motivo: string
   esRegalo: boolean
+  /** id de la sesión activa (para el registro del movimiento) */
+  usuarioId: string | null
 }
 
 interface StockAdjustModalProps {
@@ -23,6 +26,7 @@ const labelClass =
   'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
+  const { user } = useAuth()
   const [stock, setStock] = useState(String(product.stock_actual))
   const [motivo, setMotivo] = useState<string>(MOTIVOS_ENTRADA[0])
   const [esRegalo, setEsRegalo] = useState(false)
@@ -63,7 +67,12 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
     }
     setSubmitting(true)
     try {
-      await onSubmit({ stock: value, motivo: motivo.trim(), esRegalo })
+      await onSubmit({
+        stock: value,
+        motivo: motivo.trim(),
+        esRegalo,
+        usuarioId: user?.id ?? null,
+      })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo ajustar el stock')
       setSubmitting(false)
@@ -82,7 +91,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
     >
       <form
         onSubmit={handleSubmit}
-        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl"
+        className="fade-up max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl"
       >
         <div className="mb-1 flex items-center justify-between gap-3">
           <div>
@@ -134,7 +143,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
           >
             {MOTIVOS_ENTRADA.map((name) => (
               <option key={name} value={name}>
@@ -148,7 +157,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             id="motivo-ajuste"
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-[#171242] [&>option]:text-ink"
+            className="h-12 w-full cursor-pointer rounded-2xl border border-line bg-surface px-4 text-base font-semibold text-ink outline-none backdrop-blur-xl transition-all duration-300 focus:border-line-strong [&>option]:bg-white [&>option]:text-slate-900"
           >
             {MOTIVOS_SALIDA.map((name) => (
               <option key={name} value={name}>
@@ -161,13 +170,13 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {delta !== 0 && (
           <p className="mt-3 flex items-center gap-1.5 rounded-2xl border border-line bg-surface px-3 py-2 text-xs font-semibold text-muted backdrop-blur-xl">
             {movementType === 'entrada' ? (
-              <PackagePlus size={14} className="shrink-0 text-emerald-300" aria-hidden="true" />
+              <PackagePlus size={14} className="shrink-0 text-emerald-600" aria-hidden="true" />
             ) : (
-              <PackageMinus size={14} className="shrink-0 text-rose-300" aria-hidden="true" />
+              <PackageMinus size={14} className="shrink-0 text-rose-600" aria-hidden="true" />
             )}
             <span>
               Movimiento de{' '}
-              <span className={delta > 0 ? 'font-black text-emerald-200' : 'font-black text-rose-200'}>
+              <span className={delta > 0 ? 'font-black text-emerald-700' : 'font-black text-rose-700'}>
                 {movementType} {Math.abs(delta)}
               </span>{' '}
               · {motivo} · queda en {parsed}.
@@ -201,7 +210,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-2xl border border-rose-200/30 bg-rose-400/20 px-4 py-2 text-sm font-bold text-rose-100"
+            className="mt-3 rounded-2xl border border-rose-200 bg-rose-100 px-4 py-2 text-sm font-bold text-rose-700"
           >
             {error}
           </p>
@@ -218,7 +227,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
           <button
             type="submit"
             disabled={submitting}
-            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-gradient-to-br from-sky-400/90 to-sky-600/90 text-sm font-black text-ink shadow-[0_14px_36px_-14px_rgba(56,189,248,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="h-12 flex-[2] rounded-2xl border border-sky-200/30 bg-sky-500 text-sm font-black text-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {submitting ? 'Guardando…' : 'Ajustar stock'}
           </button>
