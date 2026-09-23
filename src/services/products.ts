@@ -4,6 +4,7 @@ import type {
   ProductosRow,
   RegistrarAjusteManualResult,
 } from '../types/database.types'
+import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
 
 export async function fetchProducts(): Promise<ProductosRow[]> {
@@ -63,14 +64,20 @@ export async function fetchProductByName(
 export async function insertProduct(
   product: ProductosInsert,
 ): Promise<ProductosRow> {
-  const { data, error } = await supabase
-    .from('productos')
-    .insert(product)
-    .select()
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('crear_producto', {
+    p_nombre: product.nombre,
+    p_categoria: product.categoria,
+    p_codigo_barras: product.codigo_barras,
+    p_precio_venta: product.precio_venta,
+    p_costo: product.costo,
+    p_stock_inicial: product.stock_actual,
+    p_stock_minimo: product.stock_minimo,
+  })
 
   if (error) {
-    throw new Error(error.message)
+    throw new Error(
+      getFriendlyError(error, 'No se pudo crear el producto. Inténtalo de nuevo.'),
+    )
   }
 
   if (!data) {
@@ -116,82 +123,20 @@ export async function ajustarStock(
   nuevoStock: number,
   esRegalo = false,
   motivo = 'Corrección de inventario',
-  creadoPor?: string | null,
 ): Promise<RegistrarAjusteManualResult> {
   const stock = Math.max(0, Math.round(nuevoStock))
+  const { data, error } = await supabase.rpc('registrar_ajuste_manual', {
+    p_producto_id: id,
+    p_nuevo_stock: stock,
+    p_es_regalo: esRegalo,
+    p_motivo: motivo.trim() || 'Corrección de inventario',
+  })
 
-  let userId: string | null = creadoPor ?? null
-  if (!userId) {
-    try {
-      const { data: sesion } = await supabase.auth.getUser()
-      userId = sesion.user?.id ?? null
-    } catch {
-      userId = null
-    }
+  if (error) {
+    throw new Error(error.message)
   }
-
-  const { data: producto } = await supabase
-    .from('productos')
-    .select('stock_actual, costo')
-    .eq('id', id)
-    .single()
-  const stockActual = producto?.stock_actual ?? null
-  const costo = producto?.costo ?? 0
-
-  const { data: fila, error: updateError } = await supabase
-    .from('productos')
-    .update({ stock_actual: stock })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (updateError || !fila) {
-    console.error('ajustarStock: falló el UPDATE de stock_actual', {
-      updateError,
-      id,
-      stock,
-    })
-    throw new Error(
-      updateError?.message ??
-        'No se pudo ajustar el stock: el producto no existe o tu cuenta no tiene permisos (solo admin).',
-    )
+  if (!data) {
+    throw new Error('No se pudo ajustar el stock. Inténtalo de nuevo.')
   }
-
-  const diferencia = stockActual === null ? 0 : stock - stockActual
-  const esSinCosto =
-    esRegalo ||
-    motivo.toLowerCase().includes('regalo') ||
-    motivo.toLowerCase().includes('bonificación')
-  const costoUnit = esSinCosto ? 0 : costo || 0
-
-  if (diferencia !== 0) {
-    const { data, error } = await supabase
-      .from('ingresos_mercaderia')
-      .insert({
-        producto_id: id,
-        cantidad: diferencia,
-        cantidad_ingresada: stock,
-        fecha: new Date().toISOString(),
-        motivo,
-        costo_unitario: costoUnit,
-        costo_total: Math.abs(diferencia) * costoUnit,
-        creado_por: userId || null,
-      } as never)
-      .select()
-      .maybeSingle()
-
-    console.log('Respuesta de inserción ingresos_mercaderia:', data, error)
-
-    if (error) {
-      console.error('Error al insertar ajuste en ingresos_mercaderia:', error)
-    }
-
-    return {
-      ingreso_id: data?.id ?? null,
-      stock_actual: fila.stock_actual,
-      delta: diferencia,
-    }
-  }
-
-  return { ingreso_id: null, stock_actual: fila.stock_actual, delta: diferencia }
+  return data
 }

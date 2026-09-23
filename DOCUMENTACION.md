@@ -1,4 +1,6 @@
-# Bodega POS — Documentación Técnica
+# Bodega POS — Documentación Técnica histórica
+
+> Este documento conserva la evolución de las primeras fases. Para ejecutar el sistema actual usa `README.md` y aplica `supabase/corregimientos_finales.sql`; algunas secciones herein describen Google OAuth, permisos oRPC que ya no son el estado final.
 
 Sistema de punto de venta (POS) para una bodega, construido en **5 fases incrementales**.
 Este documento explica en detalle cada fase, el modelo de datos, los scripts SQL de Supabase

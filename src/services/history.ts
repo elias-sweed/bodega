@@ -1,5 +1,4 @@
 import type {
-  AjustesStockRow,
   DetalleVentasRow,
   IngresosMercaderiaRow,
   ProductosRow,
@@ -74,44 +73,29 @@ export async function fetchProductNames(
   return data
 }
 
-export async function fetchAjustesLegacy(): Promise<AjustesStockRow[]> {
-  try {
-    const { data, error } = await supabase
-      .from('ajustes_stock')
-      .select('*')
-      .order('fecha', { ascending: false })
-
-    if (error) {
-      return []
-    }
-
-    return data ?? []
-  } catch {
-    return []
-  }
-}
-
 export async function fetchIngresosHistory(): Promise<IngresosMercaderiaRow[]> {
   const { data, error } = await supabase
     .from('ingresos_mercaderia')
     .select(
       `id,
+       compra_id,
+       proveedor_id,
+       nombre_proveedor,
        producto_id,
-       cantidad,
        cantidad_ingresada,
+       costo_total,
+       comprobante,
        motivo,
        fecha,
-       costo_total,
+       created_at,
        creado_por,
        productos ( nombre )`,
     )
     .order('fecha', { ascending: false })
 
-  console.log('Ingresos cargados en Correcciones:', data)
-
   if (error) {
     throw new Error('No se pudo cargar el historial de compras')
   }
 
-  return (data ?? []) as unknown as IngresosMercaderiaRow[]
+  return data ?? []
 }

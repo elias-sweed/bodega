@@ -10,7 +10,7 @@
 // La service_role key NUNCA sale de aquí: el navegador no la ve.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.115.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,6 +69,22 @@ serve(async (req: Request) => {
     }
     if (rol !== 'admin' && rol !== 'cajero') {
       return json({ error: 'Rol inválido (usa admin o cajero)' }, 400)
+    }
+
+    const { data: targetRow } = await admin
+      .from('usuarios_autorizados')
+      .select('rol')
+      .eq('email', email)
+      .maybeSingle()
+    if (targetRow?.rol === 'admin' && rol !== 'admin') {
+      const { count } = await admin
+        .from('usuarios_autorizados')
+        .select('email', { count: 'exact', head: true })
+        .eq('rol', 'admin')
+        .neq('email', email)
+      if ((count ?? 0) === 0) {
+        return json({ error: 'No se puede quitar el rol del último administrador' }, 400)
+      }
     }
 
     // Crea la cuenta de acceso (ya confirmada, con clave temporal aleatoria).

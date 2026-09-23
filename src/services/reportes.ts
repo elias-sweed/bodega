@@ -9,9 +9,7 @@ const CHUNK = 200
 
 function chunks<T>(items: T[], size: number): T[][] {
   const out: T[][] = []
-  for (let i = 0; i < items.length; i += size) {
-    out.push(items.slice(i, i + size))
-  }
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size))
   return out
 }
 
@@ -21,15 +19,11 @@ export async function fetchVentasMes(
 ): Promise<VentasRow[]> {
   const { data, error } = await supabase
     .from('ventas')
-    .select('id, total, fecha, metodo_pago, origen, ticket_externo, creado_por')
+    .select('id, total, fecha, metodo_pago, origen, ticket_externo, idempotency_key, creado_por')
     .gte('fecha', desdeISO)
     .lt('fecha', hastaISO)
     .order('fecha', { ascending: false })
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
+  if (error) throw new Error(error.message)
   return data ?? []
 }
 
@@ -42,14 +36,27 @@ export async function fetchDetalleVentasMes(
       .from('detalle_ventas')
       .select('id, venta_id, producto_id, cantidad, precio_unitario, subtotal, costo_unitario')
       .in('venta_id', group)
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
+    if (error) throw new Error(error.message)
     out.push(...(data ?? []))
   }
   return out
+}
+
+export async function fetchProductosReporte(
+  productoIds: string[],
+): Promise<Map<string, { nombre: string; costo: number }>> {
+  const productos = new Map<string, { nombre: string; costo: number }>()
+  for (const group of chunks(productoIds, CHUNK)) {
+    const { data, error } = await supabase
+      .from('productos')
+      .select('id, nombre, costo')
+      .in('id', group)
+    if (error) throw new Error(error.message)
+    for (const row of data ?? []) {
+      productos.set(row.id, { nombre: row.nombre, costo: row.costo })
+    }
+  }
+  return productos
 }
 
 export async function fetchCostosProductos(
@@ -61,14 +68,8 @@ export async function fetchCostosProductos(
       .from('productos')
       .select('id, costo')
       .in('id', group)
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    for (const row of data ?? []) {
-      costos.set(row.id, row.costo)
-    }
+    if (error) throw new Error(error.message)
+    for (const row of data ?? []) costos.set(row.id, row.costo)
   }
   return costos
 }
@@ -81,22 +82,21 @@ export async function fetchIngresosMes(
     .from('ingresos_mercaderia')
     .select(
       `id,
+       compra_id,
+       proveedor_id,
+       nombre_proveedor,
        producto_id,
-       cantidad,
        cantidad_ingresada,
-       motivo,
-       costo_unitario,
        costo_total,
+       comprobante,
+       motivo,
        fecha,
+       created_at,
        creado_por`,
     )
-    .gte('fecha', desdeISO)
-    .lt('fecha', hastaISO)
-    .order('fecha', { ascending: false })
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return (data ?? []) as IngresosMercaderiaRow[]
+    .gte('created_at', desdeISO)
+    .lt('created_at', hastaISO)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return data ?? []
 }

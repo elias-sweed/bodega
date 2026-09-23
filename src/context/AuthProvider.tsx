@@ -5,6 +5,7 @@ import { AuthContext } from './AuthContext'
 import type { AuthContextValue } from './AuthContext'
 import { supabase } from '../services/supabase'
 import { fetchRol } from '../services/roles'
+import { resetProductsCache } from '../services/productsCache'
 import type { UsuarioRol } from '../types/database.types'
 
 function getAppUrl(): string {
@@ -144,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       manualSignOut.current = false
       throw new Error(error.message)
     }
+    resetProductsCache()
   }, [])
 
   const acknowledgeExpired = useCallback((): void => {

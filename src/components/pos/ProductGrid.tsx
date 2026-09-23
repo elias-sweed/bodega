@@ -3,7 +3,7 @@ import { ProductButton } from './ProductButton'
 
 interface ProductGridProps {
   products: ProductosRow[]
-  title: string
+  title?: string
   cartQuantities: Map<string, number>
   highlightId: string | null
   onAdd: (product: ProductosRow) => void
@@ -33,9 +33,11 @@ export function ProductGrid({
 
   return (
     <section className="fade-in">
-      <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
-        {title}
-      </h2>
+      {title && (
+        <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
+          {title}
+        </h2>
+      )}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         {products.map((product) => (
           <ProductButton

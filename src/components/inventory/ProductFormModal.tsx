@@ -313,7 +313,7 @@ export function ProductFormModal({
     }
   }
 
-  const showStockField = Boolean(initial)
+  const showStockField = true
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()

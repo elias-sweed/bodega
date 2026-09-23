@@ -1,3 +1,4 @@
+/* oxlint-disable react/set-state-in-effect -- La paginación se reinicia al cambiar filtros. */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDown,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
-import { exportExcel } from '../../utils/exportExcel'
+import { exportCsv } from '../../utils/exportCsv'
 import { StockBadge } from './StockBadge'
 
 interface ProductTableProps {
@@ -296,7 +297,7 @@ export function ProductTable({
   const handleExport = (): void => {
     const now = new Date()
     const pad = (n: number): string => String(n).padStart(2, '0')
-    const filename = `inventario-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.xlsx`
+    const filename = `inventario-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.csv`
     const header = [
       'N.º',
       'Producto',
@@ -324,7 +325,7 @@ export function ProductTable({
         stockLevelLabel(product.stock_actual, product.stock_minimo),
       ]
     })
-    exportExcel([header, ...rows], filename)
+    exportCsv([header, ...rows], filename)
   }
 
   const start = (page - 1) * PAGE_SIZE
@@ -392,7 +393,7 @@ export function ProductTable({
         <button
           type="button"
           onClick={handleExport}
-          title="Exportar los productos filtrados a Excel"
+          title="Exportar los productos filtrados para Excel"
           className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
         >
           <Download size={16} aria-hidden="true" />
@@ -580,18 +581,16 @@ export function ProductTable({
                       Margen {renderSortIcon('margen')}
                     </button>
                   </th>
-                  {isAdmin && (
-                    <th className={`${thClass} text-right`}>
-                      <button
-                        type="button"
-                        onClick={() => toggleSort('costo')}
-                        title="Ordenar por costo"
-                        className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                      >
-                        Costo {renderSortIcon('costo')}
-                      </button>
-                    </th>
-                  )}
+                  <th className={`${thClass} text-right`}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSort('costo')}
+                      title="Ordenar por costo"
+                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
+                    >
+                      Costo {renderSortIcon('costo')}
+                    </button>
+                  </th>
                   <th className={`${thClass} text-right`}>
                     <button
                       type="button"
@@ -664,11 +663,9 @@ export function ProductTable({
                           </span>
                         )}
                       </td>
-                      {isAdmin && (
-                        <td className="px-5 py-3 text-right tabular-nums text-muted">
-                          {formatMoney(product.costo)}
-                        </td>
-                      )}
+                      <td className="px-5 py-3 text-right tabular-nums text-muted">
+                        {formatMoney(product.costo)}
+                      </td>
                       <td
                         className={`px-5 py-3 text-right font-black tabular-nums ${
                           lowStock ? 'text-loss' : 'text-ink'
@@ -696,33 +693,37 @@ export function ProductTable({
                             <History size={13} strokeWidth={2.5} aria-hidden="true" />
                             Movimientos
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => onEdit?.(product)}
-                            title="Editar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/15 px-3 py-1.5 text-xs font-black text-sky-200 backdrop-blur-xl transition-all duration-200 hover:bg-sky-200/60 active:scale-95"
-                          >
-                            <Pencil size={13} strokeWidth={2.5} aria-hidden="true" />
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onAdjustStock?.(product)}
-                            title="Ajustar stock"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-black text-gold backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
-                          >
-                            <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
-                            Stock
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onDelete?.(product)}
-                            title="Eliminar producto"
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-loss backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
-                          >
-                            <Trash2 size={13} strokeWidth={2.5} aria-hidden="true" />
-                            Eliminar
-                          </button>
+                          {isAdmin && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onEdit?.(product)}
+                                title="Editar producto"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-sky-400/40 bg-sky-400/15 px-3 py-1.5 text-xs font-black text-sky-200 backdrop-blur-xl transition-all duration-200 hover:bg-sky-200/60 active:scale-95"
+                              >
+                                <Pencil size={13} strokeWidth={2.5} aria-hidden="true" />
+                                Editar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onAdjustStock?.(product)}
+                                title="Ajustar stock"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-black text-gold backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
+                              >
+                                <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
+                                Stock
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDelete?.(product)}
+                                title="Eliminar producto"
+                                className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200/25 bg-rose-400/20 px-3 py-1.5 text-xs font-black text-loss backdrop-blur-xl transition-all duration-200 hover:bg-rose-400/35 active:scale-95"
+                              >
+                                <Trash2 size={13} strokeWidth={2.5} aria-hidden="true" />
+                                Eliminar
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

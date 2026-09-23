@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { subscribeToDataChanges } from '../services/dataEvents'
 import { fetchDetallesByVentas, fetchProductNames } from '../services/history'
 import { supabase } from '../services/supabase'
@@ -29,142 +29,105 @@ interface Rango {
   clave: string
 }
 
-function rangoHoy(): Rango {
-  const desde = new Date()
-  desde.setHours(0, 0, 0, 0)
-  return { desde, hasta: new Date(), clave: 'hoy' }
+const EMPTY: ResumenRango = {
+  productos: [],
+  total: 0,
+  count: 0,
+  efectivo: 0,
+  yape: 0,
+  plin: 0,
+  ganancia: 0,
 }
 
-/**
- * Totales + productos de un rango de fechas (por defecto: hoy).
- * `claveCache` distingue cada rango en localStorage.
- */
-export function useTodayProducts(rango?: Rango, claveCache = 'hoy', activo = true) {
-  const [data, setData] = useState<ResumenRango>({
-    productos: [],
-    total: 0,
-    count: 0,
-    efectivo: 0,
-    yape: 0,
-    plin: 0,
-    ganancia: 0,
-  })
+export function useTodayProducts(rango?: Rango, _claveCache = 'hoy', activo = true) {
+  const [data, setData] = useState<ResumenRango>(EMPTY)
   const [loading, setLoading] = useState(true)
   const [reloadToken, setReloadToken] = useState(0)
 
-  const cacheKey = `bodega:hoy-productos-cache:${claveCache}`
-  // Congelados por render: recalcularlos aquí provocaría refetch infinito
-  const desdeISO = useMemo(
-    () => (rango ?? rangoHoy()).desde.toISOString(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rango, claveCache],
-  )
-
   useEffect(() => {
-    if (!activo) {
-      setLoading(false)
-      return
-    }
+    if (!activo) return
     let cancelled = false
-
-    // Cache primero (por rango): se muestra directo al volver
-    try {
-      const raw = localStorage.getItem(cacheKey)
-      if (raw) {
-        const parsed = JSON.parse(raw) as { data?: ResumenRango }
-        if (parsed?.data) setData(parsed.data)
-      }
-    } catch {
-      // sin caché: se carga de red
-    }
+    const desde = rango ? new Date(rango.desde) : new Date()
+    if (!rango) desde.setHours(0, 0, 0, 0)
+    const hasta = rango ? new Date(rango.hasta) : new Date()
 
     void (async () => {
       try {
-        // `hasta` se calcula al momento de pedir (hoy sigue avanzando)
-        const hastaISO = (rango?.hasta ?? new Date()).toISOString()
         const { data: ventas, error } = await supabase
           .from('ventas')
           .select('id, total, metodo_pago')
-          .gte('fecha', desdeISO)
-          .lt('fecha', hastaISO)
+          .gte('fecha', desde.toISOString())
+          .lt('fecha', hasta.toISOString())
         if (error) throw error
-        const lista = (ventas ?? []) as {
-          id: string
-          total: number
-          metodo_pago: string
-        }[]
-        const ids = lista.map((v) => String(v.id))
-        const total = lista.reduce((s, v) => s + (Number(v.total) || 0), 0)
-        const porMetodo = (m: string): number =>
+
+        const lista = ventas ?? []
+        const ids = lista.map((venta) => venta.id)
+        const total = lista.reduce((sum, venta) => sum + Number(venta.total || 0), 0)
+        const porMetodo = (metodo: string): number =>
           lista
-            .filter((v) => v.metodo_pago === m)
-            .reduce((s, v) => s + (Number(v.total) || 0), 0)
+            .filter((venta) => venta.metodo_pago === metodo)
+            .reduce((sum, venta) => sum + Number(venta.total || 0), 0)
 
         let productos: ProductoHoy[] = []
         let ganancia = 0
-        if (ids.length > 0) {
+        if (ids.length) {
           const items = await fetchDetallesByVentas(ids)
-          const pids = [
+          const productoIds = [
             ...new Set(
-              items.map((i) => i.producto_id).filter((id): id is string => id !== null),
+              items
+                .map((item) => item.producto_id)
+                .filter((id): id is string => id !== null),
             ),
           ]
-          const rows = await fetchProductNames(pids)
-          const info = new Map(rows.map((r) => [r.id, r] as const))
-          const porProducto = new Map<string, ProductoHoy>()
+          const rows = await fetchProductNames(productoIds)
+          const info = new Map(rows.map((row) => [row.id, row]))
+          const grouped = new Map<string, ProductoHoy>()
           for (const item of items) {
-            const pid = item.producto_id ?? 'sin-id'
-            const actual = porProducto.get(pid) ?? {
-              id: pid,
-              nombre: info.get(pid)?.nombre ?? 'Producto eliminado',
+            const id = item.producto_id ?? 'sin-id'
+            const current = grouped.get(id) ?? {
+              id,
+              nombre: info.get(id)?.nombre ?? 'Producto eliminado',
               cantidad: 0,
               precioUnitario: item.precio_unitario,
               cobrado: 0,
               costoTotal: 0,
               ganancia: 0,
             }
-            const costo = item.costo_unitario ?? info.get(pid)?.costo ?? 0
-            actual.cantidad += item.cantidad
-            actual.cobrado += item.subtotal
-            actual.costoTotal += costo * item.cantidad
-            actual.ganancia += item.subtotal - costo * item.cantidad
-            porProducto.set(pid, actual)
+            const costo = item.costo_unitario ?? info.get(id)?.costo ?? 0
+            current.cantidad += item.cantidad
+            current.cobrado += item.subtotal
+            current.costoTotal += costo * item.cantidad
+            current.ganancia += item.subtotal - costo * item.cantidad
+            grouped.set(id, current)
           }
-          productos = [...porProducto.values()].sort((a, b) => b.cobrado - a.cobrado)
-          ganancia = productos.reduce((s, p) => s + p.ganancia, 0)
+          productos = [...grouped.values()].sort((a, b) => b.cobrado - a.cobrado)
+          ganancia = productos.reduce((sum, producto) => sum + producto.ganancia, 0)
         }
 
-        if (cancelled) return
-        const result: ResumenRango = {
-          productos,
-          total,
-          count: lista.length,
-          efectivo: porMetodo('Efectivo'),
-          yape: porMetodo('Yape'),
-          plin: porMetodo('Plin'),
-          ganancia,
-        }
-        setData(result)
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify({ data: result }))
-        } catch {
-          // sin almacenamiento: se sigue mostrando lo cargado
+        if (!cancelled) {
+          setData({
+            productos,
+            total,
+            count: lista.length,
+            efectivo: porMetodo('Efectivo'),
+            yape: porMetodo('Yape'),
+            plin: porMetodo('Plin'),
+            ganancia,
+          })
         }
       } catch {
-        // sin red: se queda lo de caché
+        if (!cancelled) setData(EMPTY)
       } finally {
         if (!cancelled) setLoading(false)
       }
     })()
+
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reloadToken, desdeISO, cacheKey, activo])
+  }, [rango, activo, reloadToken])
 
-  useEffect(() => {
-    return subscribeToDataChanges(() => setReloadToken((t) => t + 1))
-  }, [])
+  useEffect(() => subscribeToDataChanges(() => setReloadToken((token) => token + 1)), [])
 
   return { ...data, loading }
 }

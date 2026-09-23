@@ -1,5 +1,8 @@
 import type { CartItem } from '../types'
-import type { RegistrarVentaResult } from '../types/database.types'
+import type {
+  RegistrarVentaBackfillResult,
+  RegistrarVentaResult,
+} from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
 
@@ -34,16 +37,17 @@ const UUID_RE =
 export async function registrarVenta(
   items: CartItem[],
   metodoPago: string,
+  idempotencyKey: string = crypto.randomUUID(),
 ): Promise<RegistrarVentaResult> {
   const articulos = items.map((item) => ({
     producto_id: item.product.id,
     cantidad: item.quantity,
-    precio_unitario: item.product.precio_venta,
   }))
 
-  const { data, error } = await supabase.rpc('registrar_venta', {
+  const { data, error } = await supabase.rpc('registrar_venta_caja', {
     p_articulos: articulos,
     p_metodo_pago: metodoPago,
+    p_idempotency_key: idempotencyKey,
   })
 
   if (error) {
@@ -90,20 +94,11 @@ export type BackfillItem = {
   precio_unitario: number
 }
 
-export type RegistrarVentaBackfillResult = {
-  venta_id: string
-  total: number
-  stock_negativo: boolean
-}
-
-type RpcCaller = (
-  fn: string,
-  args: Record<string, unknown>,
-) => Promise<{ data: unknown; error: { message: string } | null }>
+export type { RegistrarVentaBackfillResult }
 
 /**
- * Registra una venta pasada (fecha explícita) con tolerancia de stock.
- * Requiere la migración `supabase/importar_ventas_offline.sql` ejecutada.
+ * Registra una venta pasada (fecha explícita) usando el precio histórico
+ * indicado en el archivo. Requiere la migración final aplicada.
  */
 export async function registrarVentaBackfill(
   items: BackfillItem[],
@@ -111,8 +106,7 @@ export async function registrarVentaBackfill(
   fechaISO: string,
   ticket: string,
 ): Promise<RegistrarVentaBackfillResult> {
-  const rpc = supabase.rpc as unknown as RpcCaller
-  const { data, error } = await rpc('registrar_venta_backfill', {
+  const { data, error } = await supabase.rpc('registrar_venta_backfill', {
     p_articulos: items,
     p_metodo_pago: metodoPago,
     p_fecha: fechaISO,

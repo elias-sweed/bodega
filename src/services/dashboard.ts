@@ -59,6 +59,7 @@ export async function fetchVentasUltimos7Dias(): Promise<VentaDiaria[]> {
     .from('ventas')
     .select('id, fecha, total')
     .gte('fecha', desde.toISOString())
+    .lt('fecha', new Date().toISOString())
     .order('fecha', { ascending: true })
 
   if (error) {

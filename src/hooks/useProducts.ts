@@ -34,7 +34,7 @@ export function useProducts() {
       const cached = getProductsCache()
       setProducts(cached.products ?? [])
       setError(cached.error)
-      if (cached.products !== null) {
+      if (cached.products !== null || cached.error !== null) {
         setLoading(false)
       }
     }
@@ -52,13 +52,13 @@ export function useProducts() {
         setLoading(true)
       }
     }
-    refreshProductsCache(true)
+    refreshProductsCache()
   }, [])
 
   const addProduct = useCallback(
     async (input: ProductosInsert): Promise<ProductosRow> => {
       const created = await insertProduct(input)
-      refreshProductsCache(true)
+      await refreshProductsCache()
       return created
     },
     [],
@@ -86,14 +86,14 @@ export function useProducts() {
         p_nuevo_stock: input.nuevoStock,
         p_motivo: input.motivo,
       })
-      refreshProductsCache(true)
+      await refreshProductsCache()
     },
     [],
   )
 
   const deleteProduct = useCallback(async (id: string): Promise<void> => {
     await removeProduct(id)
-    refreshProductsCache(true)
+    await refreshProductsCache()
   }, [])
 
   return { products, loading, error, refresh, addProduct, updateProduct, deleteProduct }

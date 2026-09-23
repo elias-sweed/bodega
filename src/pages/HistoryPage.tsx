@@ -14,6 +14,7 @@ import { ComprasTab } from '../components/history/ComprasTab'
 import type { HistoryFilter } from '../components/history/types'
 import { VentasTab } from '../components/history/VentasTab'
 import { ImportVentasModal } from '../components/import/ImportVentasModal'
+import { useAuth } from '../hooks/useAuth'
 import type { FranjaId } from '../utils/format'
 
 type TabId = 'ventas' | 'compras' | 'ajustes'
@@ -93,6 +94,7 @@ function rangeToFilter(
 }
 
 export function HistoryPage() {
+  const { rol } = useAuth()
   const [tab, setTab] = useState<TabId>('ventas')
   const [range, setRange] = useState<RangeId>('todo')
   const [customDate, setCustomDate] = useState(() => toInputDate(new Date()))
@@ -119,14 +121,16 @@ export function HistoryPage() {
             Qué vendiste y qué compraste, por día y por horario.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowImport(true)}
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
-        >
-          <Upload size={16} aria-hidden="true" />
-          Importar Excel
-        </button>
+        {rol === 'admin' && (
+          <button
+            type="button"
+            onClick={() => setShowImport(true)}
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-extrabold text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
+          >
+            <Upload size={16} aria-hidden="true" />
+            Importar ventas
+          </button>
+        )}
       </header>
 
       <div className="flex flex-col gap-3">

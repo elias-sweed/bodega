@@ -47,6 +47,8 @@ export function PurchasesPage() {
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
+  const purchaseKeyRef = useRef<string | null>(null)
+  const purchaseFingerprintRef = useRef<string | null>(null)
 
   const showNotice = useCallback(
     (type: Notice['type'], message: string, action?: Notice['action']): void => {
@@ -115,6 +117,8 @@ export function PurchasesPage() {
   }
 
   const resetForm = (): void => {
+    purchaseKeyRef.current = null
+    purchaseFingerprintRef.current = null
     setProveedorId(PROVEEDOR_GENERICO)
     setComprobante('')
     setItems([])
@@ -134,16 +138,29 @@ export function PurchasesPage() {
     setSaving(true)
     const proveedorReal = proveedores.find((proveedor) => proveedor.id === proveedorId)
     const nombreProveedor = proveedorReal ? proveedorReal.nombre : null
+    const itemsPayload = items.map((item) => ({
+      producto_id: item.producto.id,
+      cantidad: Number(item.cantidad),
+      costo_total: Number(item.costoTotal),
+    }))
+    const fingerprint = JSON.stringify({
+      proveedorId,
+      comprobante: comprobante.trim(),
+      items: itemsPayload,
+    })
+    if (purchaseFingerprintRef.current !== fingerprint) {
+      purchaseKeyRef.current = crypto.randomUUID()
+      purchaseFingerprintRef.current = fingerprint
+    }
+    const idempotencyKey = purchaseKeyRef.current ?? crypto.randomUUID()
+    purchaseKeyRef.current = idempotencyKey
     try {
       await registrarCompra({
         proveedorId: proveedorId === PROVEEDOR_GENERICO ? null : proveedorId,
         nombreProveedor,
         comprobante: comprobante.trim() || null,
-        items: items.map((item) => ({
-          producto_id: item.producto.id,
-          cantidad: Number(item.cantidad),
-          costo_total: Number(item.costoTotal),
-        })),
+        items: itemsPayload,
+        idempotencyKey,
       })
       showNotice(
         'success',
@@ -156,6 +173,8 @@ export function PurchasesPage() {
             }),
         },
       )
+      purchaseKeyRef.current = null
+      purchaseFingerprintRef.current = null
       resetForm()
       refreshProductos(true)
       emitDataChanged()

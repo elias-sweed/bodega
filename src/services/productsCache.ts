@@ -3,51 +3,14 @@ import type { ProductosRow } from '../types/database.types'
 import { fetchProducts } from './products'
 import { supabase } from './supabase'
 
-/**
- * Tienda en memoria de productos + suscripción "en vivo".
- *
- * El catálogo se carga UNA vez (o se refresca cuando algo cambia) y se comparte
- * entre pantallas. Así, al navegar entre secciones no se vuelve a mostrar
- * "Cargando…" ni se descarga todo de nuevo, y cualquier venta/compra que
- * cambie el stock se refleja al instante en TODAS las pantallas.
- *
- * Requisito: la tabla `productos` debe estar en la publicación de Supabase
- * Realtime (ver supabase/realtime.sql).
- */
-
 type Listener = () => void
 
-const PRODUCTS_CACHE_KEY = 'bodega:products-cache:v1'
-
-function readPersistedCache(): ProductosRow[] | null {
-  try {
-    const raw = localStorage.getItem(PRODUCTS_CACHE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as { products: ProductosRow[] }
-    if (!Array.isArray(parsed?.products)) return null
-    return parsed.products
-  } catch {
-    return null
-  }
-}
-
-function persistCache(products: ProductosRow[]): void {
-  try {
-    localStorage.setItem(
-      PRODUCTS_CACHE_KEY,
-      JSON.stringify({ products, savedAt: Date.now() }),
-    )
-  } catch {
-    // almacenamiento lleno o bloqueado: no es crítico
-  }
-}
-
-let cache: ProductosRow[] | null = readPersistedCache()
+let cache: ProductosRow[] | null = null
 let errorState: string | null = null
 let inFlight: Promise<void> | null = null
-let queuedForce = false
 let channel: RealtimeChannel | null = null
 let refreshTimer: number | null = null
+let cacheGeneration = 0
 const listeners = new Set<Listener>()
 
 function sortByName(products: ProductosRow[]): ProductosRow[] {
@@ -55,53 +18,38 @@ function sortByName(products: ProductosRow[]): ProductosRow[] {
 }
 
 function notify(): void {
-  for (const listener of Array.from(listeners)) {
-    listener()
-  }
+  for (const listener of Array.from(listeners)) listener()
 }
 
-async function fetcher(): Promise<void> {
-  const data = await fetchProducts()
-  cache = sortByName(data)
-  errorState = null
-  persistCache(cache)
-}
-
-async function load(): Promise<void> {
-  const force = queuedForce
-  queuedForce = false
-
+async function load(forceAfterCurrent = false): Promise<void> {
   if (inFlight) {
-    if (!force) {
-      await inFlight
-      return
-    }
-    // Refresco forzado: aunque haya una carga en curso, encadena OTRO viaje a la
-    // base de datos para que el nuevo stock se vea al instante.
-    const current = inFlight
-    inFlight = (async () => {
-      try {
-        await current
-      } catch {
-        // se ignora: abajo se lanza el nuevo viaje
-      }
-      await fetcher()
-    })()
-  } else {
-    inFlight = fetcher()
+    await inFlight
+    if (forceAfterCurrent) return load()
+    return
   }
 
-  try {
-    await inFlight
-  } catch (cause) {
-    if (cache === null) {
-      errorState =
-        cause instanceof Error ? cause.message : 'Error al cargar los productos'
+  const generation = cacheGeneration
+  inFlight = (async () => {
+    try {
+      const products = await fetchProducts()
+      if (generation === cacheGeneration) {
+        cache = sortByName(products)
+        errorState = null
+      }
+    } catch (cause) {
+      if (generation === cacheGeneration) {
+        errorState =
+          cause instanceof Error ? cause.message : 'No se pudieron cargar los productos'
+      }
+    } finally {
+      if (generation === cacheGeneration) {
+        inFlight = null
+        notify()
+      }
     }
-  } finally {
-    inFlight = null
-    notify()
-  }
+  })()
+
+  await inFlight
 }
 
 function ensureChannel(): void {
@@ -112,12 +60,8 @@ function ensureChannel(): void {
       'postgres_changes',
       { event: '*', schema: 'public', table: 'productos' },
       () => {
-        if (refreshTimer) {
-          window.clearTimeout(refreshTimer)
-        }
-        refreshTimer = window.setTimeout(() => {
-          void load()
-        }, 400)
+        if (refreshTimer !== null) window.clearTimeout(refreshTimer)
+        refreshTimer = window.setTimeout(() => void load(), 300)
       },
     )
     .subscribe()
@@ -132,39 +76,39 @@ export function getProductsCache(): {
 
 export function subscribeToProducts(listener: Listener): () => void {
   listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
+  return () => listeners.delete(listener)
 }
 
 export function ensureProductsLoaded(): void {
-  if (cache === null) {
-    void load()
-  }
+  void load()
   ensureChannel()
 }
 
-export function refreshProductsCache(force = false): void {
-  if (force) {
-    queuedForce = true
-  }
-  void load()
+export function refreshProductsCache(): Promise<void> {
+  return load(true)
 }
 
-/**
- * Actualiza el stock en memoria al instante (sin esperar a la red) tras una
- * venta, para que el producto agotado desaparezca de la pantalla al momento.
- */
 export function applyStockChanges(
   changes: { id: string; stockActual: number }[],
 ): void {
   if (cache === null) return
+  const byId = new Map(changes.map((change) => [change.id, change.stockActual]))
   cache = sortByName(
     cache.map((product) => {
-      const change = changes.find((item) => item.id === product.id)
-      return change ? { ...product, stock_actual: change.stockActual } : product
+      const stock = byId.get(product.id)
+      return stock === undefined ? product : { ...product, stock_actual: stock }
     }),
   )
-  persistCache(cache)
   notify()
+}
+
+export function resetProductsCache(): void {
+  cacheGeneration += 1
+  cache = null
+  errorState = null
+  inFlight = null
+  if (refreshTimer !== null) window.clearTimeout(refreshTimer)
+  refreshTimer = null
+  void channel?.unsubscribe()
+  channel = null
 }

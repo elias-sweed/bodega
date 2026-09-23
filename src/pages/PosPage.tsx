@@ -10,6 +10,7 @@ import { PosSkeleton } from '../components/pos/PosSkeleton'
 import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { SearchBar } from '../components/pos/SearchBar'
+import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
 import { emitDataChanged } from '../services/dataEvents'
 import { applyStockChanges } from '../services/productsCache'
@@ -25,7 +26,7 @@ type Notice = {
   message: string
 }
 
-const SUSPENDED_SALE_KEY = 'pos_venta_suspendida_v2'
+const SUSPENDED_SALE_KEY_PREFIX = 'pos_venta_suspendida_v2'
 
 interface SuspendedSale {
   items: { id: string; cantidad: number }[]
@@ -47,9 +48,9 @@ function isLegacySuspendedSale(value: unknown): value is CartItem[] {
   )
 }
 
-function readSuspendedSale(): SuspendedSale | null {
+function readSuspendedSale(key: string): SuspendedSale | null {
   try {
-    const raw = window.localStorage.getItem(SUSPENDED_SALE_KEY)
+    const raw = window.localStorage.getItem(key)
     if (!raw) return null
     const parsed: unknown = JSON.parse(raw)
 
@@ -90,12 +91,12 @@ function readSuspendedSale(): SuspendedSale | null {
   }
 }
 
-function writeSuspendedSale(sale: SuspendedSale): void {
-  window.localStorage.setItem(SUSPENDED_SALE_KEY, JSON.stringify(sale))
+function writeSuspendedSale(key: string, sale: SuspendedSale): void {
+  window.localStorage.setItem(key, JSON.stringify(sale))
 }
 
-function clearSuspendedSale(): void {
-  window.localStorage.removeItem(SUSPENDED_SALE_KEY)
+function clearSuspendedSale(key: string): void {
+  window.localStorage.removeItem(key)
 }
 
 function normalizeText(value: string): string {
@@ -105,7 +106,17 @@ function normalizeText(value: string): string {
     .replace(/[\u0300-\u036f]/g, '')
 }
 
+function orderProductsForCaja(products: ProductosRow[]): ProductosRow[] {
+  return [...products].sort((a, b) => {
+    const agotadoA = a.stock_actual <= 0 ? 1 : 0
+    const agotadoB = b.stock_actual <= 0 ? 1 : 0
+    return agotadoA - agotadoB || a.nombre.localeCompare(b.nombre, 'es')
+  })
+}
+
 export function PosPage() {
+  const { user } = useAuth()
+  const suspendedSaleKey = `${SUSPENDED_SALE_KEY_PREFIX}:${user?.id ?? 'anon'}`
   const { products, loading, error, refresh } = useProducts()
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState('')
@@ -114,7 +125,7 @@ export function PosPage() {
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const [suspendedSale, setSuspendedSale] = useState<SuspendedSale | null>(() =>
-    readSuspendedSale(),
+    readSuspendedSale(suspendedSaleKey),
   )
   const [lastSale, setLastSale] = useState<LastSale | null>(null)
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(METODO_PAGO_DEFAULT)
@@ -122,6 +133,7 @@ export function PosPage() {
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
   const highlightTimer = useRef<number | undefined>(undefined)
+  const saleKeyRef = useRef<string | null>(null)
 
   const flashHighlight = useCallback((productId: string): void => {
     setHighlightId(productId)
@@ -142,18 +154,23 @@ export function PosPage() {
     }
   }, [])
 
+  const outOfStockProducts = useMemo(
+    () => products.filter((product) => product.stock_actual <= 0),
+    [products],
+  )
   const categories = useMemo(() => deriveCategories(products), [products])
 
   const query = normalizeText(search)
   const isSearching = query.length > 0
 
   const filteredProducts = useMemo((): ProductosRow[] => {
-    const disponibles = products.filter((product) => product.stock_actual > 0)
     const source = isSearching
-      ? disponibles
+      ? orderProductsForCaja(products)
       : selectedCategory
-        ? disponibles.filter(
-            (product) => product.categoria === selectedCategory.id,
+        ? orderProductsForCaja(
+            products.filter(
+              (product) => product.categoria === selectedCategory.id,
+            ),
           )
         : []
 
@@ -251,6 +268,7 @@ export function PosPage() {
 
   const openPayment = (): void => {
     if (cart.length === 0 || charging) return
+    saleKeyRef.current ??= crypto.randomUUID()
     setPaymentOpen(true)
   }
 
@@ -258,12 +276,27 @@ export function PosPage() {
     if (cart.length === 0 || charging) return
     setCharging(true)
     try {
-      const result = await registrarVenta(cart, metodoPago)
+      const idempotencyKey = saleKeyRef.current ?? crypto.randomUUID()
+      saleKeyRef.current = idempotencyKey
+      const result = await registrarVenta(cart, metodoPago, idempotencyKey)
+      const receiptItems = cart.map((item) => {
+        const serverItem = result.items.find(
+          (detail) => detail.producto_id === item.product.id,
+        )
+        return {
+          ...item,
+          quantity: serverItem?.cantidad ?? item.quantity,
+          product: {
+            ...item.product,
+            precio_venta: serverItem?.precio_unitario ?? item.product.precio_venta,
+          },
+        }
+      })
       setLastSale({
         venta_id: result.venta_id,
         total: result.total,
         fecha: new Date().toISOString(),
-        items: cart,
+        items: receiptItems,
         metodo_pago: metodoPago,
       })
       const soldOut = cart.filter(
@@ -288,6 +321,7 @@ export function PosPage() {
           stockActual: item.product.stock_actual - item.quantity,
         })),
       )
+      saleKeyRef.current = null
       refresh(true)
       emitDataChanged()
     } catch (cause) {
@@ -330,7 +364,7 @@ export function PosPage() {
       ),
       count: cart.reduce((sum, item) => sum + item.quantity, 0),
     }
-    writeSuspendedSale(sale)
+    writeSuspendedSale(suspendedSaleKey, sale)
     setSuspendedSale(sale)
     setCart([])
     showNotice('success', `Venta suspendida (${sale.count} ${
@@ -360,7 +394,7 @@ export function PosPage() {
       }
       cartRestored.push({ product, quantity })
     }
-    clearSuspendedSale()
+    clearSuspendedSale(suspendedSaleKey)
     setSuspendedSale(null)
 
     if (cartRestored.length === 0) {
@@ -391,7 +425,7 @@ export function PosPage() {
   }
 
   const confirmDiscardSuspended = (): void => {
-    clearSuspendedSale()
+    clearSuspendedSale(suspendedSaleKey)
     setSuspendedSale(null)
     setDiscardOpen(false)
     showNotice('success', 'Venta suspendida descartada')
@@ -451,14 +485,38 @@ export function PosPage() {
         onDecrease={decreaseQuantity}
       />
     </div>
+  ) : products.length === 0 ? (
+    <section className="rounded-[28px] border border-dashed border-line bg-surface p-10 text-center">
+      <h2 className="text-lg font-black tracking-tight text-ink">
+        No hay productos en el inventario
+      </h2>
+      <p className="mt-2 text-sm font-medium text-muted">
+        Los productos creados en Inventario aparecerán aquí automáticamente.
+      </p>
+    </section>
   ) : (
-    <CategoryGrid
-      categories={categories}
-      onSelect={(category) => {
-        setSelectedCategory(category)
-        setSearch('')
-      }}
-    />
+    <div className="fade-in space-y-8">
+      {categories.length > 0 && (
+        <CategoryGrid
+          categories={categories}
+          onSelect={(category) => {
+            setSelectedCategory(category)
+            setSearch('')
+          }}
+        />
+      )}
+      {outOfStockProducts.length > 0 && (
+        <ProductGrid
+          products={outOfStockProducts}
+          title="Productos agotados"
+          cartQuantities={cartQtyById}
+          highlightId={highlightId}
+          onAdd={addProduct}
+          onIncrease={increaseQuantity}
+          onDecrease={decreaseQuantity}
+        />
+      )}
+    </div>
   )
 
   return (
@@ -551,6 +609,7 @@ export function PosPage() {
           onConfirm={() => void confirmPayment()}
           onCancel={() => {
             if (!charging) {
+              saleKeyRef.current = null
               setPaymentOpen(false)
             }
           }}

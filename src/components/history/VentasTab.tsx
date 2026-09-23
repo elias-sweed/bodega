@@ -24,40 +24,9 @@ type Notice = {
   message: string
 }
 
-const SUMMARIES_CACHE_KEY = 'bodega:ventas-summaries-cache:v1'
-
 interface VentaSummary {
   texto: string
   ganancia: number
-}
-
-function readSummariesCache(): Record<string, VentaSummary> {
-  try {
-    const raw = localStorage.getItem(SUMMARIES_CACHE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw) as { summaries?: Record<string, VentaSummary | string> }
-    const out: Record<string, VentaSummary> = {}
-    for (const [id, value] of Object.entries(parsed?.summaries ?? {})) {
-      // Migración: antes solo se guardaba el texto
-      out[id] = typeof value === 'string' ? { texto: value, ganancia: 0 } : value
-    }
-    return out
-  } catch {
-    return {}
-  }
-}
-
-function writeSummariesCache(summaries: Record<string, VentaSummary>): void {
-  try {
-    // Se guardan los últimos 500 para no llenar el almacenamiento
-    const entries = Object.entries(summaries).slice(-500)
-    localStorage.setItem(
-      SUMMARIES_CACHE_KEY,
-      JSON.stringify({ summaries: Object.fromEntries(entries) }),
-    )
-  } catch {
-    // almacenamiento lleno o bloqueado: no es crítico
-  }
 }
 
 const METODO_BADGES: Record<string, string> = {
@@ -81,13 +50,11 @@ function matchesFilter(venta: VentasRow, filter: HistoryFilter, numero: number):
 
 export function VentasTab({ filter }: { filter: HistoryFilter }) {
   const navigate = useNavigate()
-  const { ventas, loading, error, refresh } = useVentasHistory()
+  const { data: ventas, loading, error, refresh } = useVentasHistory()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [details, setDetails] = useState<Record<string, VentaDetail>>({})
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null)
-  const [summaries, setSummaries] = useState<Record<string, VentaSummary>>(() =>
-    readSummariesCache(),
-  )
+  const [summaries, setSummaries] = useState<Record<string, VentaSummary>>({})
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
 
@@ -134,7 +101,6 @@ export function VentasTab({ filter }: { filter: HistoryFilter }) {
         }
         if (!cancelled) {
           setSummaries(result)
-          writeSummariesCache(result)
         }
       } catch {
         // Sin resumen: las filas muestran la fecha como antes

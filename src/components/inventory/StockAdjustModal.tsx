@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { PackageMinus, PackagePlus, X } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
 import type { ProductosRow } from '../../types/database.types'
 
 export interface StockAdjustPayload {
   stock: number
   motivo: string
   esRegalo: boolean
-  /** id de la sesión activa (para el registro del movimiento) */
-  usuarioId: string | null
 }
 
 interface StockAdjustModalProps {
@@ -26,7 +23,6 @@ const labelClass =
   'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
 export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModalProps) {
-  const { user } = useAuth()
   const [stock, setStock] = useState(String(product.stock_actual))
   const [motivo, setMotivo] = useState<string>(MOTIVOS_ENTRADA[0])
   const [esRegalo, setEsRegalo] = useState(false)
@@ -71,7 +67,6 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         stock: value,
         motivo: motivo.trim(),
         esRegalo,
-        usuarioId: user?.id ?? null,
       })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo ajustar el stock')

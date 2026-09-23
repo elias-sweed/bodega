@@ -57,12 +57,14 @@ export async function registrarCompra(input: {
   nombreProveedor: string | null
   comprobante: string | null
   items: RegistrarCompraItem[]
+  idempotencyKey: string
 }): Promise<RegistrarCompraResult> {
   const { data, error } = await supabase.rpc('registrar_compra', {
     p_proveedor_id: input.proveedorId,
     p_nombre_proveedor: input.nombreProveedor,
     p_comprobante: input.comprobante,
     p_items: input.items,
+    p_idempotency_key: input.idempotencyKey,
   })
 
   if (error) {

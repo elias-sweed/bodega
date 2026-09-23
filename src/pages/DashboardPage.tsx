@@ -237,17 +237,13 @@ export function DashboardPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
-            <div className="xl:col-span-3">
-              <MetodoDonut
-                efectivo={resumen.efectivo_hoy}
-                yape={resumen.yape_hoy}
-                plin={resumen.plin_hoy}
-              />
-            </div>
-            <div className="xl:col-span-2">
-              <QuickActions layout="stack" />
-            </div>
+          <div className="grid grid-cols-1 gap-6">
+            <MetodoDonut
+              efectivo={resumen.efectivo_hoy}
+              yape={resumen.yape_hoy}
+              plin={resumen.plin_hoy}
+            />
+            <QuickActions />
           </div>
 
           <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">

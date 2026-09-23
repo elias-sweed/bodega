@@ -213,6 +213,8 @@ function groupByTicket(rows: ParsedRow[]): TicketGroup[] {
     let error: string | null = null
     if (validRows.length === 0) {
       error = 'Todas las filas tienen errores'
+    } else if (validRows.length !== ticketRows.length) {
+      error = 'El ticket tiene líneas con errores; corrige el archivo completo'
     } else if (metodos.size > 1) {
       error = 'El ticket mezcla métodos de pago'
     }

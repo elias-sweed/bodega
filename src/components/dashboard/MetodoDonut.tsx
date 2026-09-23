@@ -31,12 +31,13 @@ export function MetodoDonut({
   const RADIO = 52
   const CIRC = 2 * Math.PI * RADIO
 
-  let acumulado = 0
-  const arcos = SEGMENTOS.map((seg) => {
+  const arcos = SEGMENTOS.map((seg, index) => {
     const fraccion = total > 0 ? valores[seg.clave] / total : 0
-    const arco = { ...seg, fraccion, offset: acumulado }
-    acumulado += fraccion
-    return arco
+    const offset = SEGMENTOS.slice(0, index).reduce((sum, previous) => {
+      const previousValue = valores[previous.clave]
+      return sum + (total > 0 ? previousValue / total : 0)
+    }, 0)
+    return { ...seg, fraccion, offset }
   })
 
   return (

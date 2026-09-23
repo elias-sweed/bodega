@@ -15,7 +15,7 @@ import { describeFilter } from './types'
 
 export function ComprasTab({ filter }: { filter: HistoryFilter }) {
   const navigate = useNavigate()
-  const { ingresos, proveedorMap, productoMap, loading, error, refresh } =
+  const { data: ingresos, proveedorMap, productoMap, loading, error, refresh } =
     useIngresosHistory()
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
 

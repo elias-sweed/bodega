@@ -50,7 +50,7 @@ function sinAcentos(value: string): string {
  * "Proveedor Varios / Sin Comprobante" SIEMPRE se trata como compra.
  */
 export function esAjusteIngreso(item: IngresosMercaderiaRow): boolean {
-  if ((item.cantidad ?? 0) < 0) return true
+  if (item.cantidad_ingresada < 0) return true
   if ((item.cantidad_ingresada ?? 0) < 0) return true
   const motivo = sinAcentos((item.motivo ?? '').trim().toLowerCase())
   if (PALABRAS_MOTIVO.some((palabra) => motivo.includes(palabra))) return true

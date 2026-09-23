@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { ClipboardList, RotateCcw, SearchX, TriangleAlert } from 'lucide-react'
-import { useIngresosHistory, useLegacyAjustes } from '../../hooks/useHistory'
+import { useIngresosHistory } from '../../hooks/useHistory'
 import { formatFechaCorta, formatHora, enFranja } from '../../utils/format'
 import {
   esAjusteIngreso,
@@ -57,57 +57,49 @@ function matchesFilter(entry: AjusteEntry, filter: HistoryFilter): boolean {
 }
 
 export function AjustesTab({ filter }: { filter: HistoryFilter }) {
-  const { ingresos, proveedorMap, productoMap, loading, error, refresh } =
+  const { data: ingresos, proveedorMap, productoMap, loading, error, refresh } =
     useIngresosHistory()
-  const { ajustes: legacyAjustes, ready: legacyReady } = useLegacyAjustes()
 
   const ajustes = useMemo(() => {
     const filas = ingresos.filter(esAjusteIngreso)
-    const normales = groupByCompra(filas).map<AjusteEntry>((compra) => {
-      const cantidad = compra.items.reduce(
-        (sum, item) => sum + (item.cantidad ?? item.cantidad_ingresada ?? 0),
-        0,
+    return groupByCompra(filas)
+      .map<AjusteEntry>((compra) => {
+        const cantidad = compra.items.reduce(
+          (sum, item) => sum + item.cantidad_ingresada,
+          0,
+        )
+        const fecha = fechaDeIngreso(compra.items[0]) || compra.fecha
+        return {
+          key: compra.key,
+          fecha,
+          producto:
+            compra.items
+              .map(
+                (item) =>
+                  item.productos?.nombre ??
+                  productoMap[item.producto_id ?? ''] ??
+                  'Producto eliminado',
+              )
+              .join(', ') || 'Producto eliminado',
+          cantidad,
+          motivo:
+            compra.items.find((item) => item.motivo)?.motivo ??
+            proveedorDeCompra(compra, proveedorMap),
+          salida: cantidad < 0,
+        }
+      })
+      .sort(
+        (a, b) =>
+          parseFechaLocal(b.fecha).getTime() - parseFechaLocal(a.fecha).getTime(),
       )
-      const fecha = fechaDeIngreso(compra.items[0]) || compra.fecha
-      return {
-        key: compra.key,
-        fecha,
-        producto:
-          compra.items
-            .map(
-              (item) =>
-                item.productos?.nombre ??
-                productoMap[item.producto_id ?? ''] ??
-                'Producto eliminado',
-            )
-            .join(', ') || 'Producto eliminado',
-        cantidad,
-        motivo:
-          compra.items.find((item) => item.motivo)?.motivo ??
-          proveedorDeCompra(compra, proveedorMap),
-        salida: cantidad < 0,
-      }
-    })
-    const legacy = legacyAjustes.map<AjusteEntry>((ajuste) => ({
-      key: `legacy:${ajuste.id}`,
-      fecha: ajuste.fecha,
-      producto: productoMap[ajuste.producto_id ?? ''] ?? 'Producto eliminado',
-      cantidad: ajuste.tipo === 'salida' ? -ajuste.cantidad : ajuste.cantidad,
-      motivo: ajuste.motivo,
-      salida: ajuste.tipo === 'salida',
-    }))
-    return [...legacy, ...normales].sort(
-      (a, b) =>
-        parseFechaLocal(b.fecha).getTime() - parseFechaLocal(a.fecha).getTime(),
-    )
-  }, [ingresos, productoMap, proveedorMap, legacyAjustes])
+  }, [ingresos, productoMap, proveedorMap])
 
   const filteredAjustes = useMemo(
     () => ajustes.filter((entry) => matchesFilter(entry, filter)),
     [ajustes, filter],
   )
 
-  if ((loading || !legacyReady) && ingresos.length === 0) {
+  if (loading && ingresos.length === 0) {
     return <HistorySkeleton />
   }
 
@@ -130,7 +122,7 @@ export function AjustesTab({ filter }: { filter: HistoryFilter }) {
     )
   }
 
-  if (ingresos.length === 0 && legacyAjustes.length === 0) {
+  if (ingresos.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center shadow-sm backdrop-blur-2xl">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">

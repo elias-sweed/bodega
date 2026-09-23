@@ -19,7 +19,6 @@ export type ProductosRow = {
 }
 
 export type ProductosInsert = Omit<ProductosRow, 'id' | 'created_at'>
-
 export type ProductosUpdate = Partial<ProductosInsert>
 
 export type VentasRow = {
@@ -29,10 +28,9 @@ export type VentasRow = {
   metodo_pago: string
   origen: string
   ticket_externo: string | null
+  idempotency_key: string | null
   creado_por: string | null
 }
-
-export type VentasInsert = Omit<VentasRow, 'id' | 'fecha'>
 
 export type DetalleVentasRow = {
   id: string
@@ -44,11 +42,23 @@ export type DetalleVentasRow = {
   costo_unitario: number | null
 }
 
-export type DetalleVentasInsert = Omit<DetalleVentasRow, 'id'>
-
 export type RegistrarVentaResult = {
   venta_id: string
   total: number
+  idempotency_key: string
+  items: {
+    producto_id: string | null
+    cantidad: number
+    precio_unitario: number
+    subtotal: number
+  }[]
+}
+
+export type RegistrarVentaBackfillResult = {
+  venta_id: string
+  total: number
+  idempotency_key: string
+  stock_negativo: false
 }
 
 export type ProveedoresRow = {
@@ -66,9 +76,7 @@ export type IngresosMercaderiaRow = {
   proveedor_id: string | null
   nombre_proveedor: string | null
   producto_id: string | null
-  cantidad: number | null
   cantidad_ingresada: number
-  costo_unitario?: number | null
   costo_total: number
   comprobante: string | null
   motivo: string | null
@@ -76,28 +84,6 @@ export type IngresosMercaderiaRow = {
   created_at?: string | null
   creado_por: string | null
   productos?: { nombre: string | null } | null
-}
-
-export type IngresosMercaderiaInsert = Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
-
-export type AjustesStockRow = {
-  id: string
-  producto_id: string | null
-  tipo: 'entrada' | 'salida'
-  cantidad: number
-  motivo: string
-  stock_resultante: number
-  fecha: string
-}
-
-export type RegistrarIngresoArgs = {
-  p_compra_id: string
-  p_proveedor_id: string | null
-  p_nombre_proveedor: string | null
-  p_producto_id: string
-  p_cantidad: number
-  p_costo_total: number
-  p_comprobante: string | null
 }
 
 export type RegistrarIngresoResult = {
@@ -115,18 +101,6 @@ export type RegistrarCompraResult = {
   compra_id: string
   total: number
   items: number
-}
-
-export type ActualizarProductoArgs = {
-  p_id: string
-  p_nombre: string
-  p_categoria: string
-  p_codigo_barras: string | null
-  p_precio_venta: number
-  p_costo: number
-  p_stock_minimo: number
-  p_nuevo_stock: number | null
-  p_motivo: string
 }
 
 export type ActualizarProductoResult = {
@@ -148,13 +122,6 @@ export type DashboardResumenResult = {
   agotados: number
 }
 
-export type RegistrarAjusteManualArgs = {
-  p_producto_id: string
-  p_nuevo_stock: number
-  p_es_regalo: boolean
-  p_motivo: string
-}
-
 export type RegistrarAjusteManualResult = {
   ingreso_id: string | null
   stock_actual: number
@@ -169,8 +136,6 @@ export type UsuariosAutorizadosRow = {
   created_at: string
 }
 
-export type UsuariosAutorizadosInsert = Omit<UsuariosAutorizadosRow, 'created_at'>
-
 export type Database = {
   public: {
     Tables: {
@@ -182,14 +147,14 @@ export type Database = {
       }
       ventas: {
         Row: VentasRow
-        Insert: VentasInsert
-        Update: Partial<VentasInsert>
+        Insert: Omit<VentasRow, 'id' | 'fecha'>
+        Update: Partial<Omit<VentasRow, 'id' | 'fecha'>>
         Relationships: []
       }
       detalle_ventas: {
         Row: DetalleVentasRow
-        Insert: DetalleVentasInsert
-        Update: Partial<DetalleVentasInsert>
+        Insert: Omit<DetalleVentasRow, 'id'>
+        Update: Partial<Omit<DetalleVentasRow, 'id'>>
         Relationships: []
       }
       proveedores: {
@@ -200,63 +165,98 @@ export type Database = {
       }
       ingresos_mercaderia: {
         Row: IngresosMercaderiaRow
-        Insert: IngresosMercaderiaInsert
-        Update: Partial<IngresosMercaderiaInsert>
+        Insert: Omit<IngresosMercaderiaRow, 'id' | 'fecha'>
+        Update: Partial<Omit<IngresosMercaderiaRow, 'id' | 'fecha'>>
         Relationships: [
           {
-            foreignKeyName: 'ingresos_mercaderia_producto_id_fkey',
-            columns: ['producto_id'],
-            isOneToOne: false,
-            referencedRelation: 'productos',
-            referencedColumns: ['id'],
+            foreignKeyName: 'ingresos_mercaderia_producto_id_fkey'
+            columns: ['producto_id']
+            isOneToOne: false
+            referencedRelation: 'productos'
+            referencedColumns: ['id']
           },
         ]
       }
-      ajustes_stock: {
-        Row: AjustesStockRow
-        Insert: Omit<AjustesStockRow, 'id' | 'fecha'>
-        Update: Partial<Omit<AjustesStockRow, 'id' | 'fecha'>>
-        Relationships: []
-      }
       usuarios_autorizados: {
         Row: UsuariosAutorizadosRow
-        Insert: UsuariosAutorizadosInsert
-        Update: Partial<UsuariosAutorizadosInsert>
+        Insert: Omit<UsuariosAutorizadosRow, 'created_at'>
+        Update: Partial<Omit<UsuariosAutorizadosRow, 'created_at'>>
         Relationships: []
       }
-      }
+    }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      registrar_venta: {
-        Args: { p_articulos: Json[]; p_metodo_pago: string }
+      registrar_venta_caja: {
+        Args: {
+          p_articulos: Json[]
+          p_metodo_pago: string
+          p_idempotency_key: string
+        }
         Returns: RegistrarVentaResult
       }
-      registrar_ingreso: {
-        Args: RegistrarIngresoArgs
-        Returns: RegistrarIngresoResult
-      }
-      registrar_ajuste_manual: {
-        Args: RegistrarAjusteManualArgs
-        Returns: RegistrarAjusteManualResult
-      }
-      registrar_ajuste_stock: {
+      registrar_venta_backfill: {
         Args: {
-          p_producto_id: string
-          p_tipo: string
-          p_cantidad: number
-          p_motivo?: string
+          p_articulos: Json[]
+          p_metodo_pago: string
+          p_fecha: string
+          p_ticket: string
         }
-        Returns: { ajuste_id: string; stock_resultante: number }
+        Returns: RegistrarVentaBackfillResult
       }
       registrar_compra: {
-        Args: { p_proveedor_id: string | null; p_nombre_proveedor: string | null; p_comprobante: string | null; p_items: Json[] }
+        Args: {
+          p_proveedor_id: string | null
+          p_nombre_proveedor: string | null
+          p_comprobante: string | null
+          p_items: Json[]
+          p_idempotency_key: string
+        }
         Returns: RegistrarCompraResult
       }
+      registrar_ajuste_manual: {
+        Args: {
+          p_producto_id: string
+          p_nuevo_stock: number
+          p_es_regalo: boolean
+          p_motivo: string
+        }
+        Returns: RegistrarAjusteManualResult
+      }
       actualizar_producto: {
-        Args: ActualizarProductoArgs
+        Args: {
+          p_id: string
+          p_nombre: string
+          p_categoria: string
+          p_codigo_barras: string | null
+          p_precio_venta: number
+          p_costo: number
+          p_stock_minimo: number
+          p_nuevo_stock: number | null
+          p_motivo: string
+        }
         Returns: ActualizarProductoResult
+      }
+      crear_producto: {
+        Args: {
+          p_nombre: string
+          p_categoria: string
+          p_codigo_barras: string | null
+          p_precio_venta: number
+          p_costo: number
+          p_stock_inicial: number
+          p_stock_minimo: number
+        }
+        Returns: ProductosRow
+      }
+      cambiar_rol_usuario: {
+        Args: { p_email: string; p_rol: UsuarioRol }
+        Returns: { email: string; rol: UsuarioRol }
+      }
+      eliminar_usuario_autorizado: {
+        Args: { p_email: string }
+        Returns: undefined
       }
       dashboard_resumen: {
         Args: Record<PropertyKey, never>

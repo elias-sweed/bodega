@@ -126,7 +126,6 @@ export function InventoryPage() {
         nuevoStock,
         payload.esRegalo,
         payload.motivo,
-        payload.usuarioId,
       )
       setAdjustingProduct(null)
       showNotice(
@@ -187,17 +186,19 @@ export function InventoryPage() {
             )}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setPrefill(null)
-            setModalOpen(true)
-          }}
-          className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-6 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
-        >
-          <PackagePlus size={19} aria-hidden="true" />
-          Nuevo producto
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => {
+              setPrefill(null)
+              setModalOpen(true)
+            }}
+            className="inline-flex h-12 items-center gap-2 rounded-2xl border border-emerald-200/30 bg-emerald-500 px-6 text-base font-black tracking-tight text-white shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:scale-[0.98]"
+          >
+            <PackagePlus size={19} aria-hidden="true" />
+            Nuevo producto
+          </button>
+        )}
       </header>
 
       {loading && products.length === 0 ? (

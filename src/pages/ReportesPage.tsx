@@ -1,281 +1,101 @@
 import { useMemo, useState } from 'react'
-import {
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Printer,
-  RotateCcw,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react'
+import { BarChart3, CalendarDays, Download, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
 import { useReporteMensual } from '../hooks/useReporteMensual'
+import { exportCsv } from '../utils/exportCsv'
 import { formatMoney } from '../utils/format'
-import { exportExcel } from '../utils/exportExcel'
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0')
+type Periodo = 'dia' | 'semana' | 'mes'
+
+function inputDate(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-function mesClaveActual(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}`
-}
-
-function capitalizar(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1)
-}
-
-function etiquetaMes(y: number, m: number): string {
-  const nombreMes = new Intl.DateTimeFormat('es-PE', { month: 'long' }).format(
-    new Date(y, m - 1, 1),
-  )
-  return `${capitalizar(nombreMes)} ${y}`
-}
-
-/** Formato de un concepto que se resta en el desglose */
-function mostrarResta(valor: number): string {
-  return valor !== 0 ? `−${formatMoney(Math.abs(valor))}` : formatMoney(0)
-}
-
-function Fila({
-  etiqueta,
-  valor,
-  signo,
-  negrita,
-}: {
-  etiqueta: string
-  valor: string
-  signo?: '+' | '−' | '='
-  negrita?: boolean
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl bg-surface-sub px-4 py-3">
-      <span className="flex items-center gap-2 text-sm font-bold text-ink">
-        {signo && (
-          <span
-            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-black ${
-              signo === '−'
-                ? 'bg-rose-400/15 text-loss'
-                : signo === '='
-                  ? 'bg-profit/15 text-profit'
-                  : 'bg-sky-400/15 text-sky-200'
-            }`}
-          >
-            {signo}
-          </span>
-        )}
-        {etiqueta}
-      </span>
-      <span
-        className={`tabular-nums ${
-          negrita ? 'text-base font-black tracking-tight' : 'text-sm font-extrabold'
-        }`}
-      >
-        {valor}
-      </span>
-    </div>
-  )
-}
-
-export function ReportesPage() {
-  const [mes, setMes] = useState(mesClaveActual)
-  const hoy = useMemo(() => mesClaveActual(), [])
-
-  const { y, m } = useMemo(() => {
-    const [anio, mesNum] = mes.split('-').map(Number)
-    return { y: anio, m: mesNum }
-  }, [mes])
-  const etiqueta = useMemo(() => etiquetaMes(y, m), [y, m])
-
-  const cambiarMes = (delta: 1 | -1): void => {
-    setMes((prev) => {
-      const [anio, mesNum] = prev.split('-').map(Number)
-      const fecha = new Date(anio, mesNum - 1 + delta, 1)
-      return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}`
-    })
+function etiquetaPeriodo(periodo: Periodo, desde: Date, hasta: Date): string {
+  if (periodo === 'dia') {
+    return desde.toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
   }
+  if (periodo === 'semana') {
+    return `${desde.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' })} – ${hasta.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' })}`
+  }
+  return desde.toLocaleDateString('es-PE', { month: 'long', year: 'numeric' })
+}
 
+function rango(periodo: Periodo, fecha: Date): { desde: Date; hasta: Date } {
+  const desde = new Date(fecha)
+  if (periodo === 'dia') {
+    desde.setHours(0, 0, 0, 0)
+    const hasta = new Date(desde)
+    hasta.setDate(hasta.getDate() + 1)
+    return { desde, hasta }
+  }
+  if (periodo === 'semana') {
+    const day = desde.getDay()
+    desde.setDate(desde.getDate() + (day === 0 ? -6 : 1 - day))
+    desde.setHours(0, 0, 0, 0)
+    return { desde, hasta: new Date() }
+  }
+  desde.setDate(1)
+  desde.setHours(0, 0, 0, 0)
+  const hasta = new Date(desde)
+  hasta.setMonth(hasta.getMonth() + 1)
+  return { desde, hasta }
+}
+
+function MetricCard({ label, value, tone = 'normal' }: { label: string; value: string; tone?: 'normal' | 'profit' | 'loss' }) {
+  const color = tone === 'profit' ? 'text-profit' : tone === 'loss' ? 'text-loss' : 'text-ink'
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5 pb-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
-            Finanzas
-          </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">
-            Reportes
-          </h1>
-          <p className="mt-1.5 text-sm font-semibold text-muted">
-            Utilidad Neta del mes de {etiqueta}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-sm backdrop-blur-2xl">
-          <button
-            type="button"
-            onClick={() => cambiarMes(-1)}
-            aria-label="Mes anterior"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface text-ink transition-all duration-200 hover:bg-surface-3 active:scale-95"
-          >
-            <ChevronLeft size={17} aria-hidden="true" />
-          </button>
-          <input
-            type="month"
-            value={mes}
-            max={hoy}
-            onChange={(e) => {
-              if (e.target.value) setMes(e.target.value)
-            }}
-            aria-label="Seleccionar mes"
-            className="h-9 rounded-xl px-2 text-sm font-black tabular-nums text-ink outline-none focus:border-line-strong"
-          />
-          <button
-            type="button"
-            onClick={() => cambiarMes(1)}
-            disabled={mes >= hoy}
-            aria-label="Mes siguiente"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface text-ink transition-all duration-200 hover:bg-surface-3 active:scale-95 disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <ChevronRight size={17} aria-hidden="true" />
-          </button>
-        </div>
-      </header>
-
-      <ReporteResumen key={mes} mes={mes} />
+    <div className="rounded-[24px] border border-line bg-surface p-5 shadow-sm backdrop-blur-2xl">
+      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted">{label}</p>
+      <p className={`mt-2 text-3xl font-black tracking-tight ${color}`}>{value}</p>
     </div>
   )
 }
 
-function ReporteResumen({ mes }: { mes: string }) {
-  const { y, m } = useMemo(() => {
-    const [anio, mesNum] = mes.split('-').map(Number)
-    return { y: anio, m: mesNum }
-  }, [mes])
+function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
+  const dates = useMemo(() => rango(periodo, fecha), [periodo, fecha])
+  const etiqueta = useMemo(
+    () => etiquetaPeriodo(periodo, dates.desde, dates.hasta),
+    [periodo, dates.desde, dates.hasta],
+  )
+  const { reporte, loading, error, refresh } = useReporteMensual(dates.desde, dates.hasta)
 
-  const desde = useMemo(() => new Date(y, m - 1, 1), [y, m])
-  const hasta = useMemo(() => new Date(y, m, 1), [y, m])
-  const etiqueta = useMemo(() => etiquetaMes(y, m), [y, m])
-
-  const { reporte, loading, error, refresh } = useReporteMensual(desde, hasta)
-
-  const handleExportar = (): void => {
-    const numero = (n: number): number => Number(n.toFixed(2))
+  const exportar = (): void => {
     const rows: (string | number)[][] = [
-      [`Reporte Financiero — ${etiqueta}`],
+      [`Reporte — ${etiqueta}`],
       [],
       ['Concepto', 'Importe'],
-      ['Total Ventas Cobradas', numero(reporte.totalVentas)],
-      ...reporte.ventasPorMetodo.map((venta) => [
-        `  Ventas ${venta.metodo}`,
-        numero(venta.total),
-      ]),
-      ['Costo de Ventas (COGS)', -numero(reporte.cogs)],
-      ['Ganancia Bruta de Ventas', numero(reporte.gananciaBruta)],
-      ['Compras del Mes', -numero(reporte.comprasMes)],
-      ['Pérdidas por Mermas y Consumo', -numero(reporte.perdidasTotales)],
+      ['Ventas cobradas', reporte.totalVentas],
+      ['Costo de productos vendidos', reporte.cogs],
+      ['Ganancia estimada de ventas', reporte.gananciaEstimada],
+      ['Compras del periodo', reporte.comprasMes],
+      ['Pérdidas registradas', reporte.perdidasTotales],
       [],
-      ['GANANCIA LÍQUIDA REAL (Utilidad Neta)', numero(reporte.gananciaLiquida)],
+      ['Método de pago', 'Importe'],
+      ...reporte.ventasPorMetodo.map((metodo) => [metodo.metodo, metodo.total]),
       [],
-      ['Pérdidas del Mes por Motivo'],
-      ['Motivo', 'Importe'],
-      ...reporte.perdidasPorMotivo.map((perdida) => [
-        perdida.motivo,
-        -numero(perdida.total),
+      ['Producto', 'Unidades', 'Cobrado', 'Ganancia estimada'],
+      ...reporte.productosMasVendidos.map((producto) => [
+        producto.nombre,
+        producto.cantidad,
+        producto.cobrado,
+        producto.ganancia,
       ]),
     ]
-    exportExcel(rows, `reporte-financiero-${mes}.xlsx`, `Reporte ${etiqueta}`)
-  }
-
-  const handleImprimir = (): void => {
-    const ventana = window.open('', '_blank', 'width=820,height=920')
-    if (!ventana) return
-
-    const fila = (etiquetaFila: string, valor: string, clase = ''): string =>
-      `<tr${clase ? ` class="${clase}"` : ''}><td>${etiquetaFila}</td><td class="num">${valor}</td></tr>`
-    const metodoRows = reporte.ventasPorMetodo
-      .map((venta) => fila(`Ventas ${venta.metodo}`, formatMoney(venta.total), 'sub'))
-      .join('')
-    const perdidaRows =
-      reporte.perdidasPorMotivo.length > 0
-        ? reporte.perdidasPorMotivo
-            .map((perdida) =>
-              fila(perdida.motivo, formatMoney(perdida.total), 'sub'),
-            )
-            .join('')
-        : '<tr class="sub"><td>Sin mermas ni consumos este mes</td><td class="num">S/ 0.00</td></tr>'
-
-    const html = `<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8" />
-<title>Reporte financiero — ${etiqueta}</title>
-<style>
-  * { box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; margin: 0; padding: 32px; }
-  h1 { margin: 0 0 4px; font-size: 22px; }
-  .sub { color: #475569; font-size: 18px; }
-  h2 { margin: 28px 0 10px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #64748b; }
-  table { width: 100%; border-collapse: collapse; font-size: 15px; }
-  td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  tr.total td { border-top: 2px solid #059669; border-bottom: none; font-weight: 800; color: #047857; font-size: 16px; }
-  tr.detalle td { font-weight: 700; }
-  .encabezado { border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 4px; }
-  .pie { margin-top: 28px; font-size: 12px; color: #94a3b8; }
-</style>
-</head>
-<body>
-  <div class="encabezado">
-    <h1>Reporte financiero — ${etiqueta}</h1>
-    <p>Bodega POS · Utilidad del mes</p>
-  </div>
-  <h2>Desglose del mes</h2>
-  <table>
-    ${fila('Total Ventas Cobradas', formatMoney(reporte.totalVentas), 'detalle')}
-    ${metodoRows}
-    ${fila('Costo de Ventas (COGS)', mostrarResta(reporte.cogs), 'sub')}
-    ${fila('Ganancia Bruta de Ventas', formatMoney(reporte.gananciaBruta), 'detalle')}
-    ${fila('Compras del Mes', mostrarResta(reporte.comprasMes), 'sub')}
-    ${fila('Pérdidas por Mermas y Consumo', mostrarResta(reporte.perdidasTotales), 'sub')}
-    ${fila('GANANCIA LÍQUIDA REAL (Utilidad Neta)', formatMoney(reporte.gananciaLiquida), 'total')}
-  </table>
-  <h2>Pérdidas del mes por motivo</h2>
-  <table>
-    ${perdidaRows}
-  </table>
-  <p class="pie">Generado el ${new Date().toLocaleString('es-PE')}</p>
-</body>
-</html>`
-
-    ventana.document.write(html)
-    ventana.document.close()
-    ventana.focus()
-    try {
-      ventana.onafterprint = () => ventana.close()
-    } catch {
-      // algunos navegadores bloquean el cierre automático
-    }
-    window.setTimeout(() => ventana.print(), 120)
+    exportCsv(rows, `reporte-${periodo}-${inputDate(fecha)}.csv`)
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center shadow-sm backdrop-blur-2xl">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/30 text-loss">
-          <BarChart3 size={22} aria-hidden="true" />
-        </span>
-        <p className="text-lg font-extrabold tracking-tight text-ink">
-          No se pudo cargar el reporte
-        </p>
-        <p className="text-sm font-medium text-muted">{error}</p>
+      <div className="rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-8 text-center">
+        <p className="text-base font-extrabold text-ink">No se pudo cargar el reporte</p>
+        <p className="mt-2 text-sm text-muted">{error}</p>
         <button
           type="button"
           onClick={refresh}
-          className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-black text-rose-700"
         >
-          <RotateCcw size={15} aria-hidden="true" />
-          Reintentar
+          <RotateCcw size={15} aria-hidden="true" /> Reintentar
         </button>
       </div>
     )
@@ -283,173 +103,156 @@ function ReporteResumen({ mes }: { mes: string }) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="h-48 animate-pulse rounded-[28px] border border-line bg-surface" />
-        <div className="h-72 animate-pulse rounded-[28px] border border-line bg-surface" />
+      <div className="space-y-4" aria-busy="true" aria-label="Cargando reporte">
+        <div className="h-32 animate-pulse rounded-[28px] bg-surface" />
+        <div className="h-64 animate-pulse rounded-[28px] bg-surface" />
       </div>
     )
   }
 
   return (
-    <div className="fade-in space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="fade-in space-y-5">
+      <div className="flex justify-end">
         <button
           type="button"
-          onClick={handleExportar}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-[0.98]"
+          onClick={exportar}
+          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink shadow-sm hover:bg-surface-2"
         >
-          <Download size={16} aria-hidden="true" />
-          Exportar Excel
-        </button>
-        <button
-          type="button"
-          onClick={handleImprimir}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-profit/30 bg-profit/10 px-4 text-sm font-extrabold text-profit shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-profit/20 active:translate-y-0 active:scale-[0.98]"
-        >
-          <Printer size={16} aria-hidden="true" />
-          Imprimir
+          <Download size={16} aria-hidden="true" /> Exportar para Excel
         </button>
       </div>
 
-      <section className="relative overflow-hidden rounded-[28px] border border-profit/25 bg-profit/10 p-6 shadow-sm backdrop-blur-2xl sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard label="Ventas cobradas" value={formatMoney(reporte.totalVentas)} />
+        <MetricCard
+          label="Ganancia estimada"
+          value={formatMoney(reporte.gananciaEstimada)}
+          tone={reporte.gananciaEstimada >= 0 ? 'profit' : 'loss'}
+        />
+        <MetricCard label="Compras del periodo" value={formatMoney(reporte.comprasMes)} />
+        <MetricCard label="Operaciones de venta" value={String(reporte.numeroVentas)} />
+      </div>
+
+      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-profit">
-              Ganancia Líquida Libre · Utilidad Neta
-            </p>
-            <p className="mt-1 max-w-md text-sm font-semibold text-profit/80">
-              Lo que queda de las ventas del mes después de cubrir compras y
-              pérdidas por mermas y consumo.
-            </p>
-            <p
-              className={`mt-3 text-4xl font-black tracking-tighter tabular-nums sm:text-5xl ${
-                reporte.gananciaLiquida >= 0 ? 'text-profit' : 'text-loss'
-              }`}
-            >
-              {formatMoney(reporte.gananciaLiquida)}
-            </p>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-muted">Resumen</p>
+            <h2 className="mt-1 text-xl font-black text-ink">{etiqueta}</h2>
           </div>
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-profit/30 bg-profit/10 text-profit shadow-sm">
-            {reporte.gananciaLiquida >= 0 ? (
-              <TrendingUp size={30} strokeWidth={2.5} aria-hidden="true" />
-            ) : (
-              <TrendingDown size={30} strokeWidth={2.5} aria-hidden="true" />
-            )}
-          </span>
+          {reporte.gananciaEstimada >= 0 ? (
+            <TrendingUp className="text-profit" aria-hidden="true" />
+          ) : (
+            <TrendingDown className="text-loss" aria-hidden="true" />
+          )}
         </div>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
-            {reporte.numeroVentas} {reporte.numeroVentas === 1 ? 'venta' : 'ventas'}
-          </span>
-          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
-            {reporte.numeroComprasMes} compras
-          </span>
-          <span className="rounded-full border border-profit/30 bg-profit/10 px-3 py-1 text-xs font-bold text-profit">
-            {reporte.numeroPerdidas} mermas
-          </span>
-        </div>
+        <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl bg-surface-sub px-4 py-3">
+            <dt className="text-xs font-bold text-muted">Costo de productos vendidos</dt>
+            <dd className="mt-1 font-black text-ink">{formatMoney(reporte.cogs)}</dd>
+          </div>
+          <div className="rounded-2xl bg-surface-sub px-4 py-3">
+            <dt className="text-xs font-bold text-muted">Compras / gastos de mercadería</dt>
+            <dd className="mt-1 font-black text-ink">{formatMoney(reporte.comprasMes)}</dd>
+          </div>
+          <div className="rounded-2xl bg-surface-sub px-4 py-3 sm:col-span-2">
+            <dt className="text-xs font-bold text-muted">Métodos de pago</dt>
+            <dd className="mt-2 flex flex-wrap gap-2">
+              {reporte.ventasPorMetodo.length === 0 ? (
+                <span className="text-sm text-muted">Sin ventas en este periodo.</span>
+              ) : (
+                reporte.ventasPorMetodo.map((metodo) => (
+                  <span key={metodo.metodo} className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-black text-ink">
+                    {metodo.metodo}: {formatMoney(metodo.total)}
+                  </span>
+                ))
+              )}
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-4 text-xs font-medium text-muted">
+          La ganancia estimada usa ventas menos el costo histórico de los productos vendidos. Las compras se muestran aparte porque parte del inventario puede seguir disponible.
+        </p>
       </section>
 
       <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
-        <h2 className="text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
-          Desglose del mes · {etiqueta}
-        </h2>
-
-        <div className="mt-4 space-y-2.5">
-          <Fila
-            signo="+"
-            etiqueta="Total Ventas Cobradas"
-            valor={formatMoney(reporte.totalVentas)}
-            negrita
-          />
-          {reporte.ventasPorMetodo.map((venta) => (
-            <div
-              key={venta.metodo}
-              className="flex items-center justify-between gap-4 py-0.5 pl-12 text-sm"
-            >
-              <span className="font-bold text-muted">Ventas {venta.metodo}</span>
-              <span className="font-semibold tabular-nums text-ink">
-                {formatMoney(venta.total)}
-              </span>
-            </div>
-          ))}
-
-          <div className="pt-2">
-            <Fila
-              signo="−"
-              etiqueta="Costo de Ventas (COGS)"
-              valor={mostrarResta(reporte.cogs)}
-            />
-          </div>
-          <Fila
-            signo="="
-            etiqueta="Ganancia Bruta de Ventas"
-            valor={formatMoney(reporte.gananciaBruta)}
-            negrita
-          />
-          <Fila
-            signo="−"
-            etiqueta="Compras del Mes (reabastecimiento)"
-            valor={mostrarResta(reporte.comprasMes)}
-          />
-          <Fila
-            signo="−"
-            etiqueta="Pérdidas por Mermas y Consumo"
-            valor={mostrarResta(reporte.perdidasTotales)}
-          />
-
-          <div className="border-t border-line pt-3">
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-profit/25 bg-profit/10 px-4 py-3.5">
-              <span className="text-sm font-black uppercase tracking-wide text-profit">
-                GANANCIA LÍQUIDA REAL
-              </span>
-              <span
-                className={`text-xl font-black tracking-tighter tabular-nums ${
-                  reporte.gananciaLiquida >= 0 ? 'text-profit' : 'text-loss'
-                }`}
-              >
-                {formatMoney(reporte.gananciaLiquida)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-[28px] border border-line bg-surface p-6 shadow-sm backdrop-blur-2xl">
-        <h2 className="text-sm font-extrabold uppercase tracking-[0.18em] text-muted">
-          Pérdidas del Mes por Motivo
-        </h2>
-        {reporte.perdidasPorMotivo.length === 0 ? (
-          <div className="mt-4 flex flex-col items-start gap-2 rounded-2xl bg-surface-sub px-4 py-4">
-            <p className="text-sm font-bold text-ink">Sin pérdidas este mes</p>
-            <p className="text-sm font-medium text-muted">
-              No hubo registros de consumo interno, vencidos o dañados en {etiqueta}.
-            </p>
-          </div>
+        <h2 className="text-sm font-extrabold uppercase tracking-[0.18em] text-muted">Productos más vendidos</h2>
+        {reporte.productosMasVendidos.length === 0 ? (
+          <p className="mt-4 text-sm text-muted">No hay productos vendidos en este periodo.</p>
         ) : (
-          <ul className="mt-4 space-y-2.5">
+          <ol className="mt-4 space-y-2">
+            {reporte.productosMasVendidos.map((producto, index) => (
+              <li key={`${producto.nombre}-${index}`} className="flex items-center justify-between gap-4 rounded-2xl bg-surface-sub px-4 py-3">
+                <div>
+                  <p className="text-sm font-extrabold text-ink">{index + 1}. {producto.nombre}</p>
+                  <p className="text-xs text-muted">{producto.cantidad} unidades · ganancia {formatMoney(producto.ganancia)}</p>
+                </div>
+                <span className="font-black text-gold">{formatMoney(producto.cobrado)}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      {reporte.numeroPerdidas > 0 && (
+        <section className="rounded-[28px] border border-rose-400/30 bg-rose-400/10 p-6">
+          <h2 className="text-sm font-extrabold uppercase tracking-[0.18em] text-loss">Pérdidas registradas</h2>
+          <ul className="mt-3 space-y-2 text-sm text-ink">
             {reporte.perdidasPorMotivo.map((perdida) => (
-              <li
-                key={perdida.motivo}
-                className="flex items-center justify-between gap-4 rounded-2xl bg-surface-sub px-4 py-3"
-              >
-                <span className="flex items-center gap-2 text-sm font-bold text-ink">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-rose-400/40 bg-rose-400/15 text-loss">
-                    <span className="text-xs font-black">−</span>
-                  </span>
-                  {perdida.motivo}
-                  <span className="text-xs font-semibold text-muted">
-                    {perdida.numero} {perdida.numero === 1 ? 'registro' : 'registros'}
-                  </span>
-                </span>
-                <span className="text-sm font-black tabular-nums text-loss">
-                  {formatMoney(perdida.total)}
-                </span>
+              <li key={perdida.motivo} className="flex justify-between gap-4">
+                <span>{perdida.motivo}</span>
+                <strong>{formatMoney(perdida.total)}</strong>
               </li>
             ))}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
+    </div>
+  )
+}
+
+export function ReportesPage() {
+  const [periodo, setPeriodo] = useState<Periodo>('mes')
+  const [fecha, setFecha] = useState(() => inputDate(new Date()))
+
+  const periodLabel = periodo === 'dia' ? 'Día' : periodo === 'semana' ? 'Semana' : 'Mes'
+
+  return (
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col gap-5 pb-10">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Finanzas</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">Reportes</h1>
+          <p className="mt-1 text-sm font-semibold text-muted">Ventas, ganancia estimada, compras y productos más vendidos.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-1.5">
+          {(['dia', 'semana', 'mes'] as const).map((item) => (
+            <button
+              key={item}
+              type="button"
+              onClick={() => setPeriodo(item)}
+              className={`rounded-xl px-4 py-2 text-sm font-black ${periodo === item ? 'bg-gold text-amber-950' : 'text-muted hover:bg-surface-2'}`}
+            >
+              {item === 'dia' ? 'Día' : item === 'semana' ? 'Semana' : 'Mes'}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="flex flex-wrap items-center gap-3 rounded-[22px] border border-line bg-surface p-3">
+        <CalendarDays size={18} className="text-muted" aria-hidden="true" />
+        <label htmlFor="fecha-reporte" className="text-sm font-bold text-muted">Fecha del {periodLabel.toLowerCase()}</label>
+        <input
+          id="fecha-reporte"
+          type="date"
+          max={inputDate(new Date())}
+          value={fecha}
+          onChange={(event) => setFecha(event.target.value || inputDate(new Date()))}
+          className="h-10 rounded-xl border border-line bg-surface-2 px-3 text-sm font-bold text-ink"
+        />
+        <BarChart3 size={18} className="ml-auto text-gold" aria-hidden="true" />
+      </div>
+
+      <ReporteResumen key={`${periodo}-${fecha}`} periodo={periodo} fecha={new Date(`${fecha}T12:00:00`)} />
     </div>
   )
 }

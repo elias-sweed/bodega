@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { AdminRoute } from './components/auth/AdminRoute'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { SessionExpiredModal } from './components/auth/SessionExpiredModal'
 import { AuthLayout } from './layouts/AuthLayout'
@@ -8,7 +9,6 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { LoginPage } from './pages/LoginPage'
-import { NotificationsPage } from './pages/NotificationsPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
 import { ReportesPage } from './pages/ReportesPage'
@@ -53,11 +53,24 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/caja" element={<PosPage />} />
             <Route path="/inventario" element={<InventoryPage />} />
-            <Route path="/compras" element={<PurchasesPage />} />
+            <Route
+              path="/compras"
+              element={
+                <AdminRoute>
+                  <PurchasesPage />
+                </AdminRoute>
+              }
+            />
             <Route path="/reportes" element={<ReportesPage />} />
             <Route path="/historial" element={<HistoryPage />} />
-            <Route path="/notificaciones" element={<NotificationsPage />} />
-            <Route path="/usuarios" element={<UsersPage />} />
+            <Route
+              path="/usuarios"
+              element={
+                <AdminRoute>
+                  <UsersPage />
+                </AdminRoute>
+              }
+            />
           </Route>
         </Route>
 

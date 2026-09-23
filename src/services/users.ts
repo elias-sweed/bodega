@@ -17,37 +17,14 @@ export async function fetchUsuariosAutorizados(): Promise<UsuariosAutorizadosRow
   return data
 }
 
-export async function addUsuarioAutorizado(
-  email: string,
-  rol: UsuarioRol,
-): Promise<UsuariosAutorizadosRow> {
-  const { data, error } = await supabase
-    .from('usuarios_autorizados')
-    .insert({ email: email.trim().toLowerCase(), rol })
-    .select()
-    .maybeSingle()
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  if (!data) {
-    throw new Error('No se pudo agregar al usuario autorizado. Verifica tus permisos e inténtalo de nuevo.')
-  }
-
-  return data
-}
-
 export async function updateUsuarioRol(
   email: string,
   rol: UsuarioRol,
-): Promise<UsuariosAutorizadosRow> {
-  const { data, error } = await supabase
-    .from('usuarios_autorizados')
-    .update({ rol })
-    .eq('email', email)
-    .select()
-    .maybeSingle()
+): Promise<Pick<UsuariosAutorizadosRow, 'email' | 'rol'>> {
+  const { data, error } = await supabase.rpc('cambiar_rol_usuario', {
+    p_email: email,
+    p_rol: rol,
+  })
 
   if (error) {
     throw new Error(error.message)
@@ -61,10 +38,9 @@ export async function updateUsuarioRol(
 }
 
 export async function removeUsuarioAutorizado(email: string): Promise<void> {
-  const { error } = await supabase
-    .from('usuarios_autorizados')
-    .delete()
-    .eq('email', email)
+  const { error } = await supabase.rpc('eliminar_usuario_autorizado', {
+    p_email: email,
+  })
 
   if (error) {
     throw new Error(error.message)

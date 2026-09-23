@@ -1,3 +1,4 @@
+/* oxlint-disable react/immutability -- Three.js actualiza refs y uniforms en useFrame. */
 import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'

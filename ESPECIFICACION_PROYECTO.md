@@ -1,5 +1,7 @@
 # ESPECIFICACIÓN COMPLETA DEL PROYECTO
 
+> Documento funcional de referencia. El estado ejecutable final y el orden vigente de base de datos están en `README.md`; la migración final obligatoria es `supabase/corregimientos_finales.sql`. En la versión final, ADMIN administra productos, compras, ajustes y usuarios; CAJERO puede vender y consultar.
+
 > Documento de contexto exhaustivo. Diseñado para ser leído por una IA (o un
 > desarrollador nuevo) y permitir continuar, depurar o ampliar el proyecto sin
 > tener que reconstruir la información desde cero.

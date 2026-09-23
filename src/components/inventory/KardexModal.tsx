@@ -41,8 +41,6 @@ export function KardexModal({ product, onClose }: KardexModalProps) {
 
   useEffect(() => {
     let cancelled = false
-    setData(null)
-    setError(null)
     void fetchKardex(product.id).then(
       (result) => {
         if (!cancelled) setData(result)
