@@ -6,10 +6,15 @@ import { Toast } from '../components/common/Toast'
 import { useAuth } from '../hooks/useAuth'
 import {
   crearCuentaConAcceso,
-  fetchUsuariosAutorizados,
   removeUsuarioAutorizado,
   updateUsuarioRol,
 } from '../services/users'
+import {
+  ensureUsersLoaded,
+  getUsersCache,
+  refreshUsersCache,
+  subscribeToUsers,
+} from '../services/usersCache'
 import type {
   UsuarioRol,
   UsuariosAutorizadosRow,
@@ -29,9 +34,16 @@ export function UsersPage() {
   const { rol, user, signOut } = useAuth()
   const isAdmin = rol === 'admin'
 
-  const [usuarios, setUsuarios] = useState<UsuariosAutorizadosRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [usuarios, setUsuarios] = useState<UsuariosAutorizadosRow[]>(() => {
+    return getUsersCache().usuarios ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cache = getUsersCache()
+    return cache.usuarios === null && cache.error === null
+  })
+  const [error, setError] = useState<string | null>(() => {
+    return getUsersCache().error
+  })
   const [email, setEmail] = useState('')
   const [nuevoRol, setNuevoRol] = useState<UsuarioRol>('cajero')
   const [saving, setSaving] = useState(false)
@@ -49,32 +61,19 @@ export function UsersPage() {
   }
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const data = await fetchUsuariosAutorizados()
-        if (!cancelled) {
-          setUsuarios(data)
-          setError(null)
-        }
-      } catch (cause) {
-        if (!cancelled) {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : 'No se pudo cargar el listado',
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
-      window.clearTimeout(noticeTimer.current)
+    const update = (): void => {
+      const cache = getUsersCache()
+      setUsuarios(cache.usuarios ?? [])
+      setError(cache.error)
+      setLoading(cache.usuarios === null && cache.error === null)
     }
+    const unsubscribe = subscribeToUsers(update)
+    ensureUsersLoaded()
+    return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    return () => window.clearTimeout(noticeTimer.current)
   }, [])
 
   if (!isAdmin) {
@@ -197,15 +196,7 @@ export function UsersPage() {
   }
 
   async function loadList(): Promise<void> {
-    try {
-      const data = await fetchUsuariosAutorizados()
-      setUsuarios(data)
-      setError(null)
-    } catch (cause) {
-      setError(
-        cause instanceof Error ? cause.message : 'No se pudo cargar el listado',
-      )
-    }
+    await refreshUsersCache()
   }
 
   return (
@@ -274,7 +265,7 @@ export function UsersPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-base font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 text-base font-black uppercase tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-95 disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
           >
             <UserPlus size={18} strokeWidth={2.5} aria-hidden="true" />
             {saving ? 'Creando…' : 'Crear cuenta y dar acceso'}

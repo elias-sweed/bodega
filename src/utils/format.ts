@@ -9,6 +9,15 @@ export function toTitleCase(value: string): string {
     .join(' ')
 }
 
+/** Normaliza para comparar palabras sin distinguir mayúsculas ni tildes. */
+export function normalizeText(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
 /**
  * Compara una fecha ISO con los límites del filtro usando instantes absolutos
  * (epoch en milisegundos), para que nunca importe la zona horaria del servidor

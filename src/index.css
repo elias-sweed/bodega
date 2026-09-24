@@ -241,6 +241,7 @@
 .inventario-pos .fade-in,
 .inventario-pos .fade-up,
 .inventario-pos .row-flash,
+.inventario-pos .flash-row,
 .inventario-pos .toast-enter,
 .compras-route .fade-in,
 .compras-route .fade-up,
@@ -356,6 +357,10 @@
     animation: row-flash 1.2s ease both;
   }
 
+  .flash-row {
+    animation: flash-row 2.8s ease both;
+  }
+
   .animate-slide-right {
     animation: slide-in-right 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -441,6 +446,22 @@
   }
   25% {
     background-color: rgb(52 211 153 / 0.22);
+  }
+}
+
+/* Resalta la fila del producto recién agregado durante unos segundos */
+@keyframes flash-row {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  20%,
+  40% {
+    background-color: rgb(251 191 36 / 0.28);
+  }
+  60%,
+  80% {
+    background-color: rgb(251 191 36 / 0.12);
   }
 }
 

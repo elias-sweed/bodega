@@ -1,51 +1,70 @@
 import { useCallback, useEffect, useState } from 'react'
-import { subscribeToDataChanges } from '../services/dataEvents'
-import { fetchDashboardResumen, fetchProductosBajoStock } from '../services/dashboard'
-import type { DashboardResumenResult, ProductosRow } from '../types/database.types'
+import {
+  getDashboardCache,
+  subscribeToDashboard,
+  ensureDashboardLoaded,
+  refreshDashboardCache,
+} from '../services/dashboardCache'
+import type {
+  DashboardResumenResult,
+  ProductosRow,
+} from '../types/database.types'
 
-export function useDashboardStats() {
-  const [resumen, setResumen] = useState<DashboardResumenResult | null>(null)
-  const [lowStock, setLowStock] = useState<ProductosRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [updatedAt, setUpdatedAt] = useState<number | null>(null)
-  const [reloadToken, setReloadToken] = useState(0)
+export function useDashboardStats(): {
+  resumen: DashboardResumenResult | null
+  lowStock: ProductosRow[]
+  loading: boolean
+  isRefreshing: boolean
+  error: string | null
+  updatedAt: number | null
+  refresh: () => Promise<void>
+} {
+  const [resumen, setResumen] = useState<DashboardResumenResult | null>(() => {
+    return getDashboardCache().resumen
+  })
+  const [lowStock, setLowStock] = useState<ProductosRow[]>(() => {
+    return getDashboardCache().lowStock ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    const data = getDashboardCache()
+    return data.resumen === null && data.error === null
+  })
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(() => {
+    return getDashboardCache().inFlight
+  })
+  const [error, setError] = useState<string | null>(() => {
+    return getDashboardCache().error
+  })
+  const [updatedAt, setUpdatedAt] = useState<number | null>(() => null)
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const [resumenData, productosBajoStock] = await Promise.all([
-          fetchDashboardResumen(),
-          fetchProductosBajoStock(),
-        ])
-        if (cancelled) return
-        setResumen(resumenData)
-        setLowStock(productosBajoStock)
-        setUpdatedAt(Date.now())
-        setError(null)
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'No se pudo cargar el resumen')
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-          setIsRefreshing(false)
-        }
-      }
-    })()
-    return () => {
-      cancelled = true
+    const update = (): void => {
+      const data = getDashboardCache()
+      setResumen(data.resumen)
+      setLowStock(data.lowStock ?? [])
+      setError(data.error)
+      setIsRefreshing(data.inFlight)
+      setLoading(data.resumen === null && data.error === null)
+      if (data.resumen !== null && !data.inFlight) setUpdatedAt(Date.now())
     }
-  }, [reloadToken])
-
-  const refresh = useCallback(() => {
-    setIsRefreshing(true)
-    setReloadToken((token) => token + 1)
+    const unsubscribe = subscribeToDashboard(update)
+    ensureDashboardLoaded()
+    return unsubscribe
   }, [])
-  useEffect(() => subscribeToDataChanges(refresh), [refresh])
 
-  return { resumen, lowStock, loading, isRefreshing, error, updatedAt, refresh }
+  const refresh = useCallback((): Promise<void> => {
+    const data = getDashboardCache()
+    setLoading(data.resumen === null && data.error === null)
+    return refreshDashboardCache().finally(() => setIsRefreshing(false))
+  }, [])
+
+  return {
+    resumen,
+    lowStock,
+    loading,
+    isRefreshing,
+    error,
+    updatedAt,
+    refresh,
+  }
 }

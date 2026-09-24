@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { subscribeToDataChanges } from '../services/dataEvents'
 import { fetchDetallesByVentas, fetchProductNames } from '../services/history'
+import {
+  getHoyCache,
+  applyHoyData,
+  subscribeToDashboard,
+  ensureDashboardLoaded,
+} from '../services/dashboardCache'
 import { supabase } from '../services/supabase'
 
 export interface ProductoHoy {
@@ -39,9 +45,15 @@ const EMPTY: ResumenRango = {
   ganancia: 0,
 }
 
-export function useTodayProducts(rango?: Rango, _claveCache = 'hoy', activo = true) {
-  const [data, setData] = useState<ResumenRango>(EMPTY)
-  const [loading, setLoading] = useState(true)
+export function useTodayProducts(rango?: Rango, claveCache = 'hoy', activo = true) {
+  const [data, setData] = useState<ResumenRango>(() => {
+    if (!activo) return EMPTY
+    return getHoyCache(claveCache) ?? EMPTY
+  })
+  const [loading, setLoading] = useState(() => {
+    if (!activo) return false
+    return getHoyCache(claveCache) === null
+  })
   const [reloadToken, setReloadToken] = useState(0)
 
   useEffect(() => {
@@ -104,19 +116,24 @@ export function useTodayProducts(rango?: Rango, _claveCache = 'hoy', activo = tr
           ganancia = productos.reduce((sum, producto) => sum + producto.ganancia, 0)
         }
 
+        const siguiente: ResumenRango = {
+          productos,
+          total,
+          count: lista.length,
+          efectivo: porMetodo('Efectivo'),
+          yape: porMetodo('Yape'),
+          plin: porMetodo('Plin'),
+          ganancia,
+        }
         if (!cancelled) {
-          setData({
-            productos,
-            total,
-            count: lista.length,
-            efectivo: porMetodo('Efectivo'),
-            yape: porMetodo('Yape'),
-            plin: porMetodo('Plin'),
-            ganancia,
-          })
+          setData(siguiente)
+          applyHoyData(claveCache, siguiente)
         }
       } catch {
-        if (!cancelled) setData(EMPTY)
+        if (!cancelled) {
+          setData(EMPTY)
+          applyHoyData(claveCache, EMPTY)
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -125,7 +142,17 @@ export function useTodayProducts(rango?: Rango, _claveCache = 'hoy', activo = tr
     return () => {
       cancelled = true
     }
-  }, [rango, activo, reloadToken])
+  }, [rango, activo, claveCache, reloadToken])
+
+  useEffect(() => {
+    const update = (): void => {
+      const cached = getHoyCache(claveCache)
+      if (cached !== null) setData(cached)
+    }
+    const unsubscribe = subscribeToDashboard(update)
+    ensureDashboardLoaded()
+    return unsubscribe
+  }, [claveCache])
 
   useEffect(() => subscribeToDataChanges(() => setReloadToken((token) => token + 1)), [])
 

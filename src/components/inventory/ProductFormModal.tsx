@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { Check, Minus, PackageSearch, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
@@ -398,19 +399,20 @@ export function ProductFormModal({
     }
   }
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="nuevo-producto-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+  return createPortal(
+    <div className="app-shell inventario-route">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="nuevo-producto-title"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) onClose()
+        }}
+      >
       <form
         onSubmit={handleSubmit}
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
+        className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
       >
         <div className="mb-5 flex items-center justify-between gap-3">
           <div>
@@ -751,6 +753,8 @@ export function ProductFormModal({
           </button>
         </div>
       </form>
-    </div>
+      </div>
+    </div>,
+    document.body,
   )
 }

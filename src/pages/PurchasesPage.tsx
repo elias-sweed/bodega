@@ -511,7 +511,7 @@ export function PurchasesPage() {
                 type="button"
                 disabled={!isValid || saving}
                 onClick={() => void handleSave()}
-                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-8 text-base font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
+                className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-8 text-base font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-surface-2 disabled:text-muted disabled:shadow-none"
               >
                 <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
                 {saving ? 'Guardando…' : 'Guardar compra'}

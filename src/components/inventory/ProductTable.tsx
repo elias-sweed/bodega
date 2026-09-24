@@ -6,6 +6,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Clock3,
   Download,
   History,
   PackagePlus,
@@ -31,9 +32,45 @@ interface ProductTableProps {
   onKardex?: (product: ProductosRow) => void
   /** Ids recién llegados (ej. desde Compras): van primero y parpadean */
   pinnedIds?: string[]
+  /** Id recién creado en Inventario: salta a su fila y la marca unos segundos */
+  flashId?: string | null
+  /** Productos creados en esta sesión; alimenta el filtro "Recientes" */
+  recientesIds?: string[]
 }
 
 const PAGE_SIZE = 20
+
+/** Ventana (horas) para el filtro "Agregados recientemente" */
+const RECENT_HOURS = 72
+const RECENT_MS = RECENT_HOURS * 60 * 60 * 1000
+const FILTER_STORAGE_KEY = 'inventario:filtros:v1'
+
+/** ¿Es reciente según su fecha en la DB? null/ausente se considera "no reciente". */
+function esRecientePorFecha(product: ProductosRow): boolean {
+  if (product.created_at === null || product.created_at === '') return false
+  const instante = +new Date(product.created_at)
+  return Number.isFinite(instante) && instante >= Date.now() - RECENT_MS
+}
+
+/** Instante en ms de una fecha; sin fecha válida queda de último (-Infinity). */
+function fechaMs(iso: string | null | undefined): number {
+  if (!iso) return -Infinity
+  const instante = +new Date(iso)
+  return Number.isFinite(instante) ? instante : -Infinity
+}
+
+interface PersistedFilters {
+  search?: string
+  category?: string
+  margen?: MargenFiltro
+  stock?: StockFiltro
+  costoMin?: string
+  costoMax?: string
+  minMin?: string
+  minMax?: string
+  showFilters?: boolean
+  recientes?: boolean
+}
 
 type MargenFiltro = 'todos' | 'alto' | 'medio' | 'bajo'
 type StockFiltro = 'todos' | 'bajo' | 'medio' | 'alto'
@@ -115,20 +152,36 @@ export function ProductTable({
   onDelete,
   onKardex,
   pinnedIds = [],
+  flashId = null,
+  recientesIds = [],
 }: ProductTableProps) {
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState('todas')
-  const [margen, setMargen] = useState<MargenFiltro>('todos')
-  const [stockFiltro, setStockFiltro] = useState<StockFiltro>('todos')
-  const [costoMin, setCostoMin] = useState('')
-  const [costoMax, setCostoMax] = useState('')
-  const [minMin, setMinMin] = useState('')
-  const [minMax, setMinMax] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
+  const persistedRef = useRef<PersistedFilters | null>(null)
+  if (persistedRef.current === null) {
+    try {
+      const raw = window.sessionStorage.getItem(FILTER_STORAGE_KEY)
+      persistedRef.current = raw ? (JSON.parse(raw) as PersistedFilters) : {}
+    } catch {
+      persistedRef.current = {}
+    }
+  }
+  const persisted = persistedRef.current
+
+  const [search, setSearch] = useState(persisted.search ?? '')
+  const [category, setCategory] = useState(persisted.category ?? 'todas')
+  const [margen, setMargen] = useState<MargenFiltro>(persisted.margen ?? 'todos')
+  const [stockFiltro, setStockFiltro] = useState<StockFiltro>(persisted.stock ?? 'todos')
+  const [costoMin, setCostoMin] = useState(persisted.costoMin ?? '')
+  const [costoMax, setCostoMax] = useState(persisted.costoMax ?? '')
+  const [minMin, setMinMin] = useState(persisted.minMin ?? '')
+  const [minMax, setMinMax] = useState(persisted.minMax ?? '')
+  const [showFilters, setShowFilters] = useState(persisted.showFilters ?? false)
+  const [recientes, setRecientes] = useState(persisted.recientes ?? false)
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
   const [sort, setSort] = useState<SortState | null>(null)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
   const topRef = useRef<HTMLDivElement>(null)
+  const handledFlashRef = useRef<string | null>(null)
 
   const scrollToTop = (): void => {
     let el = topRef.current?.parentElement ?? null
@@ -194,6 +247,13 @@ export function ProductTable({
     const mMax = minMax === '' ? null : Number(minMax)
     return products.filter((product) => {
       if (
+        recientes &&
+        !recientesIds.includes(product.id) &&
+        !esRecientePorFecha(product)
+      ) {
+        return false
+      }
+      if (
         query !== '' &&
         !product.nombre.toLowerCase().includes(query) &&
         !(product.codigo_barras ?? '').toLowerCase().includes(query)
@@ -220,7 +280,7 @@ export function ProductTable({
       }
       return true
     })
-  }, [products, search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax])
+  }, [products, search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, recientes, recientesIds])
 
   const sortedProducts = useMemo(() => {
     const pinned = new Set(pinnedIds)
@@ -230,6 +290,8 @@ export function ProductTable({
       const pa = pinned.has(a.id) ? 0 : 1
       const pb = pinned.has(b.id) ? 0 : 1
       if (pa !== pb) return pa - pb
+      // En "Recientes" ordena por fecha de registro: el más nuevo primero
+      if (recientes) return fechaMs(b.created_at) - fechaMs(a.created_at)
       if (!sort) return 0
       const factor = sort.dir === 'asc' ? 1 : -1
       switch (sort.key) {
@@ -256,7 +318,7 @@ export function ProductTable({
       }
     })
     return items
-  }, [filteredProducts, sort, pinnedIds])
+  }, [filteredProducts, sort, pinnedIds, recientes])
 
   const totalPages = Math.max(1, Math.ceil(sortedProducts.length / PAGE_SIZE))
 
@@ -264,7 +326,30 @@ export function ProductTable({
   useEffect(() => {
     setPage(1)
     setDirection('next')
-  }, [search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax])
+  }, [search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, recientes])
+
+  // Los filtros sobreviven a salir/volver a la sección Inventario
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(
+        FILTER_STORAGE_KEY,
+        JSON.stringify({
+          search,
+          category,
+          margen,
+          stock: stockFiltro,
+          costoMin,
+          costoMax,
+          minMin,
+          minMax,
+          showFilters,
+          recientes,
+        }),
+      )
+    } catch {
+      // Sin almacenamiento disponible: se ignora
+    }
+  }, [search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, showFilters, recientes])
 
   // Si la lista se achica (ej. eliminan), no quedarse en una página vacía
   useEffect(() => {
@@ -277,7 +362,8 @@ export function ProductTable({
     (costoMin !== '' ? 1 : 0) +
     (costoMax !== '' ? 1 : 0) +
     (minMin !== '' ? 1 : 0) +
-    (minMax !== '' ? 1 : 0)
+    (minMax !== '' ? 1 : 0) +
+    (recientes ? 1 : 0)
 
   const clearFilters = (): void => {
     setMargen('todos')
@@ -286,7 +372,48 @@ export function ProductTable({
     setCostoMax('')
     setMinMin('')
     setMinMax('')
+    setRecientes(false)
   }
+
+  // Limpia todo (incluye búsqueda y categoría) para que nada oculte un producto
+  const resetAllFilters = (): void => {
+    setSearch('')
+    setCategory('todas')
+    clearFilters()
+  }
+
+  // Producto recién creado: salta a su página y marca su fila unos segundos
+  useEffect(() => {
+    if (!flashId || flashId === handledFlashRef.current) return
+    const idx = sortedProducts.findIndex((p) => p.id === flashId)
+    if (idx === -1) {
+      // Existe pero un filtro lo oculta: limpiamos para mostrarlo
+      if (products.some((p) => p.id === flashId)) resetAllFilters()
+      return
+    }
+    handledFlashRef.current = flashId
+    const targetPage = Math.max(1, Math.floor(idx / PAGE_SIZE) + 1)
+    if (targetPage !== page) setPage(targetPage)
+    setHighlightId(flashId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flashId, sortedProducts])
+
+  useEffect(() => {
+    if (!highlightId) return
+    const timer = window.setTimeout(() => setHighlightId(null), 4000)
+    return () => window.clearTimeout(timer)
+  }, [highlightId])
+
+  useEffect(() => {
+    if (!highlightId) return
+    const timer = window.setTimeout(() => {
+      document
+        .querySelector<HTMLElement>(`tr[data-product-id="${highlightId}"]`)
+        ?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
+    }, 0)
+    return () => window.clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightId, page])
 
   const goToPage = (next: number, dir: 'next' | 'prev'): void => {
     setDirection(dir)
@@ -370,6 +497,21 @@ export function ProductTable({
             ))}
           </select>
         </label>
+
+        <button
+          type="button"
+          onClick={() => setRecientes((value) => !value)}
+          aria-pressed={recientes}
+          title="Mostrar solo los productos agregados recientemente"
+          className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-extrabold backdrop-blur-2xl transition-all duration-300 active:scale-95 ${
+            recientes
+              ? 'border-sky-400/40 bg-sky-400/15 text-sky-200'
+              : 'border-line bg-surface text-ink hover:bg-surface-2 hover:text-ink'
+          }`}
+        >
+          <Clock3 size={16} aria-hidden="true" />
+          Recientes
+        </button>
 
         <button
           type="button"
@@ -620,12 +762,16 @@ export function ProductTable({
                   const lowStock = product.stock_actual <= product.stock_minimo
                   const margin = marginPercent(product)
                   const pinned = pinnedIds.includes(product.id)
+                  const isFlashTarget = highlightId === product.id
                   return (
                     <tr
                       key={product.id}
+                      data-product-id={product.id}
                       className={`border-b border-line transition-colors duration-200 last:border-none hover:bg-surface-2 ${
                         lowStock ? 'bg-rose-400/10' : ''
-                      } ${pinned ? 'row-flash border border-amber-300/40 bg-amber-400/10' : ''}`}
+                      } ${pinned ? 'row-flash border border-amber-300/40 bg-amber-400/10' : ''} ${
+                        isFlashTarget ? 'flash-row border border-amber-300/50' : ''
+                      }`}
                     >
                       <td className="px-5 py-3 font-mono text-xs tabular-nums text-muted">
                         {start + i + 1}

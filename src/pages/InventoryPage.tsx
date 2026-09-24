@@ -15,12 +15,27 @@ import {
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
 import { ajustarStock } from '../services/products'
+import { getProductsCache } from '../services/productsCache'
+import { addRecientes, getRecientesIds, subscribeRecientes } from '../services/recientesStore'
 import type {
   CargarInventarioInicialItem,
   ProductosInsert,
   ProductosRow,
 } from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
+import { normalizeText } from '../utils/format'
+
+/** Id real del producto recién creado: primero por nombre en la caché (la DB
+ * es la fuente de verdad); si no, el que devolvió la RPC. */
+function resolveCreatedId(returnedId: string | null, nombre: string): string | null {
+  const catalog = getProductsCache().products
+  if (catalog) {
+    const normalized = normalizeText(nombre)
+    const match = catalog.find((product) => normalizeText(product.nombre) === normalized)
+    if (match) return match.id
+  }
+  return returnedId
+}
 
 export function InventoryPage() {
   const { rol } = useAuth()
@@ -63,8 +78,21 @@ export function InventoryPage() {
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
   const [kardexProduct, setKardexProduct] = useState<ProductosRow | null>(null)
+  const [focusProductId, setFocusProductId] = useState<string | null>(null)
+  const [recientesIds, setRecientesIds] = useState<string[]>(getRecientesIds)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
+
+  useEffect(
+    () => subscribeRecientes(() => setRecientesIds(getRecientesIds())),
+    [],
+  )
+
+  useEffect(() => {
+    // Lo recién llegado desde Compras también cuenta como "recientes"
+    if (recentIds.length > 0) addRecientes(recentIds)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (initialNewName) {
@@ -97,9 +125,23 @@ export function InventoryPage() {
     [],
   )
 
+  const markRecientes = useCallback((ids: string[]): void => {
+    addRecientes(ids)
+  }, [])
+
   const handleAddProduct = async (product: ProductosInsert): Promise<void> => {
-    await addProduct(product)
+    const created = await addProduct(product)
     setModalOpen(false)
+    // La RPC no siempre devuelve la fila completa: si falta el id, lo
+    // buscamos por nombre en la caché ya refrescada para poder marcarlo.
+    const resolvedId = resolveCreatedId(
+      typeof created?.id === 'string' && created.id !== '' ? created.id : null,
+      product.nombre,
+    )
+    if (resolvedId !== null) {
+      markRecientes([resolvedId])
+      setFocusProductId(resolvedId)
+    }
     showNotice('success', `Producto "${product.nombre}" agregado correctamente`)
   }
 
@@ -108,6 +150,26 @@ export function InventoryPage() {
   ): Promise<void> => {
     const result = await loadInitialInventory(items)
     setInitialStockOpen(false)
+
+    // Los productos nuevos no devuelven su id desde la RPC: los ubicamos al
+    // refrescar la caché comparando por nombre para marcarlos y saltar a ellos.
+    const nuevos = items.filter((item): item is Extract<CargarInventarioInicialItem, { tipo: 'nuevo' }> => item.tipo === 'nuevo')
+    let nuevosIds: string[] = []
+    if (nuevos.length > 0) {
+      const catalog = getProductsCache().products ?? products
+      const byName = new Map<string, string>()
+      for (const product of catalog) {
+        byName.set(normalizeText(product.nombre), product.id)
+      }
+      nuevosIds = nuevos
+        .map((item) => byName.get(normalizeText(item.nombre)))
+        .filter((id): id is string => typeof id === 'string')
+    }
+    if (nuevosIds.length > 0) {
+      markRecientes(nuevosIds)
+      setFocusProductId(nuevosIds[0])
+    }
+
     showNotice(
       'success',
       `Inventario inicial guardado: ${result.productos} ${
@@ -218,7 +280,7 @@ export function InventoryPage() {
             <button
               type="button"
               onClick={() => setInitialStockOpen(true)}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-[0.1em] text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-widest text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
             >
               <ClipboardList size={19} aria-hidden="true" />
               Cargar inventario inicial
@@ -229,7 +291,7 @@ export function InventoryPage() {
                 setPrefill(null)
                 setModalOpen(true)
               }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
             >
               <PackagePlus size={19} aria-hidden="true" />
               Nuevo producto
@@ -283,7 +345,7 @@ export function InventoryPage() {
                   setPrefill(null)
                   setModalOpen(true)
                 }}
-                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 transition-colors hover:brightness-105"
+                className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 transition-colors hover:brightness-105"
               >
                 <PackagePlus size={17} aria-hidden="true" />
                 Nuevo producto
@@ -301,6 +363,8 @@ export function InventoryPage() {
             onDelete={(product) => handleDeleteRequest(product)}
             onKardex={(product) => setKardexProduct(product)}
             pinnedIds={recentIds}
+            flashId={focusProductId}
+            recientesIds={recientesIds}
           />
         </div>
       )}

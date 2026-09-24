@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
-import { subscribeToDataChanges } from '../services/dataEvents'
-import { fetchVentasUltimos7Dias, type VentaDiaria } from '../services/dashboard'
+import {
+  getDashboardCache,
+  subscribeToDashboard,
+  ensureDashboardLoaded,
+} from '../services/dashboardCache'
+import type { VentaDiaria } from '../services/dashboard'
 
 export interface DiaVenta {
   clave: string
@@ -31,26 +35,23 @@ function buildSemana(ventas: VentaDiaria[]): DiaVenta[] {
 }
 
 export function useWeeklySales() {
-  const [ventas, setVentas] = useState<VentaDiaria[]>([])
-  const [loading, setLoading] = useState(true)
-  const [reloadToken, setReloadToken] = useState(0)
+  const [ventas, setVentas] = useState<VentaDiaria[]>(() => {
+    return getDashboardCache().weekly ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    return getDashboardCache().weekly === null
+  })
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      try {
-        const data = await fetchVentasUltimos7Dias()
-        if (!cancelled) setVentas(data)
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => {
-      cancelled = true
+    const update = (): void => {
+      const data = getDashboardCache()
+      setVentas(data.weekly ?? [])
+      setLoading(data.weekly === null)
     }
-  }, [reloadToken])
-
-  useEffect(() => subscribeToDataChanges(() => setReloadToken((token) => token + 1)), [])
+    const unsubscribe = subscribeToDashboard(update)
+    ensureDashboardLoaded()
+    return unsubscribe
+  }, [])
 
   const dias = buildSemana(ventas)
   const ayerTotal = dias.length >= 2 ? dias[dias.length - 2].total : 0

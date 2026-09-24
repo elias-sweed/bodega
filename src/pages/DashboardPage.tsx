@@ -53,7 +53,7 @@ export function DashboardPage() {
   const { dias, ayerTotal, loading: weeklyLoading } = useWeeklySales()
   const { productos: productosHoy, loading: productosLoading } = useTodayProducts()
   const dia = useTodayProducts(rangoDia, rangoDia ? `dia-${rangoDia.clave}` : 'hoy', !!rangoDia)
-  const retry = useCallback((): void => refresh(), [refresh])
+  const retry = useCallback(() => refresh(), [refresh])
   const freshness = timeAgo(updatedAt)
 
   const cerrarVista = useCallback((): void => {
@@ -213,7 +213,7 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/caja')}
-                  className="inline-flex h-12 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-sm font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.99]"
+                  className="inline-flex h-12 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-sm font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)] transition-colors hover:brightness-105 active:scale-[0.99]"
                 >
                   <ShoppingCart size={17} aria-hidden="true" />
                   Registrar mi primera venta

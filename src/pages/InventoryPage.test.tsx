@@ -41,6 +41,7 @@ async function fillNewProduct(user: ReturnType<typeof userEvent.setup>) {
 describe('InventoryPage', () => {
   beforeEach(() => {
     authState.role = 'admin'
+    window.sessionStorage.clear()
   })
 
   it('muestra el estado de carga y luego lista los productos', async () => {
@@ -142,6 +143,71 @@ describe('InventoryPage', () => {
       precio_venta: 2.5,
       costo: 0,
     })
+  })
+
+  it('muestra en "Recientes" lo creado en esta sesión aunque la DB tenga fecha vieja', async () => {
+    mockState.createWithOldTimestamp = true
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await fillNewProduct(user)
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(await screen.findByText('Galleta Test')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Recientes' }))
+    expect(screen.getByText('Galleta Test')).toBeInTheDocument()
+  })
+
+  it('salta y marca la fila del producto recién creado', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await fillNewProduct(user)
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(await screen.findByText('Galleta Test')).toBeInTheDocument()
+
+    const row = screen.getByText('Galleta Test').closest('tr')
+    await waitFor(() => expect(row).toHaveClass('flash-row'))
+  })
+
+  it('marca en "Recientes" aunque la RPC no devuelva el id del producto', async () => {
+    mockState.createReturnsEmptyRow = true
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await fillNewProduct(user)
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+    expect(await screen.findByText('Galleta Test')).toBeInTheDocument()
+
+    const row = screen.getByText('Galleta Test').closest('tr')
+    await waitFor(() => expect(row).toHaveClass('flash-row'))
+
+    await user.click(screen.getByRole('button', { name: 'Recientes' }))
+    expect(screen.getByText('Galleta Test')).toBeInTheDocument()
+  })
+
+  it('marca y deja en "Recientes" los productos nuevos cargados como inventario inicial', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Cargar inventario inicial' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar producto nuevo' }))
+    await user.type(screen.getByLabelText('Nombre del producto'), 'Agua de prueba')
+    await user.type(screen.getByLabelText('Categoría'), 'Bebidas')
+    await user.type(screen.getByLabelText('Unidades que tienes'), '3')
+    await user.type(screen.getByLabelText('Precio de venta (S/)'), '2.50')
+    await user.click(screen.getByRole('button', { name: 'Guardar inventario inicial' }))
+
+    expect(await screen.findByText('Agua De Prueba')).toBeInTheDocument()
+    const row = screen.getByText('Agua De Prueba').closest('tr')
+    await waitFor(() => expect(row).toHaveClass('flash-row'))
+
+    await user.click(screen.getByRole('button', { name: 'Recientes' }))
+    expect(screen.getByText('Agua De Prueba')).toBeInTheDocument()
   })
 
   it('ajusta stock usando la única RPC transaccional', async () => {

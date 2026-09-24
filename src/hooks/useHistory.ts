@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { subscribeToDataChanges } from '../services/dataEvents'
-import { fetchIngresosHistory, fetchVentasHistory } from '../services/history'
-import { fetchProducts } from '../services/products'
-import { fetchProveedores } from '../services/purchases'
+import {
+  ensureIngresosHistoryLoaded,
+  ensureVentasHistoryLoaded,
+  getHistoryCache,
+  refreshIngresosHistory,
+  refreshVentasHistory,
+  subscribeToHistory,
+} from '../services/historyCache'
 import type {
   IngresosMercaderiaRow,
   VentasRow,
@@ -16,35 +21,32 @@ interface HistorialState<T> {
 }
 
 export function useVentasHistory(): HistorialState<VentasRow[]> {
-  const [ventas, setVentas] = useState<VentasRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [reloadToken, setReloadToken] = useState(0)
+  const [ventas, setVentas] = useState<VentasRow[]>(() => {
+    return getHistoryCache().ventas ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cache = getHistoryCache()
+    return cache.ventas === null && cache.ventasError === null
+  })
+  const [error, setError] = useState<string | null>(() => {
+    return getHistoryCache().ventasError
+  })
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      setLoading(true)
-      try {
-        const data = await fetchVentasHistory()
-        if (!cancelled) {
-          setVentas(data)
-          setError(null)
-        }
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'No se pudo cargar el historial')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => {
-      cancelled = true
+    const update = (): void => {
+      const cache = getHistoryCache()
+      setVentas(cache.ventas ?? [])
+      setError(cache.ventasError)
+      setLoading(cache.ventas === null && cache.ventasError === null)
     }
-  }, [reloadToken])
+    const unsubscribe = subscribeToHistory(update)
+    ensureVentasHistoryLoaded()
+    return unsubscribe
+  }, [])
 
-  const refresh = useCallback(() => setReloadToken((token) => token + 1), [])
+  const refresh = useCallback(() => {
+    void refreshVentasHistory()
+  }, [])
   useEffect(() => subscribeToDataChanges(refresh), [refresh])
 
   return { data: ventas, loading, error, refresh }
@@ -58,42 +60,40 @@ export function useIngresosHistory(): {
   error: string | null
   refresh: () => void
 } {
-  const [ingresos, setIngresos] = useState<IngresosMercaderiaRow[]>([])
-  const [proveedorMap, setProveedorMap] = useState<Record<string, string>>({})
-  const [productoMap, setProductoMap] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [reloadToken, setReloadToken] = useState(0)
+  const [ingresos, setIngresos] = useState<IngresosMercaderiaRow[]>(() => {
+    return getHistoryCache().ingresos ?? []
+  })
+  const [proveedorMap, setProveedorMap] = useState<Record<string, string>>(
+    () => getHistoryCache().proveedorMap,
+  )
+  const [productoMap, setProductoMap] = useState<Record<string, string>>(
+    () => getHistoryCache().productoMap,
+  )
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cache = getHistoryCache()
+    return cache.ingresos === null && cache.ingresosError === null
+  })
+  const [error, setError] = useState<string | null>(() => {
+    return getHistoryCache().ingresosError
+  })
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      setLoading(true)
-      try {
-        const [data, proveedores, productos] = await Promise.all([
-          fetchIngresosHistory(),
-          fetchProveedores(),
-          fetchProducts(),
-        ])
-        if (cancelled) return
-        setIngresos(data)
-        setProveedorMap(Object.fromEntries(proveedores.map((row) => [row.id, row.nombre])))
-        setProductoMap(Object.fromEntries(productos.map((row) => [row.id, row.nombre])))
-        setError(null)
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'No se pudo cargar el historial')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => {
-      cancelled = true
+    const update = (): void => {
+      const cache = getHistoryCache()
+      setIngresos(cache.ingresos ?? [])
+      setProveedorMap(cache.proveedorMap)
+      setProductoMap(cache.productoMap)
+      setError(cache.ingresosError)
+      setLoading(cache.ingresos === null && cache.ingresosError === null)
     }
-  }, [reloadToken])
+    const unsubscribe = subscribeToHistory(update)
+    ensureIngresosHistoryLoaded()
+    return unsubscribe
+  }, [])
 
-  const refresh = useCallback(() => setReloadToken((token) => token + 1), [])
+  const refresh = useCallback(() => {
+    void refreshIngresosHistory()
+  }, [])
   useEffect(() => subscribeToDataChanges(refresh), [refresh])
 
   return {

@@ -2,54 +2,57 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   createProveedor,
   deleteProveedor as deleteProveedorService,
-  fetchProveedores,
 } from '../services/purchases'
+import {
+  ensureProveedoresLoaded,
+  getProveedoresCache,
+  refreshProveedoresCache,
+  subscribeToProveedores,
+  applyProveedorChanges,
+} from '../services/proveedoresCache'
 import type { ProveedoresInsert, ProveedoresRow } from '../types/database.types'
 
-function sortByName(proveedores: ProveedoresRow[]): ProveedoresRow[] {
-  return [...proveedores].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-}
-
 export function useProveedores() {
-  const [proveedores, setProveedores] = useState<ProveedoresRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [reloadToken, setReloadToken] = useState(0)
+  const [proveedores, setProveedores] = useState<ProveedoresRow[]>(() => {
+    return getProveedoresCache().proveedores ?? []
+  })
+  const [loading, setLoading] = useState<boolean>(() => {
+    return getProveedoresCache().proveedores === null
+  })
+  const [error, setError] = useState<string | null>(() => {
+    return getProveedoresCache().error
+  })
 
   useEffect(() => {
-    let cancelled = false
-    void (async () => {
-      setLoading(true)
-      try {
-        const data = await fetchProveedores()
-        if (!cancelled) {
-          setProveedores(sortByName(data))
-          setError(null)
-        }
-      } catch (cause) {
-        if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'No se pudieron cargar los proveedores')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => {
-      cancelled = true
+    const update = (): void => {
+      const data = getProveedoresCache()
+      setProveedores(data.proveedores ?? [])
+      setError(data.error)
+      setLoading(data.proveedores === null)
     }
-  }, [reloadToken])
+    const unsubscribe = subscribeToProveedores(update)
+    ensureProveedoresLoaded()
+    return unsubscribe
+  }, [])
 
-  const refresh = useCallback(() => setReloadToken((token) => token + 1), [])
+  const refresh = useCallback((): void => {
+    setLoading(getProveedoresCache().proveedores === null)
+    void refreshProveedoresCache()
+  }, [])
 
   const addProveedor = useCallback(async (input: ProveedoresInsert) => {
     const created = await createProveedor(input)
-    setProveedores((current) => sortByName([...current, created]))
+    const current = getProveedoresCache().proveedores ?? []
+    applyProveedorChanges([...current, created])
+    await refreshProveedoresCache()
     return created
   }, [])
 
   const removeProveedor = useCallback(async (id: string) => {
     await deleteProveedorService(id)
-    setProveedores((current) => current.filter((proveedor) => proveedor.id !== id))
+    const current = getProveedoresCache().proveedores ?? []
+    applyProveedorChanges(current.filter((proveedor) => proveedor.id !== id))
+    await refreshProveedoresCache()
   }, [])
 
   return { proveedores, loading, error, refresh, addProveedor, removeProveedor }

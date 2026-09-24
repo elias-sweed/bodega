@@ -558,7 +558,7 @@ export function PosPage() {
             <button
               type="button"
               onClick={handleResume}
-              className="rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 py-2.5 text-sm font-black text-slate-900 shadow-lg transition-colors hover:brightness-105"
+              className="rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 py-2.5 text-sm font-black text-slate-900 shadow-lg transition-colors hover:brightness-105"
             >
               Retomar venta
             </button>

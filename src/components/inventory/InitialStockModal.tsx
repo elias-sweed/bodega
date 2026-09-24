@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { PackagePlus, Plus, Search, Trash2, X } from 'lucide-react'
 import type { CargarInventarioInicialItem, ProductosRow } from '../../types/database.types'
 import { getFriendlyError } from '../../utils/errors'
@@ -87,7 +88,15 @@ export function InitialStockModal({
   const [searchOpen, setSearchOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [latestKey, setLatestKey] = useState<string | null>(null)
   const keyCounter = useRef(0)
+  const latestRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (latestKey && latestRef.current) {
+      latestRef.current.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' })
+    }
+  }, [latestKey])
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent): void => {
@@ -153,7 +162,9 @@ export function InitialStockModal({
   }
 
   const addNewProduct = (): void => {
-    setNewLines((current) => [...current, nuevaLinea(nextKey('nuevo'))])
+    const key = nextKey('nuevo')
+    setLatestKey(key)
+    setNewLines((current) => [nuevaLinea(key), ...current])
   }
 
   const updateExisting = (key: string, value: string): void => {
@@ -264,16 +275,17 @@ export function InitialStockModal({
     }
   }
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="cargar-inventario-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
+  return createPortal(
+    <div className="app-shell inventario-route">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cargar-inventario-title"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) onClose()
+        }}
+      >
       <form
         onSubmit={handleSubmit}
         className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
@@ -308,10 +320,145 @@ export function InitialStockModal({
         </div>
 
         <section className="mb-6">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
+                1. Producto que todavía no existe
+              </p>
+              <p className="mt-1 text-sm font-medium text-muted">
+                Créalo aquí junto con la cantidad que ya tienes. El costo queda en 0 hasta que registres una compra.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={addNewProduct}
+              className="inline-flex h-10 items-center gap-2 rounded-2xl border border-amber-300/35 bg-amber-400/10 px-4 text-sm font-extrabold text-ink transition-colors hover:bg-amber-400/20"
+            >
+              <Plus size={16} strokeWidth={3} aria-hidden="true" />
+              Agregar producto nuevo
+            </button>
+          </div>
+
+          {newLines.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-line bg-surface-sub px-5 py-5 text-center text-sm font-medium text-muted">
+              Si el producto no aparece en el catálogo de abajo, agrégalo como nuevo.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <datalist id="categorias-inventario-inicial">
+                {categories.map((category) => (
+                  <option key={category} value={category} />
+                ))}
+              </datalist>
+              {newLines.map((line, index) => (
+                <div
+                  key={line.key}
+                  ref={line.key === latestKey ? latestRef : undefined}
+                  className={`rounded-2xl border p-4 ${
+                    line.key === latestKey
+                      ? 'fade-up row-flash border-amber-300/40 bg-amber-400/10'
+                      : 'border-line bg-surface-2'
+                  }`}
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="text-sm font-extrabold text-ink">Producto nuevo {index + 1}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeNew(line.key)}
+                      aria-label={`Quitar producto nuevo ${index + 1}`}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/35 bg-rose-400/10 text-loss transition-colors hover:bg-rose-400/20"
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="sm:col-span-2">
+                      <label htmlFor={`nombre-${line.key}`} className={labelClass}>
+                        Nombre del producto
+                      </label>
+                      <input
+                        id={`nombre-${line.key}`}
+                        autoFocus={line.key === latestKey}
+                        value={line.nombre}
+                        onChange={(event) => updateNew(line.key, 'nombre', event.target.value)}
+                        className={inputClass}
+                        placeholder="Ej. Gaseosa"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`categoria-${line.key}`} className={labelClass}>
+                        Categoría
+                      </label>
+                      <input
+                        id={`categoria-${line.key}`}
+                        list="categorias-inventario-inicial"
+                        value={line.categoria}
+                        onChange={(event) => updateNew(line.key, 'categoria', event.target.value)}
+                        className={inputClass}
+                        placeholder="Ej. Bebidas"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`cantidad-nuevo-${line.key}`} className={labelClass}>
+                        Unidades que tienes
+                      </label>
+                      <input
+                        id={`cantidad-nuevo-${line.key}`}
+                        type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
+                        value={line.cantidad}
+                        onChange={(event) => updateNew(line.key, 'cantidad', event.target.value)}
+                        aria-label={`Unidades que tienes de ${line.nombre || 'producto nuevo'}`}
+                        className={`${inputClass} tabular-nums`}
+                        placeholder="Ej. 3"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`precio-${line.key}`} className={labelClass}>
+                        Precio de venta (S/)
+                      </label>
+                      <input
+                        id={`precio-${line.key}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={line.precio_venta}
+                        onChange={(event) => updateNew(line.key, 'precio_venta', event.target.value)}
+                        className={`${inputClass} tabular-nums`}
+                        placeholder="Ej. 2.50"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`stock-minimo-${line.key}`} className={labelClass}>
+                        Avisar cuando queden (opcional)
+                      </label>
+                      <input
+                        id={`stock-minimo-${line.key}`}
+                        type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
+                        value={line.stock_minimo}
+                        onChange={(event) => updateNew(line.key, 'stock_minimo', event.target.value)}
+                        className={`${inputClass} tabular-nums`}
+                        placeholder={`Por defecto: ${STOCK_MINIMO_DEFAULT}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="mb-6 border-t border-line pt-5">
           <div className="mb-3 flex items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-                1. Productos del catálogo
+                2. Productos del catálogo
               </p>
               <p className="mt-1 text-sm font-medium text-muted">
                 Busca un producto existente y escribe cuántas unidades tienes. Si ya tiene movimientos, usa Ajustar stock.
@@ -351,7 +498,7 @@ export function InitialStockModal({
                   <li className="px-4 py-3 text-sm font-medium text-muted">
                     {products.length === 0
                       ? 'Todavía no hay productos en el catálogo.'
-                      : 'Sin coincidencias. Puedes crear uno nuevo abajo.'}
+                      : 'Sin coincidencias. Puedes crear uno nuevo arriba.'}
                   </li>
                 ) : (
                   suggestions.map((product) => (
@@ -432,132 +579,6 @@ export function InitialStockModal({
           )}
         </section>
 
-        <section className="mb-6 border-t border-line pt-5">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-                2. Producto que todavía no existe
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">
-                Créalo aquí junto con la cantidad que ya tienes. El costo queda en 0 hasta que registres una compra.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={addNewProduct}
-              className="inline-flex h-10 items-center gap-2 rounded-2xl border border-amber-300/35 bg-amber-400/10 px-4 text-sm font-extrabold text-ink transition-colors hover:bg-amber-400/20"
-            >
-              <Plus size={16} strokeWidth={3} aria-hidden="true" />
-              Agregar producto nuevo
-            </button>
-          </div>
-
-          {newLines.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-line bg-surface-sub px-5 py-5 text-center text-sm font-medium text-muted">
-              Si el producto no aparece arriba, agrégalo como nuevo.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <datalist id="categorias-inventario-inicial">
-                {categories.map((category) => (
-                  <option key={category} value={category} />
-                ))}
-              </datalist>
-              {newLines.map((line, index) => (
-                <div key={line.key} className="rounded-2xl border border-line bg-surface-2 p-4">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="text-sm font-extrabold text-ink">Producto nuevo {index + 1}</p>
-                    <button
-                      type="button"
-                      onClick={() => removeNew(line.key)}
-                      aria-label={`Quitar producto nuevo ${index + 1}`}
-                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-rose-400/35 bg-rose-400/10 text-loss transition-colors hover:bg-rose-400/20"
-                    >
-                      <Trash2 size={15} aria-hidden="true" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                      <label htmlFor={`nombre-${line.key}`} className={labelClass}>
-                        Nombre del producto
-                      </label>
-                      <input
-                        id={`nombre-${line.key}`}
-                        value={line.nombre}
-                        onChange={(event) => updateNew(line.key, 'nombre', event.target.value)}
-                        className={inputClass}
-                        placeholder="Ej. Gaseosa"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor={`categoria-${line.key}`} className={labelClass}>
-                        Categoría
-                      </label>
-                      <input
-                        id={`categoria-${line.key}`}
-                        list="categorias-inventario-inicial"
-                        value={line.categoria}
-                        onChange={(event) => updateNew(line.key, 'categoria', event.target.value)}
-                        className={inputClass}
-                        placeholder="Ej. Bebidas"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor={`cantidad-nuevo-${line.key}`} className={labelClass}>
-                        Unidades que tienes
-                      </label>
-                      <input
-                        id={`cantidad-nuevo-${line.key}`}
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={line.cantidad}
-                        onChange={(event) => updateNew(line.key, 'cantidad', event.target.value)}
-                        aria-label={`Unidades que tienes de ${line.nombre || 'producto nuevo'}`}
-                        className={`${inputClass} tabular-nums`}
-                        placeholder="Ej. 3"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor={`precio-${line.key}`} className={labelClass}>
-                        Precio de venta (S/)
-                      </label>
-                      <input
-                        id={`precio-${line.key}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        inputMode="decimal"
-                        value={line.precio_venta}
-                        onChange={(event) => updateNew(line.key, 'precio_venta', event.target.value)}
-                        className={`${inputClass} tabular-nums`}
-                        placeholder="Ej. 2.50"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor={`stock-minimo-${line.key}`} className={labelClass}>
-                        Avisar cuando queden (opcional)
-                      </label>
-                      <input
-                        id={`stock-minimo-${line.key}`}
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={line.stock_minimo}
-                        onChange={(event) => updateNew(line.key, 'stock_minimo', event.target.value)}
-                        className={`${inputClass} tabular-nums`}
-                        placeholder={`Por defecto: ${STOCK_MINIMO_DEFAULT}`}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
         {error && (
           <p
             role="alert"
@@ -592,6 +613,8 @@ export function InitialStockModal({
           </div>
         </div>
       </form>
-    </div>
+      </div>
+    </div>,
+    document.body,
   )
 }

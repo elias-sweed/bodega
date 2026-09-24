@@ -6,6 +6,11 @@ import type { AuthContextValue } from './AuthContext'
 import { supabase } from '../services/supabase'
 import { fetchRol } from '../services/roles'
 import { resetProductsCache } from '../services/productsCache'
+import { resetDashboardCache } from '../services/dashboardCache'
+import { resetProveedoresCache } from '../services/proveedoresCache'
+import { resetReporteCache } from '../services/reporteCache'
+import { resetHistoryCache } from '../services/historyCache'
+import { resetUsersCache } from '../services/usersCache'
 import type { UsuarioRol } from '../types/database.types'
 
 function getAppUrl(): string {
@@ -146,6 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message)
     }
     resetProductsCache()
+    resetDashboardCache()
+    resetProveedoresCache()
+    resetReporteCache()
+    resetHistoryCache()
+    resetUsersCache()
   }, [])
 
   const acknowledgeExpired = useCallback((): void => {

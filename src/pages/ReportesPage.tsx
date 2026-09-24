@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { BarChart3, CalendarDays, Download, RotateCcw, TrendingDown, TrendingUp } from 'lucide-react'
+import { ReportesSkeleton } from '../components/reportes/ReportesSkeleton'
 import { useReporteMensual } from '../hooks/useReporteMensual'
 import { exportCsv } from '../utils/exportCsv'
 import { formatMoney } from '../utils/format'
@@ -33,7 +34,9 @@ function rango(periodo: Periodo, fecha: Date): { desde: Date; hasta: Date } {
     const day = desde.getDay()
     desde.setDate(desde.getDate() + (day === 0 ? -6 : 1 - day))
     desde.setHours(0, 0, 0, 0)
-    return { desde, hasta: new Date() }
+    const hasta = new Date()
+    hasta.setHours(23, 59, 59, 999)
+    return { desde, hasta }
   }
   desde.setDate(1)
   desde.setHours(0, 0, 0, 0)
@@ -45,7 +48,7 @@ function rango(periodo: Periodo, fecha: Date): { desde: Date; hasta: Date } {
 function MetricCard({ label, value, tone = 'normal' }: { label: string; value: string; tone?: 'normal' | 'profit' | 'loss' }) {
   const color = tone === 'profit' ? 'text-profit' : tone === 'loss' ? 'text-loss' : 'text-ink'
   return (
-    <div className="rounded-[24px] border border-line bg-surface p-5 shadow-[0_24px_60px_-32_rgba(0,0,0,0.95)]">
+    <div className="rounded-3xl border border-line bg-surface p-5 shadow-[0_24px_60px_-32_rgba(0,0,0,0.95)]">
       <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-muted">{label}</p>
       <p className={`mt-2 text-3xl font-black tracking-tight ${color}`}>{value}</p>
     </div>
@@ -102,12 +105,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
   }
 
   if (loading) {
-    return (
-      <div className="space-y-4" aria-busy="true" aria-label="Cargando reporte">
-        <div className="h-32 animate-pulse rounded-[28px] bg-surface" />
-        <div className="h-64 animate-pulse rounded-[28px] bg-surface" />
-      </div>
-    )
+    return <ReportesSkeleton />
   }
 
   return (
@@ -116,7 +114,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         <button
           type="button"
           onClick={exportar}
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
+          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
         >
           <Download size={16} aria-hidden="true" /> Exportar para Excel
         </button>
@@ -230,7 +228,7 @@ export function ReportesPage() {
               key={item}
               type="button"
               onClick={() => setPeriodo(item)}
-              className={`rounded-xl px-4 py-2 text-sm font-black ${periodo === item ? 'border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
+              className={`rounded-xl px-4 py-2 text-sm font-black ${periodo === item ? 'border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-ink'}`}
             >
               {item === 'dia' ? 'Día' : item === 'semana' ? 'Semana' : 'Mes'}
             </button>

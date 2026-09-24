@@ -1,6 +1,7 @@
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import type { ProductosRow } from '../types/database.types'
 import { fetchProducts } from './products'
+import { addRecientes } from './recientesStore'
 import { supabase } from './supabase'
 
 type Listener = () => void
@@ -33,7 +34,17 @@ async function load(forceAfterCurrent = false): Promise<void> {
     try {
       const products = await fetchProducts()
       if (generation === cacheGeneration) {
-        cache = sortByName(products)
+        const next = sortByName(products)
+        // Cualquier producto que aparezca por primera vez en la caché es
+        // "agregado recientemente", sin depender de created_at ni de la RPC.
+        if (cache !== null) {
+          const previousIds = new Set(cache.map((product) => product.id))
+          const freshIds = next
+            .filter((product) => !previousIds.has(product.id))
+            .map((product) => product.id)
+          if (freshIds.length > 0) addRecientes(freshIds)
+        }
+        cache = next
         errorState = null
       }
     } catch (cause) {

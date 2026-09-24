@@ -1267,7 +1267,7 @@ begin
         stock_actual, stock_minimo
       ) values (
         v_nombre, v_categoria, v_codigo_barras, v_precio_venta, v_costo,
-        0, v_stock_minimo
+        v_cantidad, v_stock_minimo
       )
       returning * into v_product;
 

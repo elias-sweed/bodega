@@ -1,9 +1,12 @@
 import { delay, http, HttpResponse } from 'msw'
 import type {
   CargarInventarioInicialItem,
+  DetalleVentasRow,
   IngresosMercaderiaRow,
   ProveedoresRow,
   ProductosRow,
+  UsuariosAutorizadosRow,
+  VentasRow,
 } from '../types/database.types'
 
 const SUPABASE_URL = 'https://test.supabase.co'
@@ -12,6 +15,9 @@ type MockState = {
   products: ProductosRow[]
   providers: ProveedoresRow[]
   incomes: IngresosMercaderiaRow[]
+  sales: VentasRow[]
+  saleDetails: DetalleVentasRow[]
+  authorizedUsers: UsuariosAutorizadosRow[]
   productFailures: number
   productDelayMs: number
   providerDelayMs: number
@@ -19,6 +25,10 @@ type MockState = {
   adjustFailure: string | null
   purchaseFailure: string | null
   initialInventoryFailure: string | null
+  /** Al crear un producto, asigna una fecha vieja para simular DB sin created_at útil */
+  createWithOldTimestamp: boolean
+  /** La RPC de creación responde sin la fila (simula versión vieja del SQL) */
+  createReturnsEmptyRow: boolean
   productLookupCalls: number
   createCalls: number
   adjustCalls: number
@@ -67,6 +77,9 @@ export const mockState: MockState = {
   products: [],
   providers: [],
   incomes: [],
+  sales: [],
+  saleDetails: [],
+  authorizedUsers: [],
   productFailures: 0,
   productDelayMs: 0,
   providerDelayMs: 0,
@@ -74,6 +87,8 @@ export const mockState: MockState = {
   adjustFailure: null,
   purchaseFailure: null,
   initialInventoryFailure: null,
+  createWithOldTimestamp: false,
+  createReturnsEmptyRow: false,
   productLookupCalls: 0,
   createCalls: 0,
   adjustCalls: 0,
@@ -88,6 +103,9 @@ export function resetMockState(): void {
   mockState.products = structuredClone(initialProducts)
   mockState.providers = structuredClone(initialProviders)
   mockState.incomes = []
+  mockState.sales = []
+  mockState.saleDetails = []
+  mockState.authorizedUsers = []
   mockState.productFailures = 0
   mockState.productDelayMs = 0
   mockState.providerDelayMs = 0
@@ -95,6 +113,8 @@ export function resetMockState(): void {
   mockState.adjustFailure = null
   mockState.purchaseFailure = null
   mockState.initialInventoryFailure = null
+  mockState.createWithOldTimestamp = false
+  mockState.createReturnsEmptyRow = false
   mockState.productLookupCalls = 0
   mockState.createCalls = 0
   mockState.adjustCalls = 0
@@ -144,6 +164,31 @@ const providersHandler = http.get(
   },
 )
 
+const salesHandler = http.get(`${SUPABASE_URL}/rest/v1/ventas`, () => {
+  return HttpResponse.json(mockState.sales)
+})
+
+const saleDetailsHandler = http.get(
+  `${SUPABASE_URL}/rest/v1/detalle_ventas`,
+  () => {
+    return HttpResponse.json(mockState.saleDetails)
+  },
+)
+
+const incomesHandler = http.get(
+  `${SUPABASE_URL}/rest/v1/ingresos_mercaderia`,
+  () => {
+    return HttpResponse.json(mockState.incomes)
+  },
+)
+
+const usersHandler = http.get(
+  `${SUPABASE_URL}/rest/v1/usuarios_autorizados`,
+  () => {
+    return HttpResponse.json(mockState.authorizedUsers)
+  },
+)
+
 const createProviderHandler = http.post(
   `${SUPABASE_URL}/rest/v1/proveedores`,
   async ({ request }) => {
@@ -184,25 +229,30 @@ const createProductHandler = http.post(
       costo: body.p_costo,
       stock_actual: body.p_stock_inicial,
       stock_minimo: body.p_stock_minimo,
-      created_at: new Date().toISOString(),
+      created_at: mockState.createWithOldTimestamp
+        ? '2025-01-01T00:00:00Z'
+        : new Date().toISOString(),
     }
     mockState.products.push(product)
-    if (body.p_stock_inicial > 0) {
-      mockState.incomes.push({
-        id: `ingreso-inicial-${product.id}`,
-        compra_id: null,
-        proveedor_id: null,
-        nombre_proveedor: 'Ajuste Manual de Inventario',
-        producto_id: product.id,
-        cantidad_ingresada: body.p_stock_inicial,
-        costo_total: body.p_stock_inicial * body.p_costo,
-        comprobante: null,
-        motivo: 'Stock inicial',
-        fecha: new Date().toISOString(),
-        creado_por: 'admin@test.local',
-      })
-    }
-    return HttpResponse.json(product, { status: 201 })
+if (body.p_stock_inicial > 0) {
+        mockState.incomes.push({
+          id: `ingreso-inicial-${product.id}`,
+          compra_id: null,
+          proveedor_id: null,
+          nombre_proveedor: 'Ajuste Manual de Inventario',
+          producto_id: product.id,
+          cantidad_ingresada: body.p_stock_inicial,
+          costo_total: body.p_stock_inicial * body.p_costo,
+          comprobante: null,
+          motivo: 'Stock inicial',
+          fecha: new Date().toISOString(),
+          creado_por: 'admin@test.local',
+        })
+      }
+      if (mockState.createReturnsEmptyRow) {
+        return HttpResponse.json({}, { status: 201 })
+      }
+      return HttpResponse.json(product, { status: 201 })
   },
 )
 
@@ -447,6 +497,10 @@ const registerPurchaseHandler = http.post(
 export const handlers = [
   productsHandler,
   providersHandler,
+  salesHandler,
+  saleDetailsHandler,
+  incomesHandler,
+  usersHandler,
   createProviderHandler,
   createProductHandler,
   initialInventoryHandler,

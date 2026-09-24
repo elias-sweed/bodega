@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Banknote, Eraser, Wallet, X } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
 import { METODOS_PAGO, type MetodoPago } from './metodosPago'
@@ -67,13 +68,14 @@ export function PaymentModal({
     window.setTimeout(() => efectivoInput.current?.focus(), 0)
   }
 
-  return (
-    <div
-      className="fixed inset-0 z-30 flex items-center justify-center bg-[#080315]/90 p-4"
-      onClick={() => {
-        if (!charging) onCancel()
-      }}
-    >
+  return createPortal(
+    <div className="app-shell caja-route">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#080315]/90 p-4"
+        onClick={() => {
+          if (!charging) onCancel()
+        }}
+      >
       <div
         className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
         onClick={(e) => e.stopPropagation()}
@@ -223,6 +225,8 @@ export function PaymentModal({
           {charging ? 'PROCESANDO…' : 'CONFIRMAR COBRO'}
         </button>
       </div>
-    </div>
+      </div>
+    </div>,
+    document.body,
   )
 }
