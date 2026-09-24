@@ -1,21 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { PackagePlus, Plus, Search, Trash2, X } from 'lucide-react'
-import type { CargarInventarioInicialItem, ProductosRow } from '../../types/database.types'
+import { PackagePlus, Plus, Trash2, X } from 'lucide-react'
+import { fetchProductCategories } from '../../services/products'
+import type { CargarInventarioInicialItem } from '../../types/database.types'
 import { getFriendlyError } from '../../utils/errors'
 import { toTitleCase } from '../../utils/format'
+import { CategoryField } from './CategoryField'
 
 interface InitialStockModalProps {
-  products: ProductosRow[]
   onClose: () => void
   onSubmit: (items: CargarInventarioInicialItem[]) => Promise<void>
-}
-
-interface ExistingLine {
-  key: string
-  productoId: string
-  cantidad: string
 }
 
 interface NewLine {
@@ -77,15 +72,8 @@ function nuevaLinea(key: string): NewLine {
   }
 }
 
-export function InitialStockModal({
-  products,
-  onClose,
-  onSubmit,
-}: InitialStockModalProps) {
-  const [existingLines, setExistingLines] = useState<ExistingLine[]>([])
+export function InitialStockModal({ onClose, onSubmit }: InitialStockModalProps) {
   const [newLines, setNewLines] = useState<NewLine[]>([])
-  const [search, setSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [latestKey, setLatestKey] = useState<string | null>(null)
@@ -106,81 +94,48 @@ export function InitialStockModal({
     return () => window.removeEventListener('keydown', handleKey)
   }, [onClose])
 
-  const nextKey = (prefix: string): string => {
+  const nextKey = (): string => {
     keyCounter.current += 1
-    return `${prefix}-${keyCounter.current}`
+    return `nuevo-${keyCounter.current}`
   }
 
-  const productsById = useMemo(
-    () => new Map(products.map((product) => [product.id, product])),
-    [products],
-  )
-  const selectedIds = useMemo(
-    () => new Set(existingLines.map((line) => line.productoId)),
-    [existingLines],
-  )
-  const categories = useMemo(() => {
-    const values = new Set(CATEGORIAS)
-    for (const product of products) {
-      const category = product.categoria.trim()
-      if (category) values.add(category)
-    }
-    return Array.from(values).sort((a, b) => a.localeCompare(b, 'es'))
-  }, [products])
+const [categories, setCategories] = useState<string[]>(CATEGORIAS)
 
-  const suggestions = useMemo(() => {
-    const query = normalize(search)
-    return products
-      .filter((product) => !selectedIds.has(product.id))
-      .filter((product) => {
-        if (!query) return true
-        return (
-          normalize(product.nombre).includes(query) ||
-          normalize(product.codigo_barras ?? '').includes(query)
-        )
-      })
-      .slice(0, 8)
-  }, [products, search, selectedIds])
+  useEffect(() => {
+    let active = true
+    const loadCategories = async (): Promise<void> => {
+      try {
+        const list = await fetchProductCategories()
+        if (active) setCategories(list.length > 0 ? list : CATEGORIAS)
+      } catch {
+        if (active) setCategories(CATEGORIAS)
+      }
+    }
+    void loadCategories()
+    return () => {
+      active = false
+    }
+  }, [])
 
   const totalUnits = useMemo(
     () =>
-      [...existingLines, ...newLines].reduce((total, line) => {
+      newLines.reduce((total, line) => {
         const parsed = parseEntero(line.cantidad)
         return total + (parsed ?? 0)
       }, 0),
-    [existingLines, newLines],
+    [newLines],
   )
 
-  const addExistingProduct = (productId: string): void => {
-    if (selectedIds.has(productId)) return
-    setExistingLines((current) => [
-      ...current,
-      { key: nextKey('existente'), productoId: productId, cantidad: '' },
-    ])
-    setSearch('')
-    setSearchOpen(false)
-  }
-
   const addNewProduct = (): void => {
-    const key = nextKey('nuevo')
+    const key = nextKey()
     setLatestKey(key)
     setNewLines((current) => [nuevaLinea(key), ...current])
-  }
-
-  const updateExisting = (key: string, value: string): void => {
-    setExistingLines((current) =>
-      current.map((line) => (line.key === key ? { ...line, cantidad: value } : line)),
-    )
   }
 
   const updateNew = (key: string, field: NewTextField, value: string): void => {
     setNewLines((current) =>
       current.map((line) => (line.key === key ? { ...line, [field]: value } : line)),
     )
-  }
-
-  const removeExisting = (key: string): void => {
-    setExistingLines((current) => current.filter((line) => line.key !== key))
   }
 
   const removeNew = (key: string): void => {
@@ -191,34 +146,13 @@ export function InitialStockModal({
     event.preventDefault()
     setError(null)
 
-    if (existingLines.length === 0 && newLines.length === 0) {
+    if (newLines.length === 0) {
       setError('Agrega al menos un producto para cargar el inventario.')
       return
     }
 
     const items: CargarInventarioInicialItem[] = []
     const names = new Set<string>()
-
-    for (const line of existingLines) {
-      const product = productsById.get(line.productoId)
-      if (!product) {
-        setError('No se encontró uno de los productos seleccionados. Actualiza el inventario.')
-        return
-      }
-
-      const cantidad = parseEntero(line.cantidad)
-      if (cantidad === null) {
-        setError(`Escribe cuántas unidades tienes de "${product.nombre}".`)
-        return
-      }
-
-      names.add(normalize(product.nombre))
-      items.push({
-        tipo: 'existente',
-        producto_id: product.id,
-        cantidad,
-      })
-    }
 
     for (const line of newLines) {
       const nombre = toTitleCase(line.nombre)
@@ -323,10 +257,10 @@ export function InitialStockModal({
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-                1. Producto que todavía no existe
+                Productos nuevos
               </p>
               <p className="mt-1 text-sm font-medium text-muted">
-                Créalo aquí junto con la cantidad que ya tienes. El costo queda en 0 hasta que registres una compra.
+                Créalos aquí junto con la cantidad que ya tienes. El costo queda en 0 hasta que registres una compra.
               </p>
             </div>
             <button
@@ -341,15 +275,10 @@ export function InitialStockModal({
 
           {newLines.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-line bg-surface-sub px-5 py-5 text-center text-sm font-medium text-muted">
-              Si el producto no aparece en el catálogo de abajo, agrégalo como nuevo.
+              Agrega los productos nuevos que no están en el catálogo junto con su stock inicial.
             </div>
           ) : (
             <div className="space-y-3">
-              <datalist id="categorias-inventario-inicial">
-                {categories.map((category) => (
-                  <option key={category} value={category} />
-                ))}
-              </datalist>
               {newLines.map((line, index) => (
                 <div
                   key={line.key}
@@ -389,13 +318,12 @@ export function InitialStockModal({
                       <label htmlFor={`categoria-${line.key}`} className={labelClass}>
                         Categoría
                       </label>
-                      <input
+                      <CategoryField
                         id={`categoria-${line.key}`}
-                        list="categorias-inventario-inicial"
                         value={line.categoria}
-                        onChange={(event) => updateNew(line.key, 'categoria', event.target.value)}
-                        className={inputClass}
-                        placeholder="Ej. Bebidas"
+                        onChange={(value) => updateNew(line.key, 'categoria', value)}
+                        categories={categories}
+                        inputClassName={inputClass}
                       />
                     </div>
                     <div>
@@ -454,131 +382,6 @@ export function InitialStockModal({
           )}
         </section>
 
-        <section className="mb-6 border-t border-line pt-5">
-          <div className="mb-3 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-                2. Productos del catálogo
-              </p>
-              <p className="mt-1 text-sm font-medium text-muted">
-                Busca un producto existente y escribe cuántas unidades tienes. Si ya tiene movimientos, usa Ajustar stock.
-              </p>
-            </div>
-            <span className="shrink-0 rounded-full border border-line bg-surface-2 px-3 py-1 text-xs font-black text-muted">
-              {existingLines.length} agregados
-            </span>
-          </div>
-
-          <label htmlFor="buscar-producto-inicial" className={labelClass}>
-            Buscar producto
-          </label>
-          <div className="relative">
-            <Search
-              size={18}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-amber-200/80"
-              aria-hidden="true"
-            />
-            <input
-              id="buscar-producto-inicial"
-              type="search"
-              autoComplete="off"
-              value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
-                setSearchOpen(true)
-              }}
-              onFocus={() => setSearchOpen(true)}
-              onBlur={() => setSearchOpen(false)}
-              className={`${inputClass} pl-11`}
-              placeholder="Buscar por nombre o código…"
-            />
-            {searchOpen && (
-              <ul className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto rounded-2xl border border-line bg-surface py-1.5 shadow-[0_24px_60px_-24_rgba(0,0,0,0.95)]">
-                {suggestions.length === 0 ? (
-                  <li className="px-4 py-3 text-sm font-medium text-muted">
-                    {products.length === 0
-                      ? 'Todavía no hay productos en el catálogo.'
-                      : 'Sin coincidencias. Puedes crear uno nuevo arriba.'}
-                  </li>
-                ) : (
-                  suggestions.map((product) => (
-                    <li key={product.id}>
-                      <button
-                        type="button"
-                        onMouseDown={(event) => {
-                          event.preventDefault()
-                          addExistingProduct(product.id)
-                        }}
-                        aria-label={`Agregar ${product.nombre} al inventario inicial`}
-                        className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface-2"
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-extrabold tracking-tight text-ink">
-                            {product.nombre}
-                          </span>
-                          <span className="block text-xs font-medium text-muted">
-                            {product.categoria}
-                          </span>
-                        </span>
-                        <span className="shrink-0 text-xs font-semibold tabular-nums text-muted">
-                          stock: {product.stock_actual}
-                        </span>
-                      </button>
-                    </li>
-                  ))
-                )}
-              </ul>
-            )}
-          </div>
-
-          {existingLines.length > 0 && (
-            <div className="mt-3 space-y-2">
-              {existingLines.map((line) => {
-                const product = productsById.get(line.productoId)
-                if (!product) return null
-                return (
-                  <div
-                    key={line.key}
-                    className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface-2 p-3"
-                  >
-                    <div className="min-w-[180px] flex-1">
-                      <p className="truncate text-sm font-extrabold text-ink">{product.nombre}</p>
-                      <p className="mt-0.5 text-xs font-medium text-muted">
-                        {product.categoria} · stock registrado: {product.stock_actual}
-                      </p>
-                    </div>
-                    <div className="w-full sm:w-40">
-                      <label htmlFor={`cantidad-${line.key}`} className={labelClass}>
-                        Unidades que tienes
-                      </label>
-                      <input
-                        id={`cantidad-${line.key}`}
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={line.cantidad}
-                        onChange={(event) => updateExisting(line.key, event.target.value)}
-                        aria-label={`Unidades que tienes de ${product.nombre}`}
-                        className={`${inputClass} tabular-nums`}
-                        placeholder="Ej. 3"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeExisting(line.key)}
-                      aria-label={`Quitar ${product.nombre} de la carga inicial`}
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-rose-400/35 bg-rose-400/10 text-loss transition-colors hover:bg-rose-400/20"
-                    >
-                      <Trash2 size={17} strokeWidth={2.5} aria-hidden="true" />
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
-
         {error && (
           <p
             role="alert"
@@ -590,8 +393,7 @@ export function InitialStockModal({
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
           <p className="text-sm font-semibold text-muted">
-            {existingLines.length + newLines.length}{' '}
-            {existingLines.length + newLines.length === 1 ? 'producto' : 'productos'} ·{' '}
+            {newLines.length} {newLines.length === 1 ? 'producto' : 'productos'} ·{' '}
             <span className="font-black tabular-nums text-ink">{totalUnits} unidades</span>
           </p>
           <div className="flex w-full gap-2.5 sm:w-auto">
@@ -604,7 +406,7 @@ export function InitialStockModal({
             </button>
             <button
               type="submit"
-              disabled={submitting || (existingLines.length === 0 && newLines.length === 0)}
+              disabled={submitting || newLines.length === 0}
               className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
             >
               <PackagePlus size={17} strokeWidth={2.5} aria-hidden="true" />

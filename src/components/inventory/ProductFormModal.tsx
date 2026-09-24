@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, Minus, PackageSearch, TrendingUp, X } from 'lucide-react'
+import { Check, Minus, PackageSearch, Sparkles, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
 import { CategoryChips } from './CategoryChips'
+import { CategoryField } from './CategoryField'
 
 interface ProductFormModalProps {
   onClose: () => void
@@ -92,6 +93,58 @@ const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
     'cafe',
     'te',
     'bebida',
+    'kola',
+    'glacier',
+    'frutolli',
+    'naranja',
+  ],
+  Helados: [
+    'helado',
+    'heladito',
+    'sorbete',
+    'cremoso',
+    'peke',
+    'donofrio',
+    'triple',
+    'paleta',
+  ],
+  'Útiles': [
+    'cuaderno',
+    'lapiz',
+    'lapicero',
+    'borrador',
+    'regla',
+    'tajador',
+    'plumon',
+    'cartulina',
+    'folder',
+    'resaltador',
+    'cinta',
+    'tijera',
+    'colores',
+  ],
+  'Copias e Impresiones': [
+    'copia',
+    'impresion',
+    'impresora',
+    'anillado',
+    'resma',
+    'papel',
+    'tinta',
+    'toner',
+    'espiralado',
+  ],
+  'Accesorios Autos': [
+    'espejo',
+    'plumilla',
+    'filtro',
+    'tapon',
+    'manija',
+    'bateria',
+    'cable',
+    'faro',
+    'boquilla',
+    'accesorio',
   ],
   Snacks: [
     'canchita',
@@ -104,6 +157,8 @@ const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
     'chifle',
     'mani',
     'cacahuate',
+    'tris',
+    'bitz',
   ],
   'Lácteos': [
     'leche',
@@ -114,6 +169,8 @@ const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
     'margarina',
     'pan',
     'huevo',
+    'flan',
+    'yogurtisimo',
   ],
   Limpieza: [
     'lejia',
@@ -123,6 +180,9 @@ const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
     'esponja',
     'blanqueador',
     'jabon',
+    'cloro',
+    'lavandina',
+    'desinfectante',
   ],
   Abarrotes: [
     'arroz',
@@ -138,6 +198,9 @@ const KEYWORDS_POR_CATEGORIA: Record<string, string[]> = {
     'salsa',
     'vinagre',
     'sal',
+    'avena',
+    'quinua',
+    'fideos',
   ],
   Golosinas: ['chocolate', 'caramelo', 'chupete', 'goma', 'menta', 'turron'],
 }
@@ -271,12 +334,13 @@ export function ProductFormModal({
     return { categorias: scored, sugerida }
   }, [chippedCategories, values.nombre])
 
-  const isCustomCategory =
-    values.categoria.trim() !== '' &&
-    !chippedCategories.some(
-      (categoria) =>
-        categoria.nombre.toLowerCase() === values.categoria.trim().toLowerCase(),
-    )
+  const recomendacion = useMemo(() => {
+    const [top, second] = categoriasOrdenadas.categorias
+    if (!top || top.score < 3 || top.score === (second?.score ?? 0)) return null
+    return top.nombre
+  }, [categoriasOrdenadas])
+
+  const categoriaEscogida = values.categoria.trim().toLowerCase()
 
   const setField = (field: keyof FormValues, value: string): void => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -314,7 +378,7 @@ export function ProductFormModal({
     }
   }
 
-  const showStockField = true
+  const showStockField = initial === undefined
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
@@ -382,7 +446,9 @@ export function ProductFormModal({
         codigo_barras: values.codigo_barras.trim() || null,
         precio_venta: precioVenta,
         costo,
-        stock_actual: showStockField ? Number(values.stock_actual) : 0,
+        stock_actual: showStockField
+          ? Number(values.stock_actual)
+          : (initial?.stock_actual ?? 0),
         stock_minimo: stockMinimo,
       }
       await onSubmit(product)
@@ -450,30 +516,38 @@ export function ProductFormModal({
         {/* Paso 2: Categoría */}
         <div className="mb-6">
           <SectionTitle>Categoría</SectionTitle>
+          {recomendacion !== null &&
+            recomendacion.toLowerCase() !== categoriaEscogida && (
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3">
+                <p className="flex items-center gap-2 text-sm font-extrabold text-ink">
+                  <Sparkles size={16} aria-hidden="true" className="text-gold" />
+                  Parece ser:{' '}
+                  <span className="text-gold">{toTitleCase(recomendacion)}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setField('categoria', recomendacion)}
+                  className="shrink-0 rounded-xl border border-gold/40 bg-gold/20 px-3.5 py-2 text-xs font-black uppercase tracking-wider text-gold transition-colors hover:bg-gold/30"
+                >
+                  Usar
+                </button>
+              </div>
+            )}
           <CategoryChips
             sugerencias={categoriasOrdenadas.categorias}
             sugerida={categoriasOrdenadas.sugerida}
             selected={values.categoria}
             onSelect={(nombre) => setField('categoria', nombre)}
           />
-          <input
-            id="categoria"
-            autoComplete="off"
-            value={values.categoria}
-            onChange={(e) => setField('categoria', e.target.value)}
-            className={`${plainInputClass} mt-2`}
-            placeholder={
-              isCustomCategory
-                ? 'Escribe una categoría nueva y se creará al guardar'
-                : 'Si no encuentra la tuya, escríbela aquí'
-            }
-          />
-          {isCustomCategory && (
-            <p className="mt-1 flex items-center gap-1 text-xs font-bold text-profit">
-              <Check size={14} strokeWidth={3} aria-hidden="true" />
-              Se creará la nueva categoría “{toTitleCase(values.categoria)}”
-            </p>
-          )}
+          <div className="mt-2">
+            <CategoryField
+              id="categoria"
+              value={values.categoria}
+              onChange={(value) => setField('categoria', value)}
+              categories={chippedCategories.map((categoria) => categoria.nombre)}
+              inputClassName={plainInputClass}
+            />
+          </div>
         </div>
 
         {/* Paso 3: Precios y ganancia */}
@@ -665,7 +739,7 @@ export function ProductFormModal({
               </p>
             </div>
 
-            {showStockField && (
+            {showStockField ? (
               <div>
                 <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
                   ¿Cuántas unidades hay ahorita?
@@ -681,6 +755,16 @@ export function ProductFormModal({
                   className={plainInputClass}
                   placeholder="Ej. 30"
                 />
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3">
+                <p className="text-sm font-extrabold text-ink">
+                  Stock actual: {values.stock_actual}
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-muted">
+                  Para cambiar el stock usa el botón <strong className="font-extrabold text-amber-200">Stock</strong>{' '}
+                  de la tabla. Aquí solo se editan los datos del producto.
+                </p>
               </div>
             )}
           </div>

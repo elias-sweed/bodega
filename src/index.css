@@ -321,7 +321,7 @@
 
 @layer utilities {
   .toast-enter {
-    animation: toast-in 0.28s cubic-bezier(0.21, 1.02, 0.73, 1) both;
+    animation: toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .fade-up {
@@ -373,11 +373,13 @@
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateX(16px) scale(0.98);
+    transform: translateY(-14px) scale(0.97);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 

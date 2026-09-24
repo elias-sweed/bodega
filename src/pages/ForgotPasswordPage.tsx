@@ -213,7 +213,7 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS - 1 && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2rem] bg-slate-950/90 p-8 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-4xl bg-slate-950/90 p-8 backdrop-blur-sm">
             <div className="fade-up text-center">
               <span className="text-4xl" aria-hidden="true">
                 🤔
@@ -248,7 +248,7 @@ export function ForgotPasswordPage() {
         )}
 
         {confirmingAttempt === MAX_ATTEMPTS && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[2rem] bg-slate-950/90 p-8 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-4xl bg-slate-950/90 p-8 backdrop-blur-sm">
             <div className="fade-up text-center">
               <span className="text-4xl" aria-hidden="true">
                 ⚠️
@@ -266,7 +266,7 @@ export function ForgotPasswordPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void doSend()}
-                  className="h-12 w-full rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-base font-black uppercase tracking-[0.15em] text-ink shadow-[0_14px_35px_-12px_rgba(244,63,94,0.6)] transition-all hover:from-rose-400 hover:to-rose-500 active:scale-[0.99] disabled:opacity-60"
+                  className="h-12 w-full rounded-xl bg-linear-to-r from-rose-500 to-rose-600 text-base font-black uppercase tracking-[0.15em] text-ink shadow-[0_14px_35px_-12px_rgba(244,63,94,0.6)] transition-all hover:from-rose-400 hover:to-rose-500 active:scale-[0.99] disabled:opacity-60"
                 >
                   {submitting ? 'Enviando…' : 'Sí, estoy seguro'}
                 </button>

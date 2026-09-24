@@ -125,7 +125,7 @@ export function HistoryPage() {
           <button
             type="button"
             onClick={() => setShowImport(true)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-[0.1em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
           >
             <Upload size={16} aria-hidden="true" />
             Importar ventas
@@ -143,7 +143,7 @@ export function HistoryPage() {
               aria-pressed={tab === item.id}
               className={`rounded-xl px-5 py-2 text-base font-black tracking-tight transition-all duration-300 active:scale-95 ${
                 tab === item.id
-                  ? 'border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-md'
+                  ? 'border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 text-slate-900 shadow-md'
                   : 'text-muted hover:bg-surface hover:text-ink'
               }`}
             >
@@ -187,7 +187,7 @@ export function HistoryPage() {
                   if (e.target.value) setRange('dia')
                 }}
                 aria-label="Elegir cualquier día del calendario"
-                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none [color-scheme:dark]"
+                className="w-28 bg-transparent text-sm font-extrabold text-ink outline-none scheme-dark"
               />
             </span>
           </div>

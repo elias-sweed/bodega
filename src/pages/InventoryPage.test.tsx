@@ -27,7 +27,7 @@ async function fillNewProduct(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
   await user.type(screen.getByPlaceholderText('Ej. Inca Kola sin azúcar 500ml'), 'Galleta Test')
   await user.type(
-    screen.getByPlaceholderText('Si no encuentra la tuya, escríbela aquí'),
+    screen.getByPlaceholderText('Escribe o busca una categoría…'),
     'Snacks',
   )
   await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '2.50')
@@ -88,30 +88,6 @@ describe('InventoryPage', () => {
     expect(mockState.createCalls).toBe(1)
   })
 
-  it('carga varias unidades existentes como inventario inicial', async () => {
-    const user = userEvent.setup()
-    renderInventory()
-    await screen.findByText('Gaseosa Inca Kola')
-
-    await user.click(screen.getByRole('button', { name: 'Cargar inventario inicial' }))
-    await user.type(screen.getByLabelText('Buscar producto'), 'Gaseosa')
-    await user.click(
-      screen.getByRole('button', { name: 'Agregar Gaseosa Inca Kola al inventario inicial' }),
-    )
-    await user.type(
-      screen.getByLabelText('Unidades que tienes de Gaseosa Inca Kola'),
-      '3',
-    )
-    await user.click(screen.getByRole('button', { name: 'Guardar inventario inicial' }))
-
-    await waitFor(() => expect(mockState.initialInventoryCalls).toBe(1))
-    expect(mockState.products.find((item) => item.id === 'producto-gaseosa')).toMatchObject({
-      stock_actual: 3,
-    })
-    expect(mockState.incomes.some((item) => item.motivo === 'Stock inicial')).toBe(true)
-    expect(await screen.findByText(/Inventario inicial guardado: 1 producto y 3 unidades/)).toBeInTheDocument()
-  })
-
   it('crea un producto nuevo dentro de la carga de inventario inicial', async () => {
     const user = userEvent.setup()
     renderInventory()
@@ -143,6 +119,20 @@ describe('InventoryPage', () => {
       precio_venta: 2.5,
       costo: 0,
     })
+  })
+
+  it('filtra las categorías al escribir en la carga de inventario inicial', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Cargar inventario inicial' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar producto nuevo' }))
+
+    const categoriaInput = screen.getByLabelText('Categoría') as HTMLInputElement
+    await user.type(categoriaInput, 'Lact')
+    await user.click(screen.getByRole('button', { name: 'Lácteos' }))
+    expect(categoriaInput.value).toBe('Lácteos')
   })
 
   it('muestra en "Recientes" lo creado en esta sesión aunque la DB tenga fecha vieja', async () => {
@@ -225,6 +215,26 @@ describe('InventoryPage', () => {
     expect(await screen.findByText(/Stock de "Gaseosa Inca Kola" ajustado a 5/)).toBeInTheDocument()
   })
 
+  it('al editar un producto no se puede cambiar el stock', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getAllByRole('button', { name: 'Editar' })[0])
+    expect(screen.queryByLabelText('¿Cuántas unidades hay ahorita?')).not.toBeInTheDocument()
+    expect(
+      screen.getByText((_content, element) => {
+        return (
+          element?.tagName.toLowerCase() === 'p' &&
+          element.textContent?.includes('Para cambiar el stock usa el botón') === true
+        )
+      }),
+    ).toBeInTheDocument()
+
+    const button = screen.getByRole('button', { name: 'Guardar cambios' })
+    expect(button).toBeInTheDocument()
+  })
+
   it('oculta acciones administrativas a un cajero', async () => {
     authState.role = 'cajero'
     renderInventory()
@@ -238,6 +248,56 @@ describe('InventoryPage', () => {
     expect(screen.queryByTitle('Ajustar stock')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Movimientos' })).toHaveLength(2)
+  })
+
+  it('filtra las categorías existentes al escribir y permite elegirlas', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+    const categoriaInput = screen.getByPlaceholderText('Escribe o busca una categoría…')
+
+    await user.type(categoriaInput, 'Lact')
+    const sugerencias = screen.getAllByRole('button', { name: 'Lácteos' })
+    expect(sugerencias.length).toBeGreaterThan(1)
+    await user.click(sugerencias[sugerencias.length - 1])
+
+    expect((categoriaInput as HTMLInputElement).value).toBe('Lácteos')
+    expect(screen.getAllByRole('button', { name: 'Lácteos' })).toHaveLength(1)
+  })
+
+  it('avisa sin coincidencias al buscar una categoría inexistente', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+    const categoriaInput = screen.getByPlaceholderText('Escribe o busca una categoría…')
+
+    await user.type(categoriaInput, 'Zzz')
+    expect(screen.getByText(/Sin coincidencias/)).toBeInTheDocument()
+  })
+
+  it('recomienda una categoría al escribir el nombre y permite usarla', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+    await user.type(
+      screen.getByPlaceholderText('Ej. Inca Kola sin azúcar 500ml'),
+      'Inca Kola',
+    )
+
+    const banner = screen.getByText(/Parece ser:/)
+    expect(banner.textContent).toContain('Bebidas')
+    await user.click(screen.getByRole('button', { name: 'Usar' }))
+
+    const categoriaInput = screen.getByPlaceholderText(
+      'Escribe o busca una categoría…',
+    ) as HTMLInputElement
+    expect(categoriaInput.value).toBe('Bebidas')
   })
 
   it('muestra un estado de error si falla la carga del catálogo', async () => {

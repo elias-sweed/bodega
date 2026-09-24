@@ -189,8 +189,6 @@ export function InventoryPage() {
         precio_venta: product.precio_venta,
         costo: product.costo,
         stock_minimo: product.stock_minimo,
-        nuevoStock: product.stock_actual,
-        motivo: 'Edición de producto desde Inventario',
       })
       setEditingProduct(null)
       showNotice('success', `Producto "${product.nombre}" actualizado`)
@@ -371,7 +369,6 @@ export function InventoryPage() {
 
       {initialStockOpen && (
         <InitialStockModal
-          products={products}
           onClose={() => setInitialStockOpen(false)}
           onSubmit={handleLoadInitialInventory}
         />

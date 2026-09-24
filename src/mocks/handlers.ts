@@ -400,7 +400,7 @@ const updateProductHandler = http.post(
       p_precio_venta: number
       p_costo: number
       p_stock_minimo: number
-      p_nuevo_stock: number
+      p_nuevo_stock: number | null
     }
     const product = mockState.products.find((item) => item.id === body.p_id)
     if (!product) {
@@ -412,7 +412,7 @@ const updateProductHandler = http.post(
       precio_venta: body.p_precio_venta,
       costo: body.p_costo,
       stock_minimo: body.p_stock_minimo,
-      stock_actual: body.p_nuevo_stock,
+      stock_actual: body.p_nuevo_stock ?? product.stock_actual,
     })
     return HttpResponse.json({
       producto_id: product.id,
