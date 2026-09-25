@@ -18,7 +18,7 @@ interface QuickPurchaseModalProps {
 }
 
 const inputClass =
-  'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none placeholder:text-muted/70 focus:border-emerald-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-emerald-400/10'
+  'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-lg font-bold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
 const labelClass =
   'mb-1.5 mt-4 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
@@ -82,14 +82,14 @@ export function QuickPurchaseModal({
     >
       <form
         onSubmit={handleSubmit}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[28px] border border-white/15 bg-surface p-6 shadow-[0_30px_90px_-28px_rgba(0,0,0,0.95)]"
       >
         <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-emerald-300">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-amber-300">
               Entrada de mercadería
             </p>
-            <h2 id="registrar-compra-title" className="mt-1 text-2xl font-black tracking-tighter text-ink">
+            <h2 id="registrar-compra-title" className="text-xl font-black tracking-tighter text-ink">
               Registrar compra
             </h2>
           </div>
@@ -108,7 +108,7 @@ export function QuickPurchaseModal({
           <p className="mt-1 text-sm font-semibold text-muted">
             Stock actual: <span className="font-black tabular-nums text-ink">{product.stock_actual}</span>
             {stockResultante !== null && (
-              <span className="text-emerald-300"> → quedará en {stockResultante}</span>
+              <span className="text-profit"> → quedará en {stockResultante}</span>
             )}
           </p>
           <p className="mt-1 text-xs font-semibold text-muted">
@@ -160,9 +160,9 @@ export function QuickPurchaseModal({
         />
 
         {costoUnitario !== null && (
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-200/30 bg-emerald-400/10 px-4 py-3">
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3">
             <span className="text-sm font-extrabold text-ink">Costo por unidad</span>
-            <strong className="text-lg font-black tabular-nums text-profit">
+            <strong className="text-lg font-black tabular-nums text-gold">
               {formatMoney(costoUnitario)}
             </strong>
           </div>
@@ -182,7 +182,7 @@ export function QuickPurchaseModal({
         {error && (
           <p
             role="alert"
-            className="mt-4 rounded-2xl border border-rose-300/40 bg-rose-400/10 px-4 py-2.5 text-sm font-bold text-loss"
+            className="mt-4 rounded-2xl border border-rose-400/30 bg-rose-400/10 px-4 py-2.5 text-sm font-bold text-loss"
           >
             {error}
           </p>
@@ -199,7 +199,7 @@ export function QuickPurchaseModal({
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-emerald-300/40 bg-gradient-to-r from-emerald-200 via-emerald-400 to-emerald-600 px-4 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(52,211,153,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? <PackagePlus size={18} aria-hidden="true" /> : <ShoppingCart size={18} aria-hidden="true" />}
             {submitting ? 'Guardando…' : 'Guardar compra'}
