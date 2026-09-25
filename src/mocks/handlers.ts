@@ -143,9 +143,14 @@ const productsHandler = http.get(`${SUPABASE_URL}/rest/v1/productos`, async ({ r
   const url = new URL(request.url)
   const rawNameFilter = url.searchParams.get('nombre') ?? url.searchParams.get('name')
   const nameFilter = rawNameFilter?.replace(/^(?:eq|ilike)\./, '')
+  const rawIdFilter = url.searchParams.get('id')
+  const excludeId = rawIdFilter?.replace(/^neq\./, '')
   if (nameFilter !== undefined) mockState.productLookupCalls += 1
   const selected = nameFilter
-    ? mockState.products.filter((product) => product.nombre === nameFilter)
+    ? mockState.products.filter(
+        (product) =>
+          product.nombre === nameFilter && (!excludeId || product.id !== excludeId),
+      )
     : mockState.products
 
   if (wantsSingleObject(request)) {

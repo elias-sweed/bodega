@@ -90,7 +90,8 @@ interface SortState {
 }
 
 function marginPercent(product: ProductosRow): number | null {
-  if (product.precio_venta <= 0) return null
+  // Un costo en cero significa que todavía no se conoce el costo real.
+  if (product.precio_venta <= 0 || product.costo <= 0) return null
   return ((product.precio_venta - product.costo) / product.precio_venta) * 100
 }
 
@@ -445,7 +446,7 @@ export function ProductTable({
         product.codigo_barras ?? '',
         product.categoria,
         Number(product.precio_venta.toFixed(2)),
-        Number(product.costo.toFixed(2)),
+        product.costo > 0 ? Number(product.costo.toFixed(2)) : 'Pendiente',
         margin === null ? '' : Number(margin.toFixed(2)),
         product.stock_actual,
         product.stock_minimo,
@@ -810,7 +811,16 @@ export function ProductTable({
                         )}
                       </td>
                       <td className="px-5 py-3 text-right tabular-nums text-muted">
-                        {formatMoney(product.costo)}
+                        {product.costo > 0 ? (
+                          formatMoney(product.costo)
+                        ) : (
+                          <span
+                            className="text-xs font-extrabold text-gold"
+                            title="El costo de este producto todavía no está registrado"
+                          >
+                            Costo pendiente
+                          </span>
+                        )}
                       </td>
                       <td
                         className={`px-5 py-3 text-right font-black tabular-nums ${

@@ -17,6 +17,9 @@ export function getFriendlyError(
   if (message.includes('Solo el administrador puede editar productos')) {
     return 'Solo el administrador puede editar productos. Contacta al administrador.'
   }
+  if (message.includes('Solo el administrador puede ajustar el stock')) {
+    return 'Solo un administrador puede ajustar el stock. Inicia sesión con una cuenta de administrador.'
+  }
   if (message.includes('Solo el administrador puede cargar el inventario inicial')) {
     return 'Solo el administrador puede cargar el inventario inicial. Contacta al administrador.'
   }
@@ -57,6 +60,18 @@ export function getFriendlyError(
   }
   if (lower.includes('el producto no existe')) {
     return 'El producto ya no existe. Refresca la lista e inténtalo de nuevo.'
+  }
+  if (
+    lower.includes('pgrst203') ||
+    lower.includes('could not choose the best candidate function')
+  ) {
+    return 'La base tiene dos versiones de la RPC de ajuste. Ejecuta supabase/fix_ajuste_stock_pgrst203.sql en Supabase y prueba de nuevo.'
+  }
+  if (
+    lower.includes('registrar_ajuste_manual') &&
+    (lower.includes('does not exist') || lower.includes('could not find a function'))
+  ) {
+    return 'La RPC de ajuste de stock no está disponible. Ejecuta supabase/fix_ajuste_stock.sql en Supabase y prueba de nuevo.'
   }
   if (
     lower.includes('cargar_inventario_inicial') &&

@@ -168,7 +168,7 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
           </div>
         </dl>
         <p className="mt-4 text-xs font-medium text-muted">
-          La ganancia estimada usa ventas menos el costo histórico de los productos vendidos. Las compras se muestran aparte porque parte del inventario puede seguir disponible.
+          La ganancia estimada usa ventas menos el costo histórico de los productos vendidos. Si algún producto tiene costo pendiente (0), la ganancia puede estar sobrestimada. Las compras se muestran aparte porque parte del inventario puede seguir disponible.
         </p>
       </section>
 

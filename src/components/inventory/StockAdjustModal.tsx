@@ -47,6 +47,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
+    if (submitting) return
     setError(null)
     const value = Number(stock)
     if (!Number.isFinite(value) || value < 0) {
@@ -70,6 +71,9 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
       })
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'No se pudo ajustar el stock')
+    } finally {
+      // La vista padre puede resolver la promesa aunque la RPC haya fallado.
+      // Aun así, el modal no debe quedarse bloqueado en "Guardando…".
       setSubmitting(false)
     }
   }

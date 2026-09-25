@@ -31,9 +31,9 @@ async function fillNewProduct(user: ReturnType<typeof userEvent.setup>) {
     'Snacks',
   )
   await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '2.50')
-  await user.type(screen.getByLabelText('¿Cuánto te cuesta cada uno?'), '1.20')
+  await user.type(screen.getByLabelText('Costo por unidad (opcional)'), '1.20')
   await user.type(screen.getByLabelText('¿Cuántos deben quedar para avisarte?'), '2')
-  const stockInput = screen.getByLabelText('¿Cuántas unidades hay ahorita?')
+  const stockInput = screen.getByLabelText('¿Cuántas unidades hay ahorita? (opcional)')
   await user.clear(stockInput)
   await user.type(stockInput, '10')
 }
@@ -71,6 +71,46 @@ describe('InventoryPage', () => {
       costo: 1.2,
     })
     expect(mockState.incomes.some((item) => item.motivo === 'Stock inicial')).toBe(true)
+  })
+
+  it('crea un producto sin costo y lo marca como pendiente', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+    await user.type(screen.getByPlaceholderText('Ej. Inca Kola sin azúcar 500ml'), 'Producto Sin Costo')
+    await user.type(
+      screen.getByPlaceholderText('Escribe o busca una categoría…'),
+      'General',
+    )
+    await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '3.00')
+    await user.type(screen.getByLabelText('¿Cuántas unidades hay ahorita? (opcional)'), '2')
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+
+    await waitFor(() => expect(mockState.createCalls).toBe(1))
+    expect(mockState.products.find((item) => item.nombre === 'Producto Sin Costo')).toMatchObject({
+      costo: 0,
+      stock_actual: 2,
+    })
+    expect(await screen.findByText('Costo pendiente')).toBeInTheDocument()
+  })
+
+  it('permite editar el precio de venta dejando el costo pendiente', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getAllByRole('button', { name: 'Editar' })[0])
+    const costInput = screen.getByLabelText('Costo por unidad (opcional)')
+    await user.clear(costInput)
+    const salePriceInput = screen.getByLabelText('¿En cuánto lo vendes?')
+    await user.clear(salePriceInput)
+    await user.type(salePriceInput, '4.50')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    await waitFor(() => expect(mockState.products[0]?.precio_venta).toBe(4.5))
+    expect(mockState.products[0]?.costo).toBe(0)
   })
 
   it('muestra un error entendible cuando Supabase rechaza la creación', async () => {
@@ -215,13 +255,30 @@ describe('InventoryPage', () => {
     expect(await screen.findByText(/Stock de "Gaseosa Inca Kola" ajustado a 5/)).toBeInTheDocument()
   })
 
+  it('vuelve a habilitar el botón cuando la RPC de ajuste falla', async () => {
+    mockState.adjustFailure = 'Fallo de prueba'
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getAllByTitle('Ajustar stock')[0])
+    const stockInput = screen.getByLabelText('Nuevo stock')
+    await user.clear(stockInput)
+    await user.type(stockInput, '5')
+    await user.click(screen.getByRole('button', { name: 'Ajustar stock' }))
+
+    expect(await screen.findByText('No se pudo ajustar el stock. Inténtalo de nuevo.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ajustar stock' })).toBeEnabled()
+    expect(screen.queryByRole('button', { name: 'Guardando…' })).not.toBeInTheDocument()
+  })
+
   it('al editar un producto no se puede cambiar el stock', async () => {
     const user = userEvent.setup()
     renderInventory()
     await screen.findByText('Gaseosa Inca Kola')
 
     await user.click(screen.getAllByRole('button', { name: 'Editar' })[0])
-    expect(screen.queryByLabelText('¿Cuántas unidades hay ahorita?')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('¿Cuántas unidades hay ahorita? (opcional)')).not.toBeInTheDocument()
     expect(
       screen.getByText((_content, element) => {
         return (

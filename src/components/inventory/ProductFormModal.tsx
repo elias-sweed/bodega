@@ -255,7 +255,7 @@ export function ProductFormModal({
         categoria: initial.categoria,
         codigo_barras: initial.codigo_barras ?? '',
         precio_venta: String(initial.precio_venta),
-        costo: String(initial.costo),
+        costo: initial.costo > 0 ? String(initial.costo) : '',
         stock_actual: String(initial.stock_actual),
         stock_minimo: String(initial.stock_minimo),
       }
@@ -347,7 +347,9 @@ export function ProductFormModal({
   }
 
   const precioNum = values.precio_venta === '' ? Number.NaN : Number(values.precio_venta)
-  const costNum = values.costo === '' ? Number.NaN : Number(values.costo)
+  const costNum = values.costo.trim() === '' ? 0 : Number(values.costo)
+  const costoPendiente =
+    values.costo.trim() === '' || (Number.isFinite(costNum) && costNum === 0)
   const gananciaInfo =
     Number.isFinite(precioNum) &&
     precioNum > 0 &&
@@ -405,20 +407,16 @@ export function ProductFormModal({
       return
     }
 
-    const costo = Number(values.costo)
-    if (values.costo.trim() === '' || !Number.isFinite(costo) || costo < 0) {
-      setError('Escribe cuánto te cuesta cada uno (o usa “Compras por caja”).')
+    const costo = values.costo.trim() === '' ? 0 : Number(values.costo)
+    if (!Number.isFinite(costo) || costo < 0) {
+      setError('Escribe un costo válido o déjalo en 0 si todavía no lo conoces.')
       return
     }
 
     if (showStockField) {
-      const stockActual = Number(values.stock_actual)
-      if (
-        values.stock_actual.trim() === '' ||
-        !Number.isFinite(stockActual) ||
-        stockActual < 0
-      ) {
-        setError('Escribe cuántas unidades hay ahorita (ej. 30).')
+      const stockActual = values.stock_actual.trim() === '' ? 0 : Number(values.stock_actual)
+      if (!Number.isFinite(stockActual) || stockActual < 0) {
+        setError('Escribe cuántas unidades hay o déjalo en 0 si todavía no lo sabes.')
         return
       }
     }
@@ -447,7 +445,9 @@ export function ProductFormModal({
         precio_venta: precioVenta,
         costo,
         stock_actual: showStockField
-          ? Number(values.stock_actual)
+          ? values.stock_actual.trim() === ''
+            ? 0
+            : Number(values.stock_actual)
           : (initial?.stock_actual ?? 0),
         stock_minimo: stockMinimo,
       }
@@ -550,9 +550,9 @@ export function ProductFormModal({
           </div>
         </div>
 
-        {/* Paso 3: Precios y ganancia */}
+        {/* Paso 3: Precios y costo */}
         <div className="mb-6">
-          <SectionTitle>Precios (cuánto ganas)</SectionTitle>
+          <SectionTitle>Precios del producto</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-muted">
@@ -581,7 +581,7 @@ export function ProductFormModal({
 
             <div>
               <label htmlFor="costo" className="mb-1 block text-sm font-bold text-muted">
-                ¿Cuánto te cuesta cada uno?
+                Costo por unidad (opcional)
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">
@@ -596,14 +596,20 @@ export function ProductFormModal({
                   value={values.costo}
                   onChange={(e) => setField('costo', e.target.value)}
                   className={moneyInputClass}
-                  placeholder="1.20"
+                  placeholder="0.00"
                 />
               </div>
               <p className="mt-1 text-xs font-semibold text-muted">
-                Lo que pagas al comprarlo.
+                Si no lo conoces, déjalo en 0. Podrás actualizarlo al registrar una compra.
               </p>
             </div>
           </div>
+
+          {costoPendiente && (
+            <p className="mt-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
+              Costo pendiente. Puedes guardar el producto así y completarlo cuando conozcas el precio o registres una compra.
+            </p>
+          )}
 
           {gananciaInfo !== null && (
             <div
@@ -742,7 +748,7 @@ export function ProductFormModal({
             {showStockField ? (
               <div>
                 <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
-                  ¿Cuántas unidades hay ahorita?
+                  ¿Cuántas unidades hay ahorita? (opcional)
                 </label>
                 <input
                   id="stock_actual"
@@ -755,6 +761,9 @@ export function ProductFormModal({
                   className={plainInputClass}
                   placeholder="Ej. 30"
                 />
+                <p className="mt-1 text-xs font-semibold text-muted">
+                  Si no lo sabes, déjalo en 0 y ajústalo después.
+                </p>
               </div>
             ) : (
               <div className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3">
