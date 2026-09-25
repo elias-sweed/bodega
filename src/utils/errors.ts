@@ -65,6 +65,9 @@ export function getFriendlyError(
     lower.includes('pgrst203') ||
     lower.includes('could not choose the best candidate function')
   ) {
+    if (lower.includes('registrar_compra')) {
+      return 'La base tiene varias versiones de la RPC de compras. Ejecuta supabase/fix_costo_compra_pendiente.sql en Supabase y prueba de nuevo.'
+    }
     return 'La base tiene dos versiones de la RPC de ajuste. Ejecuta supabase/fix_ajuste_stock_pgrst203.sql en Supabase y prueba de nuevo.'
   }
   if (
@@ -72,6 +75,12 @@ export function getFriendlyError(
     (lower.includes('does not exist') || lower.includes('could not find a function'))
   ) {
     return 'La RPC de ajuste de stock no está disponible. Ejecuta supabase/fix_ajuste_stock.sql en Supabase y prueba de nuevo.'
+  }
+  if (
+    lower.includes('registrar_compra') &&
+    (lower.includes('does not exist') || lower.includes('could not find a function'))
+  ) {
+    return 'La RPC de compras no está disponible. Ejecuta supabase/fix_costo_compra_pendiente.sql en Supabase y prueba de nuevo.'
   }
   if (
     lower.includes('cargar_inventario_inicial') &&

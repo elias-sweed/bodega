@@ -44,6 +44,8 @@ Sistema web para una bodega pequeña: ventas, inventario, compras, historial, re
 
    Si la venta devuelve `null value in column "total" of relation "ventas"`, ejecuta únicamente la reparación directa `supabase/fix_venta_caja_directa.sql`. Esta crea una RPC nueva para Caja y no requiere ejecutar de nuevo toda la migración final.
 
+   Si la base ya tenía la RPC de compras anterior, ejecuta `supabase/fix_costo_compra_pendiente.sql`. Esto conserva la compra atómica y hace que la primera compra con costo pendiente establezca el costo por unidad; las siguientes usan promedio ponderado.
+
 4. Despliega la Edge Function de usuarios desde Supabase:
 
    ```bash

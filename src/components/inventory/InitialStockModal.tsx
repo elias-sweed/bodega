@@ -260,7 +260,7 @@ const [categories, setCategories] = useState<string[]>(CATEGORIAS)
                 Productos nuevos
               </p>
               <p className="mt-1 text-sm font-medium text-muted">
-                Créalos aquí junto con la cantidad que ya tienes. El costo queda en 0 hasta que registres una compra.
+                Créalos aquí junto con la cantidad que ya tienes. El costo queda pendiente hasta que registres una compra; por eso aún no se mostrará el margen.
               </p>
             </div>
             <button

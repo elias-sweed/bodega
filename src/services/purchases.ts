@@ -68,7 +68,12 @@ export async function registrarCompra(input: {
   })
 
   if (error) {
-    throw new Error(getFriendlyError(error, 'No se pudo registrar la compra. Inténtalo de nuevo.'))
+    throw new Error(
+      getFriendlyError(
+        new Error(error.message),
+        'No se pudo registrar la compra. Inténtalo de nuevo.',
+      ),
+    )
   }
 
   if (!data) {

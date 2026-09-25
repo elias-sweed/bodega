@@ -9,11 +9,17 @@ import { KardexModal } from '../components/inventory/KardexModal'
 import { ProductFormModal } from '../components/inventory/ProductFormModal'
 import { ProductTable } from '../components/inventory/ProductTable'
 import {
+  QuickPurchaseModal,
+  type QuickPurchasePayload,
+} from '../components/purchases/QuickPurchaseModal'
+import {
   StockAdjustModal,
   type StockAdjustPayload,
 } from '../components/inventory/StockAdjustModal'
 import { useAuth } from '../hooks/useAuth'
 import { useProducts } from '../hooks/useProducts'
+import { emitDataChanged } from '../services/dataEvents'
+import { registrarCompra } from '../services/purchases'
 import { ajustarStock } from '../services/products'
 import { getProductsCache } from '../services/productsCache'
 import { addRecientes, getRecientesIds, subscribeRecientes } from '../services/recientesStore'
@@ -75,6 +81,7 @@ export function InventoryPage() {
     initialNewName ? { nombre: initialNewName, categoria: '' } : null,
   )
   const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
+  const [purchasingProduct, setPurchasingProduct] = useState<ProductosRow | null>(null)
   const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
   const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
   const [kardexProduct, setKardexProduct] = useState<ProductosRow | null>(null)
@@ -82,6 +89,7 @@ export function InventoryPage() {
   const [recientesIds, setRecientesIds] = useState<string[]>(getRecientesIds)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
+  const quickPurchaseKeyRef = useRef<{ fingerprint: string; key: string } | null>(null)
 
   useEffect(
     () => subscribeRecientes(() => setRecientesIds(getRecientesIds())),
@@ -197,6 +205,62 @@ export function InventoryPage() {
         'error',
         getFriendlyError(cause, 'No se pudo actualizar el producto. Inténtalo de nuevo.'),
       )
+    }
+  }
+
+  const handleOpenPurchase = (product: ProductosRow): void => {
+    setEditingProduct(null)
+    quickPurchaseKeyRef.current = null
+    setPurchasingProduct(product)
+  }
+
+  const handleQuickPurchase = async (payload: QuickPurchasePayload): Promise<void> => {
+    const product = purchasingProduct
+    if (!product) return
+
+    const fingerprint = JSON.stringify({
+      producto_id: product.id,
+      cantidad: payload.cantidad,
+      costo_total: payload.costoTotal,
+      comprobante: payload.comprobante,
+    })
+    if (quickPurchaseKeyRef.current?.fingerprint !== fingerprint) {
+      quickPurchaseKeyRef.current = {
+        fingerprint,
+        key: crypto.randomUUID(),
+      }
+    }
+    const purchaseKey = quickPurchaseKeyRef.current
+    if (!purchaseKey) return
+
+    try {
+      await registrarCompra({
+        proveedorId: null,
+        nombreProveedor: null,
+        comprobante: payload.comprobante,
+        items: [
+          {
+            producto_id: product.id,
+            cantidad: payload.cantidad,
+            costo_total: payload.costoTotal,
+          },
+        ],
+        idempotencyKey: purchaseKey.key,
+      })
+      quickPurchaseKeyRef.current = null
+      setPurchasingProduct(null)
+      showNotice(
+        'success',
+        `Compra registrada: +${payload.cantidad} unidades de "${product.nombre}".`,
+      )
+      refresh(true)
+      emitDataChanged()
+    } catch (cause) {
+      showNotice(
+        'error',
+        getFriendlyError(cause, 'No se pudo registrar la compra. Inténtalo de nuevo.'),
+      )
+      throw cause
     }
   }
 
@@ -357,6 +421,7 @@ export function InventoryPage() {
             products={products}
             isAdmin={isAdmin}
             onEdit={(product) => setEditingProduct(product)}
+            onPurchase={handleOpenPurchase}
             onAdjustStock={(product) => setAdjustingProduct(product)}
             onDelete={(product) => handleDeleteRequest(product)}
             onKardex={(product) => setKardexProduct(product)}
@@ -390,6 +455,15 @@ export function InventoryPage() {
           initial={editingProduct}
           onClose={() => setEditingProduct(null)}
           onSubmit={handleEditProduct}
+          onRegisterPurchase={handleOpenPurchase}
+        />
+      )}
+
+      {purchasingProduct && (
+        <QuickPurchaseModal
+          product={purchasingProduct}
+          onClose={() => setPurchasingProduct(null)}
+          onSubmit={handleQuickPurchase}
         />
       )}
 

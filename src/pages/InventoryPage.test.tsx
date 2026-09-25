@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -255,6 +255,28 @@ describe('InventoryPage', () => {
     expect(await screen.findByText(/Stock de "Gaseosa Inca Kola" ajustado a 5/)).toBeInTheDocument()
   })
 
+  it('registra una compra desde inventario y establece el costo pendiente', async () => {
+    mockState.products[0].stock_actual = 10
+    mockState.products[0].costo = 0
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getAllByTitle('Registrar compra')[0])
+    expect(screen.getByRole('heading', { name: 'Registrar compra' })).toBeInTheDocument()
+    await user.type(screen.getByLabelText('¿Cuántas unidades llegaron?'), '24')
+    await user.type(
+      screen.getByLabelText('¿Cuánto costó toda la caja o paquete? (S/)'),
+      '48',
+    )
+    expect(screen.getByText('Costo por unidad')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Guardar compra' }))
+
+    await waitFor(() => expect(mockState.purchaseCalls).toBe(1))
+    expect(mockState.products[0]).toMatchObject({ stock_actual: 34, costo: 2 })
+    expect(await screen.findByText(/Compra registrada: \+24 unidades/)).toBeInTheDocument()
+  })
+
   it('vuelve a habilitar el botón cuando la RPC de ajuste falla', async () => {
     mockState.adjustFailure = 'Fallo de prueba'
     const user = userEvent.setup()
@@ -283,9 +305,12 @@ describe('InventoryPage', () => {
       screen.getByText((_content, element) => {
         return (
           element?.tagName.toLowerCase() === 'p' &&
-          element.textContent?.includes('Para cambiar el stock usa el botón') === true
+          element.textContent?.includes('Para sumar mercadería y calcular su costo') === true
         )
       }),
+    ).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Registrar compra' }),
     ).toBeInTheDocument()
 
     const button = screen.getByRole('button', { name: 'Guardar cambios' })
@@ -303,6 +328,7 @@ describe('InventoryPage', () => {
     ).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
     expect(screen.queryByTitle('Ajustar stock')).not.toBeInTheDocument()
+    expect(screen.queryByTitle('Registrar compra')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Eliminar' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Movimientos' })).toHaveLength(2)
   })

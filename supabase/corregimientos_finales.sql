@@ -446,6 +446,8 @@ declare
   v_cantidad integer;
   v_costo_total numeric(12, 2);
   v_costo_previo numeric(12, 2);
+  v_costo_unitario numeric(12, 2);
+  v_costo_nuevo numeric(12, 2);
   v_stock_actual integer;
   v_total numeric(12, 2) := 0;
   v_count integer := 0;
@@ -506,13 +508,22 @@ begin
       raise exception 'El producto no existe (id: %)', v_producto_id;
     end if;
 
+    -- Si el costo aún está pendiente (0), la primera compra real establece
+    -- el costo por unidad. Las compras siguientes usan promedio ponderado.
+    v_costo_unitario := round(v_costo_total / v_cantidad, 2);
+    if coalesce(v_costo_previo, 0) <= 0 then
+      v_costo_nuevo := v_costo_unitario;
+    else
+      v_costo_nuevo := round(
+        (v_costo_previo * v_stock_actual + v_costo_total)
+        / (v_stock_actual + v_cantidad),
+        2
+      );
+    end if;
+
     update public.productos
     set stock_actual = stock_actual + v_cantidad,
-        costo = round(
-          (coalesce(v_costo_previo, 0) * v_stock_actual + v_costo_total)
-          / (v_stock_actual + v_cantidad),
-          2
-        )
+        costo = v_costo_nuevo
     where id = v_producto_id;
 
     insert into public.ingresos_mercaderia (

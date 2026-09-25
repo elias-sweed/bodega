@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { Check, Minus, PackageSearch, Sparkles, TrendingUp, X } from 'lucide-react'
+import { Check, Minus, PackageSearch, ShoppingCart, Sparkles, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
@@ -11,6 +11,7 @@ import { CategoryField } from './CategoryField'
 interface ProductFormModalProps {
   onClose: () => void
   onSubmit: (product: ProductosInsert) => Promise<void>
+  onRegisterPurchase?: (product: ProductosRow) => void
   initial?: ProductosRow | null
   initialPrefill?: {
     nombre: string
@@ -245,6 +246,7 @@ function SectionTitle({ children }: { children: string }) {
 export function ProductFormModal({
   onClose,
   onSubmit,
+  onRegisterPurchase,
   initial,
   initialPrefill = null,
 }: ProductFormModalProps) {
@@ -771,9 +773,23 @@ export function ProductFormModal({
                   Stock actual: {values.stock_actual}
                 </p>
                 <p className="mt-0.5 text-xs font-medium text-muted">
-                  Para cambiar el stock usa el botón <strong className="font-extrabold text-amber-200">Stock</strong>{' '}
-                  de la tabla. Aquí solo se editan los datos del producto.
+                  Para sumar mercadería y calcular su costo, registra una compra. Para corregir una diferencia, usa <strong className="font-extrabold text-amber-200">Stock</strong>.
                 </p>
+                {initial && onRegisterPurchase && (
+                  <button
+                    type="button"
+                    onClick={() => onRegisterPurchase(initial)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl border border-emerald-300/40 bg-emerald-400/15 px-3 py-2 text-xs font-black text-emerald-200 transition-colors hover:bg-emerald-400/25"
+                  >
+                    <ShoppingCart size={14} aria-hidden="true" />
+                    Registrar compra
+                  </button>
+                )}
+                {initial && onRegisterPurchase && (
+                  <p className="mt-2 text-[11px] font-medium leading-relaxed text-muted">
+                    Si cambiaste otros datos del producto, guárdalos antes de registrar la compra.
+                  </p>
+                )}
               </div>
             )}
           </div>

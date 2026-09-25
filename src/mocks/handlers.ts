@@ -471,10 +471,13 @@ const registerPurchaseHandler = http.post(
     products.forEach(({ item, product }, index) => {
       if (!product) return
       const previousStock = product.stock_actual
+      const unitCost = item.costo_total / item.cantidad
+      const nextCost =
+        product.costo <= 0
+          ? unitCost
+          : (product.costo * previousStock + item.costo_total) / (previousStock + item.cantidad)
       product.stock_actual += item.cantidad
-      product.costo = Math.round(
-        ((product.costo * previousStock + item.costo_total) / product.stock_actual) * 100,
-      ) / 100
+      product.costo = Math.round(nextCost * 100) / 100
       total += item.costo_total
       mockState.incomes.push({
         id: `ingreso-compra-${mockState.purchaseCalls}-${index}`,

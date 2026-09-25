@@ -12,6 +12,7 @@ import {
   PackagePlus,
   Pencil,
   Search,
+  ShoppingCart,
   SlidersHorizontal,
   Tags,
   Trash2,
@@ -27,6 +28,7 @@ interface ProductTableProps {
   products: ProductosRow[]
   isAdmin?: boolean
   onEdit?: (product: ProductosRow) => void
+  onPurchase?: (product: ProductosRow) => void
   onAdjustStock?: (product: ProductosRow) => void
   onDelete?: (product: ProductosRow) => void
   onKardex?: (product: ProductosRow) => void
@@ -149,6 +151,7 @@ export function ProductTable({
   products,
   isAdmin = false,
   onEdit,
+  onPurchase,
   onAdjustStock,
   onDelete,
   onKardex,
@@ -860,6 +863,17 @@ export function ProductTable({
                                 <Pencil size={13} strokeWidth={2.5} aria-hidden="true" />
                                 Editar
                               </button>
+                              {onPurchase && (
+                                <button
+                                  type="button"
+                                  onClick={() => onPurchase(product)}
+                                  title="Registrar compra"
+                                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-300/35 bg-emerald-400/15 px-3 py-1.5 text-xs font-black text-emerald-200 backdrop-blur-xl transition-all duration-200 hover:bg-emerald-400/25 hover:text-emerald-100 active:scale-95"
+                                >
+                                  <ShoppingCart size={13} strokeWidth={2.5} aria-hidden="true" />
+                                  Registrar compra
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => onAdjustStock?.(product)}
