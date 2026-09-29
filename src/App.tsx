@@ -6,12 +6,11 @@ import { AuthLayout } from './layouts/AuthLayout'
 import { PosLayout } from './layouts/PosLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
-import { HistoryPage } from './pages/HistoryPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { LoginPage } from './pages/LoginPage'
+import { MovimientosPage } from './pages/MovimientosPage'
 import { PosPage } from './pages/PosPage'
 import { PurchasesPage } from './pages/PurchasesPage'
-import { ReportesPage } from './pages/ReportesPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { UsersPage } from './pages/UsersPage'
 import { useAuth } from './hooks/useAuth'
@@ -61,8 +60,7 @@ function App() {
                 </AdminRoute>
               }
             />
-            <Route path="/reportes" element={<ReportesPage />} />
-            <Route path="/historial" element={<HistoryPage />} />
+            <Route path="/movimientos" element={<MovimientosPage />} />
             <Route
               path="/usuarios"
               element={

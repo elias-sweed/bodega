@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, History, ShoppingBag, ShoppingCart, Zap } from 'lucide-react'
+import { BarChart3, Boxes, ShoppingBag, ShoppingCart, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -31,21 +31,12 @@ const ACCIONES = [
     adminOnly: false,
   },
   {
-    to: '/historial',
-    etiqueta: 'Ver historial',
-    detalle: 'Revisar qué ocurrió',
-    Icon: History,
-    clases: 'border-line bg-surface-2 hover:bg-surface-3',
-    iconoClases: 'border-amber-300/40 bg-amber-400/15 text-gold',
-    adminOnly: false,
-  },
-  {
-    to: '/reportes',
-    etiqueta: 'Ver reportes',
-    detalle: 'Analizar el negocio',
+    to: '/movimientos',
+    etiqueta: 'Ver movimientos',
+    detalle: 'Ganancias y detalle de ventas',
     Icon: BarChart3,
     clases: 'border-line bg-surface-2 hover:bg-surface-3',
-    iconoClases: 'border-rose-300/40 bg-rose-400/15 text-loss',
+    iconoClases: 'border-amber-300/40 bg-amber-400/15 text-gold',
     adminOnly: false,
   },
 ]

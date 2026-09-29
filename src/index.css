@@ -136,10 +136,8 @@
 .inventario-pos,
 .app-shell.compras-route,
 .compras-pos,
-.app-shell.reportes-route,
-.reportes-pos,
-.app-shell.historial-route,
-.historial-pos,
+.app-shell.movimientos-route,
+.movimientos-pos,
 .app-shell.usuarios-route,
 .usuarios-pos {
   --color-surface-sub: rgba(23, 18, 66, 0.55);
@@ -159,8 +157,7 @@
 .app-shell.caja-route,
 .app-shell.inventario-route,
 .app-shell.compras-route,
-.app-shell.reportes-route,
-.app-shell.historial-route,
+.app-shell.movimientos-route,
 .app-shell.usuarios-route {
   color: #f5f3ff;
   background:
@@ -192,18 +189,12 @@
 .compras-pos input,
 .compras-pos select,
 .compras-pos textarea,
-.reportes-route input,
-.reportes-route select,
-.reportes-route textarea,
-.reportes-pos input,
-.reportes-pos select,
-.reportes-pos textarea,
-.historial-route input,
-.historial-route select,
-.historial-route textarea,
-.historial-pos input,
-.historial-pos select,
-.historial-pos textarea,
+.movimientos-route input,
+.movimientos-route select,
+.movimientos-route textarea,
+.movimientos-pos input,
+.movimientos-pos select,
+.movimientos-pos textarea,
 .usuarios-route input,
 .usuarios-route select,
 .usuarios-route textarea,
@@ -249,15 +240,13 @@
 .compras-pos .fade-in,
 .compras-pos .fade-up,
 .compras-pos .toast-enter,
-.reportes-route .fade-in,
-.reportes-route .animate-pulse,
-.reportes-pos .fade-in,
-.reportes-pos .animate-pulse,
-.historial-route .fade-in,
-.historial-route .toast-enter,
-.historial-pos .fade-in,
-.historial-pos .animate-spin,
-.historial-pos .toast-enter,
+.movimientos-route .fade-in,
+.movimientos-route .animate-pulse,
+.movimientos-route .toast-enter,
+.movimientos-pos .fade-in,
+.movimientos-pos .animate-pulse,
+.movimientos-pos .animate-spin,
+.movimientos-pos .toast-enter,
 .usuarios-route .fade-in,
 .usuarios-route .fade-up,
 .usuarios-route .toast-enter,
@@ -271,8 +260,7 @@
 .caja-pos .skeleton-shimmer,
 .inventario-pos .skeleton-shimmer,
 .compras-pos .skeleton-shimmer,
-.reportes-pos .skeleton-shimmer,
-.historial-pos .skeleton-shimmer,
+.movimientos-pos .skeleton-shimmer,
 .usuarios-pos .skeleton-shimmer {
   animation: none !important;
   background: #2a1568;
@@ -282,8 +270,7 @@
 .caja-pos [class*='backdrop-blur'],
 .inventario-pos [class*='backdrop-blur'],
 .compras-pos [class*='backdrop-blur'],
-.reportes-pos [class*='backdrop-blur'],
-.historial-pos [class*='backdrop-blur'],
+.movimientos-pos [class*='backdrop-blur'],
 .usuarios-pos [class*='backdrop-blur'] {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -293,8 +280,7 @@
 .caja-route [class*='transition-'],
 .inventario-route [class*='transition-'],
 .compras-route [class*='transition-'],
-.reportes-route [class*='transition-'],
-.historial-route [class*='transition-'],
+.movimientos-route [class*='transition-'],
 .usuarios-route [class*='transition-'] {
   transition: none !important;
 }

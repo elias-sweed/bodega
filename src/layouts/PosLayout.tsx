@@ -1,6 +1,4 @@
 import {
-  BarChart3,
-  History,
   LayoutDashboard,
   Package,
   ShoppingBag,
@@ -32,8 +30,7 @@ const NAV_ITEMS: {
   { to: '/caja', label: 'Caja', icon: Wallet },
   { to: '/inventario', label: 'Inventario', icon: Package },
   { to: '/compras', label: 'Compras', icon: ShoppingBag, adminOnly: true },
-  { to: '/reportes', label: 'Reportes', icon: BarChart3 },
-  { to: '/historial', label: 'Historial', icon: History },
+  { to: '/movimientos', label: 'Movimientos', icon: LayoutDashboard },
   { to: '/usuarios', label: 'Usuarios', icon: Users, adminOnly: true },
 ]
 
@@ -44,16 +41,14 @@ export function PosLayout() {
   const isCashRegister = location.pathname === '/caja'
   const isInventory = location.pathname === '/inventario'
   const isPurchases = location.pathname === '/compras'
-  const isReports = location.pathname === '/reportes'
-  const isHistory = location.pathname === '/historial'
+  const isMovimientos = location.pathname === '/movimientos'
   const isUsers = location.pathname === '/usuarios'
   const usesStaticAuthBackground =
     isDashboard ||
     isCashRegister ||
     isInventory ||
     isPurchases ||
-    isReports ||
-    isHistory ||
+    isMovimientos ||
     isUsers
   const routeClass = isDashboard
     ? 'dashboard-route'
@@ -63,13 +58,11 @@ export function PosLayout() {
         ? 'inventario-route'
         : isPurchases
           ? 'compras-route'
-          : isReports
-            ? 'reportes-route'
-            : isHistory
-              ? 'historial-route'
-              : isUsers
-                ? 'usuarios-route'
-                : ''
+          : isMovimientos
+            ? 'movimientos-route'
+            : isUsers
+              ? 'usuarios-route'
+              : ''
 
   return (
     <div

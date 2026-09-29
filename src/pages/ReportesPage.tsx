@@ -215,12 +215,12 @@ export function ReportesPage() {
   const periodLabel = periodo === 'dia' ? 'Día' : periodo === 'semana' ? 'Semana' : 'Mes'
 
   return (
-    <div className="reportes-pos mx-auto flex h-full w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
+    <div className="reportes-pos mx-auto flex w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Finanzas</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">Reportes</h1>
-          <p className="mt-1 text-sm font-semibold text-muted">Ventas, ganancia estimada, compras y productos más vendidos.</p>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Resumen</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">¿Cuánto gané?</h1>
+          <p className="mt-1 text-sm font-semibold text-muted">Mira tus ventas, ganancias y compras en un período.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-1.5">
           {(['dia', 'semana', 'mes'] as const).map((item) => (

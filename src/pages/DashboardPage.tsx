@@ -61,7 +61,7 @@ export function DashboardPage() {
   }, [navigate])
 
   const volverHistorial = useCallback((): void => {
-    navigate('/historial')
+    navigate('/movimientos')
   }, [navigate])
 
   // ---- MODO VISTA DE DÍA (desde Historial) ----
