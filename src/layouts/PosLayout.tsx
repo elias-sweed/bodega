@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingBag,
+  TrendingUp,
   Users,
   Wallet,
 } from 'lucide-react'
@@ -30,7 +31,7 @@ const NAV_ITEMS: {
   { to: '/caja', label: 'Caja', icon: Wallet },
   { to: '/inventario', label: 'Inventario', icon: Package },
   { to: '/compras', label: 'Compras', icon: ShoppingBag, adminOnly: true },
-  { to: '/movimientos', label: 'Movimientos', icon: LayoutDashboard },
+  { to: '/movimientos', label: 'Movimientos', icon: TrendingUp },
   { to: '/usuarios', label: 'Usuarios', icon: Users, adminOnly: true },
 ]
 

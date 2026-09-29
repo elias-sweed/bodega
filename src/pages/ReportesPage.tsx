@@ -208,20 +208,22 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
   )
 }
 
-export function ReportesPage() {
+export function ReportesPage({ mostrarEncabezado = true }: { mostrarEncabezado?: boolean }) {
   const [periodo, setPeriodo] = useState<Periodo>('mes')
   const [fecha, setFecha] = useState(() => inputDate(new Date()))
 
   const periodLabel = periodo === 'dia' ? 'Día' : periodo === 'semana' ? 'Semana' : 'Mes'
 
   return (
-    <div className="reportes-pos mx-auto flex w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
       <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Resumen</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">¿Cuánto gané?</h1>
-          <p className="mt-1 text-sm font-semibold text-muted">Mira tus ventas, ganancias y compras en un período.</p>
-        </div>
+        {mostrarEncabezado && (
+          <div>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">Resumen</p>
+            <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink sm:text-4xl">¿Cuánto gané?</h1>
+            <p className="mt-1 text-sm font-semibold text-muted">Mira tus ventas, ganancias y compras en un período.</p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-surface p-1.5">
           {(['dia', 'semana', 'mes'] as const).map((item) => (
             <button

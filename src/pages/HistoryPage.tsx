@@ -93,7 +93,7 @@ function rangeToFilter(
   }
 }
 
-export function HistoryPage() {
+export function HistoryPage({ mostrarEncabezado = true }: { mostrarEncabezado?: boolean }) {
   const { rol } = useAuth()
   const [tab, setTab] = useState<TabId>('ventas')
   const [range, setRange] = useState<RangeId>('todo')
@@ -108,30 +108,34 @@ export function HistoryPage() {
   )
 
   return (
-    <div className="historial-pos mx-auto flex w-full max-w-6xl flex-col gap-5 overflow-y-auto bg-transparent px-4 pb-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
-            Detalle
-          </p>
-          <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink  sm:text-4xl">
-            ¿Qué vendí o compré?
-          </h1>
-          <p className="mt-1 text-sm font-medium text-muted">
-            Busca ventas, compras o ajustes de stock específicos.
-          </p>
-        </div>
-        {rol === 'admin' && (
-          <button
-            type="button"
-            onClick={() => setShowImport(true)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
-          >
-            <Upload size={16} aria-hidden="true" />
-            Importar ventas
-          </button>
-        )}
-      </header>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 overflow-y-auto bg-transparent px-4 pb-10">
+      {(mostrarEncabezado || rol === 'admin') && (
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          {mostrarEncabezado && (
+            <div>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+                Detalle
+              </p>
+              <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink  sm:text-4xl">
+                ¿Qué vendí o compré?
+              </h1>
+              <p className="mt-1 text-sm font-medium text-muted">
+                Busca ventas, compras o ajustes de stock específicos.
+              </p>
+            </div>
+          )}
+          {rol === 'admin' && (
+            <button
+              type="button"
+              onClick={() => setShowImport(true)}
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black uppercase tracking-widest text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.55)]"
+            >
+              <Upload size={16} aria-hidden="true" />
+              Importar ventas
+            </button>
+          )}
+        </header>
+      )}
 
       <div className="flex flex-col gap-3">
         <div className="flex w-max max-w-full gap-2 overflow-x-auto rounded-[20px] border border-line bg-surface p-1.5 backdrop-blur-2xl">

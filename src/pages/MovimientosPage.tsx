@@ -68,7 +68,11 @@ export function MovimientosPage() {
       </div>
 
       <div key={tab} className="fade-in">
-        {tab === 'resumen' ? <ReportesPage /> : <HistoryPage />}
+        {tab === 'resumen' ? (
+          <ReportesPage mostrarEncabezado={false} />
+        ) : (
+          <HistoryPage mostrarEncabezado={false} />
+        )}
       </div>
     </div>
   )
