@@ -4,6 +4,7 @@ import type {
   VentasRow,
 } from '../types/database.types'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 const CHUNK = 200
 
@@ -17,14 +18,15 @@ export async function fetchVentasMes(
   desdeISO: string,
   hastaISO: string,
 ): Promise<VentasRow[]> {
-  const { data, error } = await supabase
-    .from('ventas')
-    .select('id, total, fecha, metodo_pago, origen, ticket_externo, idempotency_key, creado_por')
-    .gte('fecha', desdeISO)
-    .lt('fecha', hastaISO)
-    .order('fecha', { ascending: false })
-  if (error) throw new Error(error.message)
-  return data ?? []
+  return fetchAllPages<VentasRow>((offset, limit) =>
+    supabase
+      .from('ventas')
+      .select('id, total, fecha, metodo_pago, origen, ticket_externo, idempotency_key, creado_por')
+      .gte('fecha', desdeISO)
+      .lt('fecha', hastaISO)
+      .order('fecha', { ascending: false })
+      .range(offset, offset + limit - 1),
+  )
 }
 
 export async function fetchDetalleVentasMes(
@@ -78,25 +80,26 @@ export async function fetchIngresosMes(
   desdeISO: string,
   hastaISO: string,
 ): Promise<IngresosMercaderiaRow[]> {
-  const { data, error } = await supabase
-    .from('ingresos_mercaderia')
-    .select(
-      `id,
-       compra_id,
-       proveedor_id,
-       nombre_proveedor,
-       producto_id,
-       cantidad_ingresada,
-       costo_total,
-       comprobante,
-       motivo,
-       fecha,
-       created_at,
-       creado_por`,
-    )
-    .gte('created_at', desdeISO)
-    .lt('created_at', hastaISO)
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return data ?? []
+  return fetchAllPages<IngresosMercaderiaRow>((offset, limit) =>
+    supabase
+      .from('ingresos_mercaderia')
+      .select(
+        `id,
+         compra_id,
+         proveedor_id,
+         nombre_proveedor,
+         producto_id,
+         cantidad_ingresada,
+         costo_total,
+         comprobante,
+         motivo,
+         fecha,
+         created_at,
+         creado_por`,
+      )
+      .gte('created_at', desdeISO)
+      .lt('created_at', hastaISO)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1),
+  )
 }

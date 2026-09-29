@@ -6,18 +6,16 @@ import type {
 } from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 export async function fetchProveedores(): Promise<ProveedoresRow[]> {
-  const { data, error } = await supabase
-    .from('proveedores')
-    .select('*')
-    .order('nombre', { ascending: true })
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return data
+  return fetchAllPages<ProveedoresRow>((offset, limit) =>
+    supabase
+      .from('proveedores')
+      .select('*')
+      .order('nombre', { ascending: true })
+      .range(offset, offset + limit - 1),
+  )
 }
 
 export async function createProveedor(

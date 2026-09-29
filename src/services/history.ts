@@ -5,18 +5,16 @@ import type {
   VentasRow,
 } from '../types/database.types'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 export async function fetchVentasHistory(): Promise<VentasRow[]> {
-  const { data, error } = await supabase
-    .from('ventas')
-    .select('*')
-    .order('fecha', { ascending: false })
-
-  if (error) {
-    throw new Error('No se pudo cargar el historial de ventas')
-  }
-
-  return data
+  return fetchAllPages<VentasRow>((offset, limit) =>
+    supabase
+      .from('ventas')
+      .select('*')
+      .order('fecha', { ascending: false })
+      .range(offset, offset + limit - 1),
+  )
 }
 
 export async function fetchDetalleVenta(
@@ -74,28 +72,25 @@ export async function fetchProductNames(
 }
 
 export async function fetchIngresosHistory(): Promise<IngresosMercaderiaRow[]> {
-  const { data, error } = await supabase
-    .from('ingresos_mercaderia')
-    .select(
-      `id,
-       compra_id,
-       proveedor_id,
-       nombre_proveedor,
-       producto_id,
-       cantidad_ingresada,
-       costo_total,
-       comprobante,
-       motivo,
-       fecha,
-       created_at,
-       creado_por,
-       productos ( nombre )`,
-    )
-    .order('fecha', { ascending: false })
-
-  if (error) {
-    throw new Error('No se pudo cargar el historial de compras')
-  }
-
-  return data ?? []
+  return fetchAllPages<IngresosMercaderiaRow>((offset, limit) =>
+    supabase
+      .from('ingresos_mercaderia')
+      .select(
+        `id,
+         compra_id,
+         proveedor_id,
+         nombre_proveedor,
+         producto_id,
+         cantidad_ingresada,
+         costo_total,
+         comprobante,
+         motivo,
+         fecha,
+         created_at,
+         creado_por,
+         productos ( nombre )`,
+      )
+      .order('fecha', { ascending: false })
+      .range(offset, offset + limit - 1),
+  )
 }

@@ -3,18 +3,16 @@ import type {
   UsuariosAutorizadosRow,
 } from '../types/database.types'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 export async function fetchUsuariosAutorizados(): Promise<UsuariosAutorizadosRow[]> {
-  const { data, error } = await supabase
-    .from('usuarios_autorizados')
-    .select('*')
-    .order('created_at', { ascending: true })
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return data
+  return fetchAllPages<UsuariosAutorizadosRow>((offset, limit) =>
+    supabase
+      .from('usuarios_autorizados')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .range(offset, offset + limit - 1),
+  )
 }
 
 export async function updateUsuarioRol(

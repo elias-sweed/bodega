@@ -4,6 +4,7 @@ import type {
 } from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
   const { data, error } = await supabase.rpc('dashboard_resumen')
@@ -30,16 +31,15 @@ export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
 }
 
 export async function fetchProductosBajoStock(): Promise<ProductosRow[]> {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-    .order('stock_actual', { ascending: true })
+  const allProducts = await fetchAllPages<ProductosRow>((offset, limit) =>
+    supabase
+      .from('productos')
+      .select('*')
+      .order('stock_actual', { ascending: true })
+      .range(offset, offset + limit - 1),
+  )
 
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return (data ?? [])
+  return allProducts
     .filter((producto) => producto.stock_actual <= producto.stock_minimo)
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
 }

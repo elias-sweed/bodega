@@ -4,6 +4,7 @@ import type {
   VentasRow,
 } from '../types/database.types'
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedFetch'
 
 export interface KardexMovement {
   id: string
@@ -26,25 +27,23 @@ export interface KardexResult {
 const AJUSTE_NOMBRE = 'Ajuste Manual de Inventario'
 
 export async function fetchKardex(productoId: string): Promise<KardexResult> {
-  const [{ data: detalle, error: detalleError }, { data: ingresos, error: ingresosError }] =
-    await Promise.all([
-      supabase.from('detalle_ventas').select('*').eq('producto_id', productoId),
+  const [detalleRows, ingresoRows] = await Promise.all([
+    fetchAllPages<DetalleVentasRow>((offset, limit) =>
+      supabase
+        .from('detalle_ventas')
+        .select('*')
+        .eq('producto_id', productoId)
+        .range(offset, offset + limit - 1),
+    ),
+    fetchAllPages<IngresosMercaderiaRow>((offset, limit) =>
       supabase
         .from('ingresos_mercaderia')
         .select('*')
         .eq('producto_id', productoId)
-        .order('fecha', { ascending: false }),
-    ])
-
-  if (detalleError) {
-    throw new Error('No se pudo cargar el historial de ventas del producto')
-  }
-  if (ingresosError) {
-    throw new Error('No se pudo cargar el historial de ingresos del producto')
-  }
-
-  const detalleRows = (detalle ?? []) as DetalleVentasRow[]
-  const ingresoRows = (ingresos ?? []) as IngresosMercaderiaRow[]
+        .order('fecha', { ascending: false })
+        .range(offset, offset + limit - 1),
+    ),
+  ])
 
   const ventaIds = [...new Set(detalleRows.map((d) => d.venta_id))]
   let ventasById = new Map<string, VentasRow>()
