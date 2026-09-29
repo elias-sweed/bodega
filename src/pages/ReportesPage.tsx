@@ -215,7 +215,7 @@ export function ReportesPage({ mostrarEncabezado = true }: { mostrarEncabezado?:
   const periodLabel = periodo === 'dia' ? 'Día' : periodo === 'semana' ? 'Semana' : 'Mes'
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 bg-transparent pb-10">
+    <div className="flex w-full flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-4">
         {mostrarEncabezado && (
           <div>

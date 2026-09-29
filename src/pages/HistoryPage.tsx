@@ -108,7 +108,7 @@ export function HistoryPage({ mostrarEncabezado = true }: { mostrarEncabezado?: 
   )
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 overflow-y-auto bg-transparent px-4 pb-10">
+    <div className="flex w-full flex-col gap-5">
       {(mostrarEncabezado || rol === 'admin') && (
         <header className="flex flex-wrap items-end justify-between gap-4">
           {mostrarEncabezado && (

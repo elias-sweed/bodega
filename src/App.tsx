@@ -35,6 +35,12 @@ function SessionExpiredGate() {
   return <SessionExpiredModal onAccept={acknowledgeExpired} />
 }
 
+function RutaDesconocida() {
+  const { user, loading } = useAuth()
+  if (loading) return null
+  return <Navigate to={user ? '/' : '/login'} replace />
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -72,7 +78,7 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<RutaDesconocida />} />
       </Routes>
     </BrowserRouter>
   )

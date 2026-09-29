@@ -1,20 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BarChart3, History, X, HelpCircle } from 'lucide-react'
 
-const STORAGE_KEY = 'movimientos-welcome-seen'
+export const MOVIMIENTOS_WELCOME_KEY = 'movimientos-welcome-seen'
 
 export function MovimientosWelcomeModal() {
-  const [isOpen, setIsOpen] = useState(false)
-
-  useEffect(() => {
-    const seen = localStorage.getItem(STORAGE_KEY)
-    if (!seen) {
-      setIsOpen(true)
-    }
-  }, [])
+  const [isOpen, setIsOpen] = useState(() => localStorage.getItem(MOVIMIENTOS_WELCOME_KEY) === null)
 
   const close = (): void => {
-    localStorage.setItem(STORAGE_KEY, 'true')
+    localStorage.setItem(MOVIMIENTOS_WELCOME_KEY, 'true')
     setIsOpen(false)
   }
 
