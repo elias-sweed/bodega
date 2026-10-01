@@ -6,6 +6,9 @@
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },
+  "allowScripts": {
+    "msw": true
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
