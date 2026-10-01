@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AlertTriangle, Plus, RotateCcw, Search, Settings2, Trash2 } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
@@ -10,12 +10,13 @@ import {
   ProveedorSelect,
 } from '../components/purchases/ProveedorSelect'
 import { PurchasesSkeleton } from '../components/purchases/PurchasesSkeleton'
+import { usePurchaseForm } from '../hooks/usePurchaseForm'
 import { useProveedores } from '../hooks/useProveedores'
 import { useProducts } from '../hooks/useProducts'
 import { emitDataChanged } from '../services/dataEvents'
 import { registrarCompra } from '../services/purchases'
-import type { ProductosRow } from '../types/database.types'
 import { formatMoney } from '../utils/format'
+import { inputClass, labelClass } from '../styles/formClasses'
 
 type Notice = {
   type: 'success' | 'error'
@@ -24,12 +25,6 @@ type Notice = {
     label: string
     onClick: () => void
   }
-}
-
-interface CompraItem {
-  producto: ProductosRow
-  cantidad: string
-  costoTotal: string
 }
 
 export function PurchasesPage() {
@@ -41,14 +36,26 @@ export function PurchasesPage() {
   const [proveedorId, setProveedorId] = useState(PROVEEDOR_GENERICO)
   const [comprobante, setComprobante] = useState('')
   const [proveedoresModalOpen, setProveedoresModalOpen] = useState(false)
-  const [items, setItems] = useState<CompraItem[]>([])
-  const [search, setSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState<Notice | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
   const purchaseKeyRef = useRef<string | null>(null)
   const purchaseFingerprintRef = useRef<string | null>(null)
+
+  const {
+    items,
+    addItem,
+    updateItem,
+    removeItem,
+    clearItems,
+    totalCompra,
+    isValid,
+    suggestedProducts,
+    search,
+    setSearch,
+    searchOpen,
+    setSearchOpen,
+  } = usePurchaseForm(products)
 
   const showNotice = useCallback(
     (type: Notice['type'], message: string, action?: Notice['action']): void => {
@@ -63,66 +70,12 @@ export function PurchasesPage() {
     return () => window.clearTimeout(noticeTimer.current)
   }, [])
 
-  const addedProductIds = useMemo(
-    () => new Set(items.map((item) => item.producto.id)),
-    [items],
-  )
-
-  const suggestedProducts = useMemo(() => {
-    const query = search.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    const list = query === '' ? products : products.filter(
-      (producto) =>
-        producto.nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(query) ||
-        (producto.codigo_barras ?? '').toLowerCase().includes(query),
-    )
-    return list.filter((producto) => !addedProductIds.has(producto.id)).slice(0, 8)
-  }, [products, search, addedProductIds])
-
-  const totalCompra = items.reduce((total, item) => {
-    const costo = Number(item.costoTotal)
-    return total + (Number.isFinite(costo) && costo > 0 ? costo : 0)
-  }, 0)
-
-  const isValid =
-    proveedorId !== '' &&
-    items.length > 0 &&
-    items.every((item) => {
-      const cantidad = Number(item.cantidad)
-      const costo = Number(item.costoTotal)
-      return (
-        Number.isInteger(cantidad) &&
-        cantidad >= 1 &&
-        Number.isFinite(costo) &&
-        costo >= 0
-      )
-    })
-
-  const addItem = (producto: ProductosRow): void => {
-    if (addedProductIds.has(producto.id)) return
-    setItems((current) => [...current, { producto, cantidad: '', costoTotal: '' }])
-    setSearch('')
-    setSearchOpen(false)
-  }
-
-  const updateItem = (productoId: string, field: 'cantidad' | 'costoTotal', value: string): void => {
-    setItems((current) =>
-      current.map((item) =>
-        item.producto.id === productoId ? { ...item, [field]: value } : item,
-      ),
-    )
-  }
-
-  const removeItem = (productoId: string): void => {
-    setItems((current) => current.filter((item) => item.producto.id !== productoId))
-  }
-
   const resetForm = (): void => {
     purchaseKeyRef.current = null
     purchaseFingerprintRef.current = null
     setProveedorId(PROVEEDOR_GENERICO)
     setComprobante('')
-    setItems([])
-    setSearch('')
+    clearItems()
   }
 
   const handleEliminarProveedor = async (id: string): Promise<void> => {
@@ -187,11 +140,6 @@ export function PurchasesPage() {
       setSaving(false)
     }
   }
-
-  const inputClass =
-    'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base font-semibold text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
-  const labelClass =
-    'mb-1 block text-xs font-extrabold uppercase tracking-[0.16em] text-muted'
 
   const isFirstLoad = proveedoresLoading && proveedores.length === 0
 

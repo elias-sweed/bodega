@@ -17,6 +17,7 @@ import {
   type StockAdjustPayload,
 } from '../components/inventory/StockAdjustModal'
 import { useAuth } from '../hooks/useAuth'
+import { useInventoryModals } from '../hooks/useInventoryModals'
 import { useProducts } from '../hooks/useProducts'
 import { emitDataChanged } from '../services/dataEvents'
 import { registrarCompra } from '../services/purchases'
@@ -68,8 +69,6 @@ export function InventoryPage() {
     [],
   )
   const initialNewName = searchParams.get('nuevo')
-  const [modalOpen, setModalOpen] = useState(initialNewName !== null)
-  const [initialStockOpen, setInitialStockOpen] = useState(false)
   const [prefill, setPrefill] = useState<{
     nombre: string
     categoria: string
@@ -80,16 +79,28 @@ export function InventoryPage() {
   } | null>(
     initialNewName ? { nombre: initialNewName, categoria: '' } : null,
   )
-  const [editingProduct, setEditingProduct] = useState<ProductosRow | null>(null)
-  const [purchasingProduct, setPurchasingProduct] = useState<ProductosRow | null>(null)
-  const [adjustingProduct, setAdjustingProduct] = useState<ProductosRow | null>(null)
-  const [deletingProduct, setDeletingProduct] = useState<ProductosRow | null>(null)
-  const [kardexProduct, setKardexProduct] = useState<ProductosRow | null>(null)
   const [focusProductId, setFocusProductId] = useState<string | null>(null)
   const [recientesIds, setRecientesIds] = useState<string[]>(getRecientesIds)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
   const quickPurchaseKeyRef = useRef<{ fingerprint: string; key: string } | null>(null)
+
+  const {
+    modalOpen,
+    setModalOpen,
+    initialStockOpen,
+    setInitialStockOpen,
+    editingProduct,
+    setEditingProduct,
+    purchasingProduct,
+    setPurchasingProduct,
+    adjustingProduct,
+    setAdjustingProduct,
+    deletingProduct,
+    setDeletingProduct,
+    kardexProduct,
+    setKardexProduct,
+  } = useInventoryModals()
 
   useEffect(
     () => subscribeRecientes(() => setRecientesIds(getRecientesIds())),
@@ -354,7 +365,7 @@ export function InventoryPage() {
                 setPrefill(null)
                 setModalOpen(true)
               }}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px 35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
             >
               <PackagePlus size={19} aria-hidden="true" />
               Nuevo producto

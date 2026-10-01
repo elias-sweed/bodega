@@ -15,6 +15,7 @@ import {
   refreshUsersCache,
   subscribeToUsers,
 } from '../services/usersCache'
+import { inputClass, labelClass } from '../styles/formClasses'
 import type {
   UsuarioRol,
   UsuariosAutorizadosRow,
@@ -24,11 +25,6 @@ type Notice = {
   type: 'success' | 'error'
   message: string
 }
-
-const inputClass =
-  'h-12 w-full rounded-2xl border border-line bg-surface-2 px-4 text-base font-medium text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
-const labelClass =
-  'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted'
 
 export function UsersPage() {
   const { rol, user, signOut } = useAuth()
