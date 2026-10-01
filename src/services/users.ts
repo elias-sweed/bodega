@@ -2,6 +2,7 @@ import type {
   UsuarioRol,
   UsuariosAutorizadosRow,
 } from '../types/database.types'
+import { throwSupabaseError } from '../utils/errors'
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
@@ -25,7 +26,7 @@ export async function updateUsuarioRol(
   })
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo actualizar el rol del usuario. Inténtalo de nuevo.')
   }
 
   if (!data) {
@@ -41,7 +42,7 @@ export async function removeUsuarioAutorizado(email: string): Promise<void> {
   })
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo eliminar el usuario. Inténtalo de nuevo.')
   }
 }
 
@@ -59,7 +60,7 @@ export async function crearCuentaConAcceso(
   })
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo crear la cuenta. Inténtalo de nuevo.')
   }
   if (data?.error) {
     throw new Error(String(data.error))

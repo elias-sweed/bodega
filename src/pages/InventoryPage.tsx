@@ -304,7 +304,8 @@ export function InventoryPage() {
       setDeletingProduct(null)
       showNotice('success', `Producto "${product.nombre}" eliminado`)
     } catch (cause) {
-      throw new Error(
+      showNotice(
+        'error',
         getFriendlyError(cause, 'No se pudo eliminar el producto. Inténtalo de nuevo.'),
       )
     }

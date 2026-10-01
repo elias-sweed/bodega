@@ -3,6 +3,7 @@ import type {
   IngresosMercaderiaRow,
   VentasRow,
 } from '../types/database.types'
+import { throwSupabaseError } from '../utils/errors'
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
@@ -38,7 +39,7 @@ export async function fetchDetalleVentasMes(
       .from('detalle_ventas')
       .select('id, venta_id, producto_id, cantidad, precio_unitario, subtotal, costo_unitario')
       .in('venta_id', group)
-    if (error) throw new Error(error.message)
+    if (error) throwSupabaseError(error, 'No se pudieron cargar los detalles de ventas.')
     out.push(...(data ?? []))
   }
   return out
@@ -53,7 +54,7 @@ export async function fetchProductosReporte(
       .from('productos')
       .select('id, nombre, costo')
       .in('id', group)
-    if (error) throw new Error(error.message)
+    if (error) throwSupabaseError(error, 'No se pudieron cargar los productos del reporte.')
     for (const row of data ?? []) {
       productos.set(row.id, { nombre: row.nombre, costo: row.costo })
     }
@@ -70,7 +71,7 @@ export async function fetchCostosProductos(
       .from('productos')
       .select('id, costo')
       .in('id', group)
-    if (error) throw new Error(error.message)
+    if (error) throwSupabaseError(error, 'No se pudieron cargar los costos de los productos.')
     for (const row of data ?? []) costos.set(row.id, row.costo)
   }
   return costos

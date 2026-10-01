@@ -6,7 +6,7 @@ import type {
   ProductosRow,
   RegistrarAjusteManualResult,
 } from '../types/database.types'
-import { getFriendlyError } from '../utils/errors'
+import { getFriendlyError, throwSupabaseError } from '../utils/errors'
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
@@ -27,7 +27,7 @@ export async function fetchProductCategories(): Promise<string[]> {
     .order('categoria', { ascending: true })
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudieron cargar las categorías.')
   }
 
   const unique = new Set<string>()
@@ -55,7 +55,7 @@ export async function fetchProductByName(
   const { data, error } = await query.maybeSingle()
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo buscar el producto.')
   }
 
   return data
@@ -127,7 +127,7 @@ export async function actualizarProducto(input: {
 }): Promise<ActualizarProductoResult> {
   const { data, error } = await supabase.rpc('actualizar_producto', input)
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo actualizar el producto. Inténtalo de nuevo.')
   }
   if (!data) {
     throw new Error(
@@ -141,7 +141,7 @@ export async function deleteProduct(id: string): Promise<void> {
   const { error } = await supabase.from('productos').delete().eq('id', id)
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo eliminar el producto. Inténtalo de nuevo.')
   }
 }
 
@@ -160,7 +160,7 @@ export async function ajustarStock(
   })
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo ajustar el stock. Inténtalo de nuevo.')
   }
   if (!data) {
     throw new Error('No se pudo ajustar el stock. Inténtalo de nuevo.')

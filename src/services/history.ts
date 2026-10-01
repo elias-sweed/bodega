@@ -4,6 +4,7 @@ import type {
   ProductosRow,
   VentasRow,
 } from '../types/database.types'
+import { throwSupabaseError } from '../utils/errors'
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
@@ -37,7 +38,7 @@ export async function fetchDetalleVenta(
     .eq('venta_id', ventaId)
 
   if (error) {
-    throw new Error('No se pudo cargar el detalle de la venta')
+    throwSupabaseError(error, 'No se pudo cargar el detalle de la venta.')
   }
 
   return data
@@ -56,7 +57,7 @@ export async function fetchDetallesByVentas(
       .select('*')
       .in('venta_id', chunk)
     if (error) {
-      throw new Error('No se pudo cargar el detalle de las ventas')
+      throwSupabaseError(error, 'No se pudo cargar el detalle de las ventas.')
     }
     all.push(...(data ?? []))
   }
@@ -76,7 +77,7 @@ export async function fetchProductNames(
     .in('id', ids)
 
   if (error) {
-    throw new Error('No se pudieron cargar los productos')
+    throwSupabaseError(error, 'No se pudieron cargar los productos.')
   }
 
   return data

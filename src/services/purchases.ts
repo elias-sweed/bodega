@@ -4,7 +4,7 @@ import type {
   RegistrarCompraItem,
   RegistrarCompraResult,
 } from '../types/database.types'
-import { getFriendlyError } from '../utils/errors'
+import { getFriendlyError, throwSupabaseError } from '../utils/errors'
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
@@ -28,7 +28,7 @@ export async function createProveedor(
     .maybeSingle()
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo crear el proveedor. Inténtalo de nuevo.')
   }
 
   if (!data) {
@@ -42,7 +42,7 @@ export async function deleteProveedor(id: string): Promise<void> {
   const { error } = await supabase.from('proveedores').delete().eq('id', id)
 
   if (error) {
-    throw new Error(error.message)
+    throwSupabaseError(error, 'No se pudo eliminar el proveedor. Inténtalo de nuevo.')
   }
 }
 

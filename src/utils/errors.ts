@@ -98,6 +98,26 @@ export function getFriendlyError(
   return fallback
 }
 
+/**
+ * Lanza un error con mensaje amigable. Úsalo en todos los servicios en lugar
+ * de `throw new Error(error.message)` para que la usuaria nunca vea mensajes
+ * técnicos de Postgres.
+ */
+export function throwSupabaseError(
+  error: { message: string },
+  fallback?: string,
+): never {
+  throw new Error(getFriendlyError(error, fallback))
+}
+
+/**
+ * Detecta si un error es por falta de conexión a internet.
+ */
+export function isNetworkError(error: unknown): boolean {
+  if (!navigator.onLine) return true
+  return error instanceof TypeError && error.message === 'Failed to fetch'
+}
+
 export function getAuthErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : ''
 

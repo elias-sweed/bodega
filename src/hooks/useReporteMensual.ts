@@ -17,6 +17,7 @@ import type {
   VentasRow,
 } from '../types/database.types'
 import { calcularReporteMensual, type ReporteMensual } from '../utils/reporteFinanciero'
+import { getFriendlyError, isNetworkError } from '../utils/errors'
 
 export function useReporteMensual(
   desde: Date,
@@ -87,7 +88,11 @@ export function useReporteMensual(
         })
       } catch (cause) {
         if (!cancelled) {
-          setError(cause instanceof Error ? cause.message : 'No se pudo cargar el reporte.')
+          if (isNetworkError(cause)) {
+            setError('Sin conexión. Revisa tu internet e inténtalo de nuevo.')
+          } else {
+            setError(getFriendlyError(cause, 'No se pudo cargar el reporte.'))
+          }
         }
       } finally {
         if (!cancelled) setLoading(false)
