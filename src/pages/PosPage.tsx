@@ -60,8 +60,16 @@ export function PosPage() {
   const [lastSale, setLastSale] = useState<LastSale | null>(null)
   const [metodoPago, setMetodoPago] = useState<MetodoPago>(METODO_PAGO_DEFAULT)
   const [discardOpen, setDiscardOpen] = useState(false)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
   const noticeTimer = useRef<number | undefined>(undefined)
+  const highlightTimer = useRef<number | undefined>(undefined)
   const saleKeyRef = useRef<string | null>(null)
+
+  const flashHighlight = useCallback((productId: string): void => {
+    setHighlightId(productId)
+    window.clearTimeout(highlightTimer.current)
+    highlightTimer.current = window.setTimeout(() => setHighlightId(null), 1200)
+  }, [])
 
   const showNotice = useCallback((type: Notice['type'], message: string): void => {
     window.clearTimeout(noticeTimer.current)
