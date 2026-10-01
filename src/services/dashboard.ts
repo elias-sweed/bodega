@@ -4,7 +4,6 @@ import type {
 } from '../types/database.types'
 import { getFriendlyError } from '../utils/errors'
 import { supabase } from './supabase'
-import { fetchAllPages } from './paginatedFetch'
 
 export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
   const { data, error } = await supabase.rpc('dashboard_resumen')
@@ -31,17 +30,13 @@ export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
 }
 
 export async function fetchProductosBajoStock(): Promise<ProductosRow[]> {
-  const allProducts = await fetchAllPages<ProductosRow>((offset, limit) =>
-    supabase
-      .from('productos')
-      .select('*')
-      .order('stock_actual', { ascending: true })
-      .range(offset, offset + limit - 1),
-  )
+  const { data, error } = await supabase.rpc('productos_bajo_stock')
 
-  return allProducts
-    .filter((producto) => producto.stock_actual <= producto.stock_minimo)
-    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+  if (error) {
+    throw new Error(getFriendlyError(error, 'No se pudieron cargar los productos con bajo stock.'))
+  }
+
+  return (data ?? []) as ProductosRow[]
 }
 
 export interface VentaDiaria {

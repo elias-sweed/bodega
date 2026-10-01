@@ -7,14 +7,25 @@ import type {
 import { supabase } from './supabase'
 import { fetchAllPages } from './paginatedFetch'
 
-export async function fetchVentasHistory(): Promise<VentasRow[]> {
-  return fetchAllPages<VentasRow>((offset, limit) =>
-    supabase
+export async function fetchVentasHistory(
+  desde?: string,
+  hasta?: string,
+): Promise<VentasRow[]> {
+  return fetchAllPages<VentasRow>((offset, limit) => {
+    let query = supabase
       .from('ventas')
       .select('*')
       .order('fecha', { ascending: false })
-      .range(offset, offset + limit - 1),
-  )
+
+    if (desde) {
+      query = query.gte('fecha', desde)
+    }
+    if (hasta) {
+      query = query.lt('fecha', hasta)
+    }
+
+    return query.range(offset, offset + limit - 1)
+  })
 }
 
 export async function fetchDetalleVenta(
@@ -71,9 +82,12 @@ export async function fetchProductNames(
   return data
 }
 
-export async function fetchIngresosHistory(): Promise<IngresosMercaderiaRow[]> {
-  return fetchAllPages<IngresosMercaderiaRow>((offset, limit) =>
-    supabase
+export async function fetchIngresosHistory(
+  desde?: string,
+  hasta?: string,
+): Promise<IngresosMercaderiaRow[]> {
+  return fetchAllPages<IngresosMercaderiaRow>((offset, limit) => {
+    let query = supabase
       .from('ingresos_mercaderia')
       .select(
         `id,
@@ -91,6 +105,14 @@ export async function fetchIngresosHistory(): Promise<IngresosMercaderiaRow[]> {
          productos ( nombre )`,
       )
       .order('fecha', { ascending: false })
-      .range(offset, offset + limit - 1),
-  )
+
+    if (desde) {
+      query = query.gte('fecha', desde)
+    }
+    if (hasta) {
+      query = query.lt('fecha', hasta)
+    }
+
+    return query.range(offset, offset + limit - 1)
+  })
 }
