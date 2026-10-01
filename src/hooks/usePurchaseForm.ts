@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { ProductosRow } from '../types/database.types'
 import { normalizeText } from '../utils/format'
 

@@ -33,7 +33,6 @@ interface PosProductAreaProps {
  */
 export function PosProductArea({
   products,
-  loading,
   error,
   search,
   onSearchChange,

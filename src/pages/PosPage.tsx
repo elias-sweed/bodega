@@ -69,6 +69,21 @@ export function PosPage() {
     highlightTimer.current = window.setTimeout(() => setHighlightId(null), 1200)
   }, [])
 
+  const handleAddProduct = useCallback((product: ProductosRow): void => {
+    addProduct(product)
+    flashHighlight(product.id)
+  }, [addProduct, flashHighlight])
+
+  const handleIncreaseQuantity = useCallback((productId: string): void => {
+    increaseQuantity(productId)
+    flashHighlight(productId)
+  }, [increaseQuantity, flashHighlight])
+
+  const handleDecreaseQuantity = useCallback((productId: string): void => {
+    decreaseQuantity(productId)
+    flashHighlight(productId)
+  }, [decreaseQuantity, flashHighlight])
+
   const showNotice = useCallback((type: Notice['type'], message: string): void => {
     window.clearTimeout(noticeTimer.current)
     setNotice({ type, message })
@@ -329,9 +344,9 @@ export function PosPage() {
           outOfStockProducts={outOfStockProducts}
           cartQtyById={cartQtyById}
           highlightId={highlightId}
-          onAdd={addProduct}
-          onIncrease={increaseQuantity}
-          onDecrease={decreaseQuantity}
+          onAdd={handleAddProduct}
+          onIncrease={handleIncreaseQuantity}
+          onDecrease={handleDecreaseQuantity}
           onRetry={retry}
           isFirstLoad={isFirstLoad}
           isSearching={isSearching}

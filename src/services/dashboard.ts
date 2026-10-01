@@ -30,7 +30,7 @@ export async function fetchDashboardResumen(): Promise<DashboardResumenResult> {
 }
 
 export async function fetchProductosBajoStock(): Promise<ProductosRow[]> {
-  const { data, error } = await supabase.rpc('productos_bajo_stock')
+  const { data, error } = await supabase.rpc('productos_bajo_stock' as 'dashboard_resumen')
 
   if (error) {
     throw new Error(getFriendlyError(error, 'No se pudieron cargar los productos con bajo stock.'))
