@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AlertTriangle, ArrowLeft, PauseCircle, RotateCcw } from 'lucide-react'
+import { PauseCircle } from 'lucide-react'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { Toast } from '../components/common/Toast'
-import { Cart } from '../components/pos/Cart'
 import { METODO_PAGO_DEFAULT, type MetodoPago } from '../components/pos/metodosPago'
-import { CategoryGrid } from '../components/pos/CategoryGrid'
 import { PaymentModal } from '../components/pos/PaymentModal'
+import { PosProductArea } from '../components/pos/PosProductArea'
+import { PosSidebar } from '../components/pos/PosSidebar'
 import { PosSkeleton } from '../components/pos/PosSkeleton'
-import { ProductGrid } from '../components/pos/ProductGrid'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
-import { SearchBar } from '../components/pos/SearchBar'
 import { useAuth } from '../hooks/useAuth'
 import { usePosCart } from '../hooks/usePosCart'
 import { useProducts } from '../hooks/useProducts'
@@ -254,88 +252,13 @@ export function PosPage() {
 
   const isFirstLoad = loading && products.length === 0
 
-  const content = isFirstLoad ? (
-    <PosSkeleton />
-  ) : error && products.length === 0 ? (
-    <div className="flex flex-col items-center gap-4 rounded-[28px] border border-rose-200/25 bg-rose-500/15 p-8 text-center shadow-sm backdrop-blur-2xl">
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-400/25 text-loss">
-        <AlertTriangle size={22} aria-hidden="true" />
-      </span>
-      <p className="text-lg font-extrabold tracking-tight text-ink">
-        No se pudieron cargar los productos
-      </p>
-      <p className="text-sm font-medium text-muted">{error}</p>
-      <button
-        type="button"
-        onClick={retry}
-        className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-rose-700 shadow-lg transition-transform duration-300 hover:-translate-y-0.5"
-      >
-        <RotateCcw size={15} aria-hidden="true" />
-        Reintentar
-      </button>
-    </div>
-  ) : isSearching ? (
-    <ProductGrid
-      products={filteredProducts}
-      title="Resultados de búsqueda"
-      cartQuantities={cartQtyById}
-      onAdd={addProduct}
-      onIncrease={increaseQuantity}
-      onDecrease={decreaseQuantity}
-    />
-  ) : selectedCategory ? (
-    <div className="fade-in">
-      <button
-        type="button"
-        onClick={() => setSelectedCategory(null)}
-        className="mb-4 inline-flex items-center gap-2 rounded-2xl border border-line bg-surface px-4 py-2.5 text-sm font-extrabold text-ink backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
-      >
-        <ArrowLeft size={16} aria-hidden="true" />
-        Volver a categorías
-      </button>
-      <ProductGrid
-        products={filteredProducts}
-        title={selectedCategory.label}
-        cartQuantities={cartQtyById}
-        highlightId={highlightId}
-        onAdd={addProduct}
-        onIncrease={increaseQuantity}
-        onDecrease={decreaseQuantity}
-      />
-    </div>
-  ) : products.length === 0 ? (
-    <section className="rounded-[28px] border border-dashed border-line bg-surface p-10 text-center">
-      <h2 className="text-lg font-black tracking-tight text-ink">
-        No hay productos en el inventario
-      </h2>
-      <p className="mt-2 text-sm font-medium text-muted">
-        Los productos creados en Inventario aparecerán aquí automáticamente.
-      </p>
-    </section>
-  ) : (
-    <div className="fade-in space-y-8">
-      {categories.length > 0 && (
-        <CategoryGrid
-          categories={categories}
-          onSelect={(category) => {
-            setSelectedCategory(category)
-            setSearch('')
-          }}
-        />
-      )}
-      {outOfStockProducts.length > 0 && (
-        <ProductGrid
-          products={outOfStockProducts}
-          title="Productos agotados"
-          cartQuantities={cartQtyById}
-          highlightId={highlightId}
-          onAdd={addProduct}
-          onIncrease={increaseQuantity}
-          onDecrease={decreaseQuantity}
-        />
-      )}
-    </div>
-  )
+  if (isFirstLoad) {
+    return (
+      <div className="caja-pos mx-auto flex h-full w-full max-w-7xl flex-col gap-4 bg-transparent">
+        <PosSkeleton />
+      </div>
+    )
+  }
 
   return (
     <div className="caja-pos mx-auto flex h-full w-full max-w-7xl flex-col gap-4 bg-transparent">
@@ -392,27 +315,38 @@ export function PosPage() {
       )}
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-y-auto pb-2 lg:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] lg:overflow-hidden lg:pb-0">
-        <section className="flex min-h-0 flex-col gap-4">
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            onEnter={handleSearchEnter}
-          />
-          <div className="min-h-0 flex-1 overflow-y-auto pr-1">{content}</div>
-        </section>
+        <PosProductArea
+          products={products}
+          loading={loading}
+          error={error}
+          search={search}
+          onSearchChange={setSearch}
+          onSearchEnter={handleSearchEnter}
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          categories={categories}
+          filteredProducts={filteredProducts}
+          outOfStockProducts={outOfStockProducts}
+          cartQtyById={cartQtyById}
+          highlightId={highlightId}
+          onAdd={addProduct}
+          onIncrease={increaseQuantity}
+          onDecrease={decreaseQuantity}
+          onRetry={retry}
+          isFirstLoad={isFirstLoad}
+          isSearching={isSearching}
+        />
 
-        <div ref={cartSectionRef} className="min-h-0 scroll-mt-2">
-          <Cart
-            items={cart}
-            charging={charging}
-            highlightId={highlightId}
-            onIncrease={increaseQuantity}
-            onDecrease={decreaseQuantity}
-            onRemove={removeFromCart}
-            onCharge={openPayment}
-            onSuspend={handleSuspendSale}
-          />
-        </div>
+        <PosSidebar
+          cart={cart}
+          charging={charging}
+          highlightId={highlightId}
+          onIncrease={increaseQuantity}
+          onDecrease={decreaseQuantity}
+          onRemove={removeFromCart}
+          onCharge={openPayment}
+          onSuspend={handleSuspendSale}
+        />
       </div>
 
       {paymentOpen && (
