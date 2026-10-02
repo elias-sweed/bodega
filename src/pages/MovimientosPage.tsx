@@ -5,6 +5,7 @@ import { BarChart3, History } from 'lucide-react'
 import { ReportesPage } from './ReportesPage'
 import { HistoryPage } from './HistoryPage'
 import { MovimientosWelcomeModal } from '../components/movimientos/MovimientosWelcomeModal'
+import { HelpTip } from '../components/common/HelpTip'
 
 type TabId = 'resumen' | 'detalle'
 
@@ -77,6 +78,14 @@ export function MovimientosPage() {
           <p className="mt-1 text-sm font-semibold text-muted">
             Mira tus ganancias o busca ventas y compras específicas.
           </p>
+          <div className="mt-1.5">
+            <HelpTip
+              title="¿Resumen o Detalle?"
+              label="¿Cuál uso?"
+              text="'Resumen' es para ver cuánto ganaste en un día, semana o mes. 'Detalle' es para buscar una venta o compra específica de cualquier fecha."
+              example="Quieres saber cuánto ganaste este mes: entra a Resumen y toca 'Mes'. Te acuerdas de una venta del lunes: usa Detalle y filtra por fecha."
+            />
+          </div>
         </div>
         <MovimientosWelcomeModal />
       </header>

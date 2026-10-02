@@ -4,6 +4,7 @@ import { ReportesSkeleton } from '../components/reportes/ReportesSkeleton'
 import { useReporteMensual } from '../hooks/useReporteMensual'
 import { exportCsv } from '../utils/exportCsv'
 import { formatMoney } from '../utils/format'
+import { HelpTip } from '../components/common/HelpTip'
 
 type Periodo = 'dia' | 'semana' | 'mes'
 
@@ -130,6 +131,13 @@ function ReporteResumen({ periodo, fecha }: { periodo: Periodo; fecha: Date }) {
         <MetricCard label="Compras del periodo" value={formatMoney(reporte.comprasMes)} />
         <MetricCard label="Operaciones de venta" value={String(reporte.numeroVentas)} />
       </div>
+      <div className="-mt-2">
+        <HelpTip
+          title="Las 4 tarjetas"
+          text="Ventas cobradas: todo lo que te pagaron. Ganancia: lo que te quedó libre. Compras: lo gastado en mercadería. Operaciones: cuántas ventas hiciste en total."
+          example="Si cobraste S/500 vendiendo 30 veces, verás S/500, tu ganancia, tus compras y el número 30."
+        />
+      </div>
 
       <section className="rounded-[28px] border border-line bg-surface p-6 shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -235,6 +243,11 @@ export function ReportesPage({ mostrarEncabezado = true }: { mostrarEncabezado?:
               {item === 'dia' ? 'Día' : item === 'semana' ? 'Semana' : 'Mes'}
             </button>
           ))}
+          <HelpTip
+            title="Día, Semana o Mes"
+            text="Elige el tiempo que quieres mirar. 'Día' es hoy (o la fecha que elijas), 'Semana' es esta semana y 'Mes' es este mes."
+            example="Tocas 'Mes' y ves cuánto ganaste en todo octubre de un vistazo."
+          />
         </div>
       </header>
 

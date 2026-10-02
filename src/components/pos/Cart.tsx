@@ -1,6 +1,7 @@
 import { Pause, ShoppingCart } from 'lucide-react'
 import type { CartItem } from '../../types'
 import { formatMoney } from '../../utils/format'
+import { HelpTip } from '../common/HelpTip'
 import { CartEmptyState, CartItemRow } from './CartItemRow'
 
 interface CartProps {
@@ -42,6 +43,11 @@ export function Cart({
         <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-ink">
           <ShoppingCart size={19} aria-hidden="true" className="text-amber-300" />
           Carrito
+          <HelpTip
+            title="El carrito"
+            text="Aquí van los productos que el cliente lleva. Suma o resta cantidades, y cuando esté listo toca Cobrar para terminar la venta."
+            example="El cliente lleva 3 gaseosas y 1 atún: tócalos en la lista y aparecen aquí con su total."
+          />
         </h2>
         <span className="rounded-full border border-amber-300/25 bg-surface-2 px-3 py-1 text-xs font-black text-ink">
           {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}

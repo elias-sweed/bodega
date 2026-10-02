@@ -312,6 +312,11 @@ export function PosPage() {
             <div>
               <p className="text-sm font-black tracking-tight text-ink">
                 Hay una venta suspendida
+                <HelpTip
+                  title="Venta suspendida"
+                  text="Guardaste una venta sin cobrar (por ejemplo para atender a otra persona). Toca 'Retomar venta' para seguir donde la dejaste o 'Descartar' para borrarla."
+                  example="Un cliente se fue a buscar vuelto: suspendes su venta y atiendes a otro. Cuando vuelva, tocas Retomar."
+                />
               </p>
               <p className="text-xs font-semibold text-muted">
                 {suspendedSale.count} {suspendedSale.count === 1 ? 'artículo' : 'artículos'} ·{' '}

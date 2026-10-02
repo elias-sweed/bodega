@@ -15,6 +15,7 @@ import type { HistoryFilter } from '../components/history/types'
 import { VentasTab } from '../components/history/VentasTab'
 import { ImportVentasModal } from '../components/import/ImportVentasModal'
 import { useAuth } from '../hooks/useAuth'
+import { HelpTip } from '../components/common/HelpTip'
 import type { FranjaId } from '../utils/format'
 
 type TabId = 'ventas' | 'compras' | 'ajustes'
@@ -122,6 +123,13 @@ export function HistoryPage({ mostrarEncabezado = true }: { mostrarEncabezado?: 
               <p className="mt-1 text-sm font-medium text-muted">
                 Busca ventas, compras o ajustes de stock específicos.
               </p>
+              <div className="mt-1.5">
+                <HelpTip
+                  title="Ventas, Compras y Correcciones"
+                  text="'Ventas' son lo que vendiste (caja). 'Compras' son la mercadería que compraste. 'Correcciones' son los ajustes de cantidad (mermas o conteos). Filtros de arriba: fecha y hora del día."
+                  example="Busca una venta de anoche: toca 'Ventas', luego 'Ayer' y la franja 'Noche'."
+                />
+              </div>
             </div>
           )}
           {rol === 'admin' && (
