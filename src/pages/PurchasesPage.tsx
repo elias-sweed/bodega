@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AlertTriangle, Plus, RotateCcw, Search, Settings2 } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
+import { HelpTip } from '../components/common/HelpTip'
 import {
   GestionProveedoresModal,
 } from '../components/purchases/GestionProveedoresModal'
@@ -157,6 +158,14 @@ export function PurchasesPage() {
           <p className="mt-1 text-sm font-medium text-muted">
             Recibe mercadería: suma stock y actualiza el costo de tus productos.
           </p>
+          <div className="mt-1.5">
+            <HelpTip
+              title="¿Cuándo usar Compras?"
+              label="¿Cuándo la uso?"
+              text="Úsala cada vez que te llega mercadería nueva para vender (lo que compraste al por mayor). Aquí sumas las unidades a tu stock y pones cuánto te costó. Inventario es solo para ver y ordenar; Compras es para registrar lo que compraste."
+              example="Fuiste al mercado y compraste 2 cajas de atún: lo registras aquí. Automáticamente tu inventario sube."
+            />
+          </div>
         </div>
         {items.length > 0 && (
           <span className="rounded-full border border-amber-300/25 bg-surface-2 px-3 py-1 text-xs font-black text-ink">

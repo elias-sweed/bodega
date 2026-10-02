@@ -98,7 +98,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
               Inventario
             </p>
             <h2 id="ajustar-stock-title" className="text-xl font-black tracking-tighter text-ink">
-              Ajustar stock
+              Corregir cantidad
             </h2>
           </div>
           <button
@@ -117,7 +117,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
         </p>
 
         <label htmlFor="nuevo-stock" className={labelClass}>
-          Nuevo stock
+          Nuevo stock (cantidad real)
         </label>
         <input
           id="nuevo-stock"
@@ -228,7 +228,7 @@ export function StockAdjustModal({ product, onClose, onSubmit }: StockAdjustModa
             disabled={submitting}
             className="h-12 flex-[2] rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 text-sm font-black text-slate-900 shadow-[0_14px_35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? 'Guardando…' : 'Ajustar stock'}
+            {submitting ? 'Guardando…' : 'Corregir cantidad'}
           </button>
         </div>
       </form>

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { PackagePlus, ShoppingCart, X } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
 import { formatMoney } from '../../utils/format'
+import { HelpTip } from '../common/HelpTip'
 
 export interface QuickPurchasePayload {
   cantidad: number
@@ -145,7 +146,14 @@ export function QuickPurchaseModal({
         />
 
         <label htmlFor="costo-total-compra" className={labelClass}>
-          ¿Cuánto costó toda la caja o paquete? (S/)
+          <span className="inline-flex items-center gap-1.5">
+            ¿Cuánto costó toda la caja o paquete? (S/)
+            <HelpTip
+              title="Costo total"
+              text="Es lo que pagaste por TODO junto, no por una sola unidad. La app divide sola entre las unidades y te dice cuánto te costó cada una."
+              example="Compraste una caja con 24 gaseosas a S/48. Pones 48 ahí. Cada gaseosa te costó S/2."
+            />
+          </span>
         </label>
         <input
           id="costo-total-compra"
@@ -161,7 +169,14 @@ export function QuickPurchaseModal({
 
         {costoUnitario !== null && (
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3">
-            <span className="text-sm font-extrabold text-ink">Costo por unidad</span>
+            <span className="inline-flex items-center gap-1.5 text-sm font-extrabold text-ink">
+              Costo por unidad
+              <HelpTip
+                title="Costo por unidad y ganancia"
+                text="Es lo que te costó UNA sola unidad. Con eso la app calcula tu ganancia: precio de venta menos costo por unidad."
+                example="Si cada gaseosa te costó S/2 y la vendes a S/3.50, ganas S/1.50 por cada una."
+              />
+            </span>
             <strong className="text-lg font-black tabular-nums text-gold">
               {formatMoney(costoUnitario)}
             </strong>

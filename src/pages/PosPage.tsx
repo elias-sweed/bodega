@@ -9,6 +9,7 @@ import { PosSidebar } from '../components/pos/PosSidebar'
 import { PosSkeleton } from '../components/pos/PosSkeleton'
 import { ReceiptModal, type LastSale } from '../components/pos/ReceiptModal'
 import { useAuth } from '../hooks/useAuth'
+import { HelpTip } from '../components/common/HelpTip'
 import { usePosCart } from '../hooks/usePosCart'
 import { useProducts } from '../hooks/useProducts'
 import { useSuspendedSale } from '../hooks/useSuspendedSale'
@@ -285,6 +286,14 @@ export function PosPage() {
           <h1 className="mt-1 text-3xl font-black tracking-tighter text-ink ">
             Caja
           </h1>
+          <div className="mt-1.5">
+            <HelpTip
+              title="Caja: registrar ventas"
+              label="¿Cómo funciona?"
+              text="Aquí solo registras lo que los clientes compran. Toca un producto y se va al carrito; cuando termines, cobra y registra la venta. No uses esta pantalla para contar mercadería nueva: eso va en Compras."
+              example="Llega un cliente y lleva 2 gaseosas y 1 atún: los tocas aquí, eliges cómo pagó y cobras."
+            />
+          </div>
         </div>
         {loading && products.length > 0 && (
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-muted backdrop-blur-xl">

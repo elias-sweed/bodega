@@ -23,6 +23,7 @@ import type { ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
 import { exportCsv } from '../../utils/exportCsv'
 import { StockBadge } from './StockBadge'
+import { HelpTip } from '../common/HelpTip'
 
 interface ProductTableProps {
   products: ProductosRow[]
@@ -517,6 +518,12 @@ export function ProductTable({
           Recientes
         </button>
 
+        <HelpTip
+          title="Filtro Recientes"
+          text="Apretas este botón y la lista solo te muestra los productos que agregaste hace poco. No borra ni esconde para siempre: lo aprietas otra vez y vuelves a ver todo."
+          example="Agregaste 3 productos nuevos hoy. Toca 'Recientes' para verlos rápido sin buscar uno por uno."
+        />
+
         <button
           type="button"
           onClick={() => setShowFilters((open) => !open)}
@@ -744,7 +751,7 @@ export function ProductTable({
                       title="Ordenar por stock"
                       className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
                     >
-                      Stock {renderSortIcon('stock_actual')}
+                      Cantidad {renderSortIcon('stock_actual')}
                     </button>
                   </th>
                   <th className={`${thClass} text-right`}>
@@ -754,11 +761,29 @@ export function ProductTable({
                       title="Ordenar por stock mínimo"
                       className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
                     >
-                      Mín. {renderSortIcon('stock_minimo')}
+                      Mín. cantidad {renderSortIcon('stock_minimo')}
                     </button>
                   </th>
-                  <th className={`${thClass} text-right`}>Estado</th>
-                  <th className={`${thClass} text-right`}>Acciones</th>
+                  <th className={`${thClass} text-right`}>
+                    <span className="inline-flex items-center gap-1.5">
+                      Estado
+                      <HelpTip
+                        title="Estado de la cantidad"
+                        text="Te dice si te queda suficiente, poco o nada de ese producto. 'Mín.' es la cantidad mínima que quieres tener siempre: cuando bajas de eso, se marca en rojo."
+                        example="Si tu mínimo de gaseosa es 10 y te quedan 8, el producto se marca en rojo para que compres más."
+                      />
+                    </span>
+                  </th>
+                  <th className={`${thClass} text-right`}>
+                    <span className="inline-flex items-center gap-1.5">
+                      Acciones
+                      <HelpTip
+                        title="Botones de acciones"
+                        text="En cada fila tienes botones para: editar los datos del producto, registrar una compra que llegó, corregir la cantidad (merma o conteo), ver su historial y eliminarlo."
+                        example="Se rompieron 2 atunes: usa 'Ajustar' para descontarlos. Llegó mercadería: usa 'Registrar compra'."
+                      />
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -877,11 +902,11 @@ export function ProductTable({
                               <button
                                 type="button"
                                 onClick={() => onAdjustStock?.(product)}
-                                title="Ajustar stock"
+                                title="Corregir la cantidad que tienes"
                                 className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-black text-gold backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
                               >
                                 <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
-                                Stock
+                                Ajustar
                               </button>
                               <button
                                 type="button"

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { AlertTriangle, ClipboardList, PackagePlus, RotateCcw } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
+import { HelpTip } from '../components/common/HelpTip'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
 import { InitialStockModal } from '../components/inventory/InitialStockModal'
 import { InventorySkeleton } from '../components/inventory/InventorySkeleton'
@@ -350,7 +351,13 @@ export function InventoryPage() {
           </div>
         </div>
         {isAdmin && (
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <HelpTip
+              title="¿Inventario inicial o Nuevo producto?"
+              label="¿Cuál uso?"
+              text="Usa 'Cargar inventario inicial' para contar lo que YA tienes en la bodega ahora mismo. Usa 'Nuevo producto' cuando agregas algo que nunca habías vendido. Las compras de mercadería que llegan después no van aquí: van en Compras."
+              example="Ya vendes atún y tienes 15 latas: eso es inventario inicial. Quieres empezar a vender chocolate: ese es nuevo producto."
+            />
             <button
               type="button"
               onClick={() => setInitialStockOpen(true)}
