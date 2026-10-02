@@ -1,5 +1,6 @@
 import { PieChart } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
+import { HelpTip } from '../common/HelpTip'
 
 interface MetodoDonutProps {
   efectivo: number
@@ -45,6 +46,11 @@ export function MetodoDonut({
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
         <PieChart size={16} aria-hidden="true" className="text-ink" />
         {titulo}
+        <HelpTip
+          title="Método de pago"
+          text="De todo lo que cobraste hoy, qué parte fue en efectivo, Yape o Plin. Cada color es una forma de pago."
+          example="Si cobraste S/100 y S/60 fueron por Yape, la parte azul del gráfico es más de la mitad."
+        />
       </p>
 
       {total <= 0 ? (

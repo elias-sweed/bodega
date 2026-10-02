@@ -1,5 +1,6 @@
 import { Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
+import { HelpTip } from '../common/HelpTip'
 
 interface SalesTodayCardProps {
   resumen: {
@@ -41,6 +42,14 @@ export function SalesTodayCard({ resumen, ayerTotal = 0, etiqueta = 'Ventas de h
           <p className="mt-3 text-5xl font-black tracking-tighter text-gold  sm:text-6xl">
             {formatMoney(cobrado)}
           </p>
+          <div className="mt-2">
+            <HelpTip
+              title="Ventas de hoy"
+              label="¿Qué es esto?"
+              text="El número grande es TODO lo que te pagaron hoy. Debajo, en verde, está lo que realmente te quedó libre después de descontar lo que te costó la mercadería."
+              example="Vendiste S/50 en gaseosas. Si esas gaseosas te costaron S/30, ganaste S/20 libres."
+            />
+          </div>
           <p className="mt-2 text-lg font-black tracking-tight tabular-nums text-profit">
             De eso, ganaste {formatMoney(ganado)}
           </p>

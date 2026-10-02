@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, PackageSearch } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
 import type { ProductoHoy } from '../../hooks/useTodayProducts'
+import { HelpTip } from '../common/HelpTip'
 
 interface TodayProductsProps {
   productos: ProductoHoy[]
@@ -29,6 +30,11 @@ export function TodayProducts({
           <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-ink">
             <PackageSearch size={20} aria-hidden="true" className="text-ink" />
             {titulo}
+            <HelpTip
+              title="Hoy por producto"
+              text="Cada producto que vendiste hoy, con cuánto cobraste y cuánto ganaste. Toca uno para ver el detalle."
+              example="Si vendiste 10 atunes a S/3, aquí sale S/30 cobrados por ese producto."
+            />
           </h2>
           <p className="mt-1 text-sm font-medium text-muted">
             {subtitulo}

@@ -1,4 +1,5 @@
 import { Boxes } from 'lucide-react'
+import { HelpTip } from '../common/HelpTip'
 
 interface StockResumenCardProps {
   total: number
@@ -14,6 +15,11 @@ export function StockResumenCard({ total, bajos, agotados }: StockResumenCardPro
           <Boxes size={16} aria-hidden="true" />
         </span>
         Stock actual
+        <HelpTip
+          title="Stock actual"
+          text="Cuántos productos tienes en total, cuántos están por acabarse y cuántos ya se agotaron."
+          example="Si un producto está por acabarse (quedan menos de tu mínimo), aparece en 'stock bajo' para que compres más pronto."
+        />
       </p>
       <div className="mt-4 flex flex-wrap gap-x-8 gap-y-4">
         <div>

@@ -1,6 +1,7 @@
 import { BarChart3 } from 'lucide-react'
 import { formatMoney } from '../../utils/format'
 import type { DiaVenta } from '../../hooks/useWeeklySales'
+import { HelpTip } from '../common/HelpTip'
 
 interface WeeklySalesChartProps {
   dias: DiaVenta[]
@@ -18,6 +19,11 @@ export function WeeklySalesChart({ dias, loading }: WeeklySalesChartProps) {
         <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
           <BarChart3 size={16} aria-hidden="true" className="text-ink" />
           Ventas de la semana
+          <HelpTip
+            title="Gráfico de la semana"
+            text="Cada barra es lo que vendiste ese día. La barra más alta fue tu mejor día de la semana."
+            example="Si la barra del viernes es la más grande, ese día vendiste más que los demás."
+          />
         </p>
         <p className="text-xs font-bold text-muted">
           Total: <span className="font-black text-gold">{formatMoney(totalSemana)}</span>

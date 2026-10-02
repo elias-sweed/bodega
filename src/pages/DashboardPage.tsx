@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AlertTriangle, ArrowLeft, CalendarDays, PackageSearch, ShoppingCart, Sparkles, X } from 'lucide-react'
+import { HelpTip } from '../components/common/HelpTip'
 import { DashboardHero } from '../components/dashboard/DashboardHero'
 import { DashboardSkeleton } from '../components/dashboard/DashboardSkeleton'
 import { GastoMesCard } from '../components/dashboard/GastoMesCard'
@@ -252,6 +253,11 @@ export function DashboardPage() {
                 <h2 className="flex items-center gap-2 text-xl font-black tracking-tighter text-ink">
                   <PackageSearch size={20} aria-hidden="true" className="text-ink" />
                   Atención: productos por agotarse
+                  <HelpTip
+                    title="Por agotarse"
+                    text="Son los productos que ya tienen menos de la cantidad mínima que pusiste. Si no los reabasteos, se te acaban."
+                    example="Pusiste mínimo 10 gaseosas y quedan 6: aparece aquí en la lista roja."
+                  />
                 </h2>
                 <p className="mt-1 text-sm font-medium text-muted">
                   {lowStock.length}{' '}

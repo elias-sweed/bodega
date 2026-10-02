@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { CalendarDays, RefreshCw, Sparkles } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { HelpTip } from '../common/HelpTip'
 
 function saludoPorHora(): string {
   const hora = new Date().getHours()
@@ -66,6 +67,11 @@ export function DashboardHero({
               {fechaLarga()}
             </span>
             <span>{subtitulo}</span>
+            <HelpTip
+              title="Resumen de hoy"
+              text="Esta es tu pantalla principal: verás cuánto vendiste hoy, qué productos se mueven, cuánto gastaste en mercadería y qué productos están por acabarse."
+              example="Al entrar aquí en la mañana, de un vistazo sabes cómo va tu bodega hoy."
+            />
             {freshness && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
                 <span

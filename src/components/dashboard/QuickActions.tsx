@@ -1,6 +1,7 @@
 import { BarChart3, Boxes, ShoppingBag, ShoppingCart, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { HelpTip } from '../common/HelpTip'
 
 const ACCIONES = [
   {
@@ -50,6 +51,11 @@ export function QuickActions({ layout = 'grid' }: { layout?: 'grid' | 'stack' })
       <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
         <Zap size={15} aria-hidden="true" className="text-gold" />
         Acciones rápidas
+        <HelpTip
+          title="Acciones rápidas"
+          text="Atajos para entrar directo a cada parte sin buscarla arriba. Tócala y te lleva."
+          example="Todo el día atiendes en caja: toca 'Vender' y vas directo a cobrar."
+        />
       </p>
       <div
         className={
