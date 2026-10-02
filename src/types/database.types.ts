@@ -289,6 +289,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: DashboardResumenResult
       }
+      productos_bajo_stock: {
+        Args: Record<PropertyKey, never>
+        Returns: ProductosRow[]
+      }
     }
     Enums: {
       [_ in never]: never

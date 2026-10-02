@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
-import type { CartItem, MetodoPago } from '../types'
+import type { CartItem } from '../types'
+import type { MetodoPago } from '../components/pos/metodosPago'
 import type { ProductosRow } from '../types/database.types'
 
 const SUSPENDED_SALE_KEY_PREFIX = 'pos_venta_suspendida_v2'
