@@ -116,10 +116,11 @@ function stockLevel(stock: number, minimo: number): 'bajo' | 'medio' | 'alto' {
 }
 
 function stockLevelLabel(stock: number, minimo: number): string {
+  if (stock <= 0) return 'Agotado'
   const level = stockLevel(stock, minimo)
-  if (level === 'bajo') return 'Bajo'
-  if (level === 'medio') return 'Medio'
-  return 'Alto'
+  if (level === 'bajo') return 'Por agotar'
+  if (level === 'medio') return 'Pocos'
+  return 'Disponible'
 }
 
 function pageNumbers(current: number, total: number): (number | '…')[] {
@@ -434,13 +435,12 @@ export function ProductTable({
       'Categoría',
       'Precio venta',
       'Costo',
-      'Margen %',
+      'Ganancia por unidad',
       'Stock actual',
       'Stock mín',
       'Estado',
     ]
     const rows: (string | number)[][] = sortedProducts.map((product, i) => {
-      const margin = marginPercent(product)
       return [
         i + 1,
         product.nombre,
@@ -448,7 +448,9 @@ export function ProductTable({
         product.categoria,
         Number(product.precio_venta.toFixed(2)),
         product.costo > 0 ? Number(product.costo.toFixed(2)) : 'Pendiente',
-        margin === null ? '' : Number(margin.toFixed(2)),
+        product.precio_venta > 0 && product.costo > 0
+          ? Number((product.precio_venta - product.costo).toFixed(2))
+          : '',
         product.stock_actual,
         product.stock_minimo,
         stockLevelLabel(product.stock_actual, product.stock_minimo),
@@ -725,10 +727,10 @@ export function ProductTable({
                     <button
                       type="button"
                       onClick={() => toggleSort('margen')}
-                      title="Ordenar por margen"
+                      title="Ordenar por lo que ganas en cada unidad"
                       className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
                     >
-                      Margen {renderSortIcon('margen')}
+                      Ganas {renderSortIcon('margen')}
                     </button>
                   </th>
                   <th className={`${thClass} text-right`}>
@@ -824,14 +826,14 @@ export function ProductTable({
                         ) : (
                           <span
                             className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-black ${marginClass(margin)}`}
-                            title="Margen de ganancia sobre el precio de venta"
+                            title="Lo que ganas en cada unidad vendida"
                           >
                             <TrendingUp
                               size={12}
                               strokeWidth={2.5}
                               aria-hidden="true"
                             />
-                            {Math.round(margin)}%
+                            {formatMoney(product.precio_venta - product.costo)}
                           </span>
                         )}
                       </td>
