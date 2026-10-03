@@ -12,7 +12,13 @@ function notify(): void {
   if (pendingTimer !== null) window.clearTimeout(pendingTimer)
   pendingTimer = window.setTimeout(() => {
     pendingTimer = null
-    for (const listener of Array.from(listeners)) listener()
+    for (const listener of Array.from(listeners)) {
+      try {
+        listener()
+      } catch (cause) {
+        console.error('Error en oyente de ventas en vivo:', cause)
+      }
+    }
   }, 500)
 }
 

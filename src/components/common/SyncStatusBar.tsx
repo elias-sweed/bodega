@@ -25,16 +25,15 @@ export function SyncStatusBar() {
       try {
         const n = await countPendingSales()
         if (!alive) return
-        setPending((prev) => {
-          if (prev > 0 && n === 0 && navigator.onLine) {
-            setJustSynced(true)
-            window.setTimeout(() => {
-              if (alive) setJustSynced(false)
-            }, 3000)
-          }
-          return n
-        })
+        // Comparación directa y pura: nada de efectos dentro del setState.
+        if (lastPending.current > 0 && n === 0 && navigator.onLine) {
+          setJustSynced(true)
+          window.setTimeout(() => {
+            if (alive) setJustSynced(false)
+          }, 3000)
+        }
         lastPending.current = n
+        setPending(n)
       } catch {
         /* IndexedDB no disponible: no mostramos nada falso */
       }

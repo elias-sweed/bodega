@@ -105,6 +105,8 @@ export function PosPage() {
   // Sube sola las ventas guardadas offline al recuperar internet.
   useAutoSync((summary) => {
     if (summary.synced > 0) {
+      // Son nuestras: marcamos la hora para no mostrar "otro dispositivo".
+      lastOwnSaleAt.current = Date.now()
       showNotice(
         'success',
         `Se subieron ${summary.synced} venta${summary.synced === 1 ? '' : 's'} que estaban guardadas sin internet.`,
