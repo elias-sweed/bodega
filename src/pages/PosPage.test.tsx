@@ -49,6 +49,7 @@ describe('PosPage', () => {
       costo: 2.5,
       stock_actual: 4,
       stock_minimo: 1,
+      tipo: 'producto',
       created_at: '2026-09-20T12:00:00Z',
     })
 

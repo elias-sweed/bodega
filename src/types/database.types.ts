@@ -6,6 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type TipoProducto = 'producto' | 'servicio'
+
 export type ProductosRow = {
   id: string
   codigo_barras: string | null
@@ -15,7 +17,13 @@ export type ProductosRow = {
   stock_actual: number
   stock_minimo: number
   categoria: string
+  tipo: TipoProducto
   created_at: string
+}
+
+/** Un servicio (impresión, tipeo, escaneo) no se agota en stock. */
+export function esServicio(product: Pick<ProductosRow, 'tipo'>): boolean {
+  return product.tipo === 'servicio'
 }
 
 export type ProductosInsert = Omit<ProductosRow, 'id' | 'created_at'>

@@ -24,7 +24,7 @@ export function LowStockList({ products }: LowStockListProps) {
 
   return (
     <ul className="flex flex-col gap-3">
-      {products.map((product) => {
+      {products.filter((product) => product.tipo !== 'servicio').map((product) => {
         const agotado = product.stock_actual <= 0
         return (
           <li

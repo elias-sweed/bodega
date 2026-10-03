@@ -13,7 +13,7 @@ interface CartItemRowProps {
 
 export function CartItemRow({ item, highlight = false, onIncrease, onDecrease, onRemove }: CartItemRowProps) {
   const { product, quantity } = item
-  const atMaxStock = quantity >= product.stock_actual
+  const atMaxStock = quantity >= product.stock_actual && product.tipo !== 'servicio'
   const rowRef = useRef<HTMLLIElement>(null)
 
   useEffect(() => {

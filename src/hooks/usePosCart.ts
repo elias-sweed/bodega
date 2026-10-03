@@ -10,11 +10,12 @@ export function usePosCart() {
   const [cart, setCart] = useState<CartItem[]>([])
 
   const addProduct = useCallback((product: ProductosRow): void => {
-    if (product.stock_actual <= 0) return
+    // Los servicios no tienen stock físico: siempre se pueden cobrar.
+    if (product.tipo !== 'servicio' && product.stock_actual <= 0) return
     setCart((current) => {
       const existing = current.find((item) => item.product.id === product.id)
       if (existing) {
-        if (existing.quantity >= product.stock_actual) {
+        if (product.tipo !== 'servicio' && existing.quantity >= product.stock_actual) {
           return current
         }
         return current.map((item) =>
@@ -33,7 +34,7 @@ export function usePosCart() {
         if (item.product.id !== productId) {
           return item
         }
-        if (item.quantity >= item.product.stock_actual) {
+        if (item.product.tipo !== 'servicio' && item.quantity >= item.product.stock_actual) {
           return item
         }
         return { ...item, quantity: item.quantity + 1 }

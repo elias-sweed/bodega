@@ -30,8 +30,9 @@ export function ProductButton({
   onIncrease,
   onDecrease,
 }: ProductButtonProps) {
-  const agotado = product.stock_actual <= 0
-  const atMax = qtyInCart >= product.stock_actual
+  const esServ = product.tipo === 'servicio'
+  const agotado = !esServ && product.stock_actual <= 0
+  const atMax = !esServ && qtyInCart >= product.stock_actual
   const width = Math.round(stockLevel(product.stock_actual, product.stock_minimo) * 100)
 
   return (
@@ -82,8 +83,14 @@ export function ProductButton({
 
         <div
           className="flex w-full items-center gap-2"
-          title={`Quedan ${product.stock_actual} unidades`}
+          title={esServ ? 'Servicio: venta libre' : `Quedan ${product.stock_actual} unidades`}
         >
+          {esServ ? (
+            <span className="text-xs font-black uppercase tracking-widest text-sky-300">
+              Servicio
+            </span>
+          ) : (
+          <>
           <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-3">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
@@ -103,6 +110,8 @@ export function ProductButton({
           >
             {agotado ? 'Agotado' : `${product.stock_actual}`}
           </span>
+          </>
+          )}
         </div>
       </button>
 

@@ -278,6 +278,7 @@ export function ProductFormModal({
     }
   })
   const [categories, setCategories] = useState<string[]>([])
+  const [tipo, setTipo] = useState<'producto' | 'servicio'>(() => initial?.tipo ?? 'producto')
   const [paqueteOpen, setPaqueteOpen] = useState(false)
   const [opcionesOpen, setOpcionesOpen] = useState(false)
   const [paquetePrecio, setPaquetePrecio] = useState('')
@@ -452,6 +453,7 @@ export function ProductFormModal({
             : Number(values.stock_actual)
           : (initial?.stock_actual ?? 0),
         stock_minimo: stockMinimo,
+        tipo,
       }
       await onSubmit(product)
     } catch (cause) {
@@ -513,6 +515,33 @@ export function ProductFormModal({
             className={plainInputClass}
             placeholder="Ej. Inca Kola sin azúcar 500ml"
           />
+        </div>
+
+        {/* Producto o Servicio */}
+        <div className="mb-6">
+          <SectionTitle>Tipo</SectionTitle>
+          <div className="flex gap-2">
+            {(['producto', 'servicio'] as const).map((opcion) => (
+              <button
+                key={opcion}
+                type="button"
+                onClick={() => setTipo(opcion)}
+                aria-pressed={tipo === opcion}
+                className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
+                  tipo === opcion
+                    ? 'border-amber-300/60 bg-amber-400/20 text-ink'
+                    : 'border-line bg-surface text-muted hover:bg-surface-2'
+                }`}
+              >
+                {opcion === 'producto' ? '📦 Producto' : '🛠️ Servicio'}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs font-semibold text-muted">
+            {tipo === 'servicio'
+              ? 'Se vende siempre, sin agotarse (ej. impresión, escaneo, tipeo).'
+              : 'Se descuenta del stock al vender.'}
+          </p>
         </div>
 
         {/* Paso 2: Categoría */}

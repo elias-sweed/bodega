@@ -10,6 +10,7 @@ as $$
   select *
   from public.productos
   where stock_actual <= stock_minimo
+    and tipo <> 'servicio'
   order by nombre asc;
 $$;
 

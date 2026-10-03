@@ -18,6 +18,7 @@ function createCartItem(quantity = 2): CartItem {
     costo: 2.5,
     stock_actual: 8,
     stock_minimo: 3,
+    tipo: 'producto',
     created_at: '2026-09-20T12:00:00Z',
   }
   return { product, quantity }
