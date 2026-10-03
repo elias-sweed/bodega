@@ -6,7 +6,9 @@ alter table public.productos
     check (tipo in ('producto', 'servicio'));
 
 -- Los servicios no cuentan como "agotados" en las alertas.
-create or replace function public.productos_bajo_stock()
+drop function if exists public.productos_bajo_stock();
+
+create function public.productos_bajo_stock()
 returns setof public.productos
 language sql
 stable

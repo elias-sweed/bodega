@@ -416,7 +416,7 @@ export function ProductFormModal({
       return
     }
 
-    if (showStockField) {
+    if (showStockField && tipo === 'producto') {
       const stockActual = values.stock_actual.trim() === '' ? 0 : Number(values.stock_actual)
       if (!Number.isFinite(stockActual) || stockActual < 0) {
         setError('Escribe cuántas unidades hay o déjalo en 0 si todavía no lo sabes.')
@@ -447,12 +447,16 @@ export function ProductFormModal({
         codigo_barras: values.codigo_barras.trim() || null,
         precio_venta: precioVenta,
         costo,
-        stock_actual: showStockField
-          ? values.stock_actual.trim() === ''
+        // Un servicio no maneja stock físico: siempre 0 y nunca "agota".
+        stock_actual:
+          tipo === 'servicio'
             ? 0
-            : Number(values.stock_actual)
-          : (initial?.stock_actual ?? 0),
-        stock_minimo: stockMinimo,
+            : showStockField
+              ? values.stock_actual.trim() === ''
+                ? 0
+                : Number(values.stock_actual)
+              : (initial?.stock_actual ?? 0),
+        stock_minimo: tipo === 'servicio' ? 0 : stockMinimo,
         tipo,
       }
       await onSubmit(product)
@@ -673,6 +677,7 @@ export function ProductFormModal({
             </div>
           )}
 
+          {tipo === 'producto' && (<>
           <button
             type="button"
             onClick={() => setPaqueteOpen((open) => !open)}
@@ -750,9 +755,11 @@ export function ProductFormModal({
               )}
             </div>
           )}
+        </>)}
         </div>
 
         {/* Paso 4: Alerta de stock */}
+        {tipo === 'producto' && (
         <div className="mb-6">
           <SectionTitle>¿Cuándo avisarte?</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -776,7 +783,7 @@ export function ProductFormModal({
               </p>
             </div>
 
-            {showStockField ? (
+            {showStockField && tipo === 'producto' ? (
               <div>
                 <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
                   ¿Cuántas unidades hay ahorita? (opcional)
@@ -823,6 +830,7 @@ export function ProductFormModal({
             )}
           </div>
         </div>
+        )}
 
         {/* Opciones (avanzado): código de barras */}
         <div className="mb-6">
