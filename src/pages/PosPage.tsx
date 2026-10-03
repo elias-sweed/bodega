@@ -18,6 +18,7 @@ import { emitDataChanged } from '../services/dataEvents'
 import { useAutoSync } from '../hooks/useAutoSync'
 import { applyStockChanges } from '../services/productsCache'
 import { getStockShortIds, registrarVenta, VentaError } from '../services/sales'
+import { subscribeToVentasLive } from '../services/ventasRealtime'
 import {
   addPendingSale,
   countPendingSales,
@@ -72,6 +73,7 @@ export function PosPage() {
   const noticeTimer = useRef<number | undefined>(undefined)
   const highlightTimer = useRef<number | undefined>(undefined)
   const saleKeyRef = useRef<string | null>(null)
+  const lastOwnSaleAt = useRef(0)
 
   const flashHighlight = useCallback((productId: string): void => {
     setHighlightId(productId)
@@ -114,6 +116,18 @@ export function PosPage() {
       )
     }
   })
+
+  // Aviso amigable cuando otro dispositivo registra una venta.
+  useEffect(() => {
+    const unsubscribe = subscribeToVentasLive(() => {
+      if (Date.now() - lastOwnSaleAt.current < 4000) return
+      showNotice(
+        'success',
+        '🔔 Se registró una venta desde otro dispositivo. El stock ya se actualizó.',
+      )
+    })
+    return unsubscribe
+  }, [showNotice])
 
   useEffect(() => {
     return () => {
@@ -257,6 +271,7 @@ export function PosPage() {
         })),
       )
       saleKeyRef.current = null
+      lastOwnSaleAt.current = Date.now()
       refresh(true)
       emitDataChanged()
     } catch (cause) {
