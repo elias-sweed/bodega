@@ -15,6 +15,10 @@ alter table public.productos
   add column if not exists consumo_por_unidad integer not null default 0
     check (consumo_por_unidad >= 0);
 
+-- Precisión real para costos pequeños (hoja: 0.0216 S/, no 0.02).
+alter table public.productos
+  alter column costo type numeric(12, 4);
+
 -- Los servicios no cuentan como "agotados" en las alertas.
 drop function if exists public.productos_bajo_stock();
 

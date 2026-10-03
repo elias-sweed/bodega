@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { Check, Minus, PackageSearch, ShoppingCart, Sparkles, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
-import { formatMoney, toTitleCase } from '../../utils/format'
+import { formatCostoUnidad, formatMoney, toTitleCase } from '../../utils/format'
 import { CategoryChips } from './CategoryChips'
 import { CategoryField } from './CategoryField'
 
@@ -387,7 +387,7 @@ export function ProductFormModal({
     const p = precio === '' ? Number.NaN : Number(precio)
     const u = unidades === '' ? Number.NaN : Number(unidades)
     if (Number.isFinite(p) && p > 0 && Number.isFinite(u) && u > 0) {
-      setField('costo', (p / u).toFixed(2))
+      setField('costo', (p / u).toFixed(4))
     }
   }
 
@@ -800,7 +800,7 @@ export function ProductFormModal({
               {costoCalc !== null && (
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200/30 bg-emerald-400/15 px-3 py-2">
                   <p className="text-sm font-black text-profit">
-                    Cada unidad te cuesta ≈ {formatMoney(costoCalc)}
+                    Cada unidad te cuesta ≈ {formatCostoUnidad(costoCalc)}
                   </p>
                   <button
                     type="button"
@@ -810,7 +810,7 @@ export function ProductFormModal({
                     }}
                     className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-white transition-all hover:bg-emerald-400 active:scale-[0.98]"
                   >
-                    Usar este costo [ S/ {formatMoney(costoCalc)} ]
+                    Usar este costo [ {formatCostoUnidad(costoCalc)} ]
                   </button>
                 </div>
               )}

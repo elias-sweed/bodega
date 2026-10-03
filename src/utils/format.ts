@@ -42,6 +42,16 @@ export function formatMoney(value: number): string {
   }).format(value)
 }
 
+/** Costo por unidad legible: S/ 0.0216 (≈ 2.2 ctvs.) cuando es muy pequeño. */
+export function formatCostoUnidad(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return formatMoney(0)
+  if (value > 0 && value < 0.1) {
+    const centavos = (value * 100).toFixed(1).replace(/\.0$/, '')
+    return `S/ ${value.toFixed(4)} (≈ ${centavos} ctvs.)`
+  }
+  return formatMoney(value)
+}
+
 export function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat('es-PE', {
     day: '2-digit',
