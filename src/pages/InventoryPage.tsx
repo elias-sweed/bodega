@@ -461,6 +461,7 @@ export function InventoryPage() {
       {modalOpen && (
         <ProductFormModal
           initialPrefill={prefill}
+          productosDisponibles={products}
           onClose={() => {
             setModalOpen(false)
             setPrefill(null)
@@ -472,6 +473,7 @@ export function InventoryPage() {
       {editingProduct && (
         <ProductFormModal
           initial={editingProduct}
+          productosDisponibles={products}
           onClose={() => setEditingProduct(null)}
           onSubmit={handleEditProduct}
           onRegisterPurchase={handleOpenPurchase}

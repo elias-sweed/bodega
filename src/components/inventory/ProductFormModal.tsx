@@ -13,6 +13,7 @@ interface ProductFormModalProps {
   onSubmit: (product: ProductosInsert) => Promise<void>
   onRegisterPurchase?: (product: ProductosRow) => void
   initial?: ProductosRow | null
+  productosDisponibles?: ProductosRow[]
   initialPrefill?: {
     nombre: string
     categoria: string
@@ -248,8 +249,15 @@ export function ProductFormModal({
   onSubmit,
   onRegisterPurchase,
   initial,
+  productosDisponibles = [],
   initialPrefill = null,
 }: ProductFormModalProps) {
+  const [consumoProductoId, setConsumoProductoId] = useState<string>(
+    () => initial?.consumo_producto_id ?? '',
+  )
+  const [consumoPorUnidad, setConsumoPorUnidad] = useState<string>(() =>
+    initial?.consumo_por_unidad ? String(initial.consumo_por_unidad) : '1',
+  )
   const [values, setValues] = useState<FormValues>(() => {
     if (initial) {
       return {
@@ -458,6 +466,12 @@ export function ProductFormModal({
               : (initial?.stock_actual ?? 0),
         stock_minimo: tipo === 'servicio' ? 0 : stockMinimo,
         tipo,
+        consumo_producto_id:
+          tipo === 'servicio' && consumoProductoId ? consumoProductoId : null,
+        consumo_por_unidad:
+          tipo === 'servicio'
+            ? Math.max(0, Math.round(Number(consumoPorUnidad) || 0))
+            : 0,
       }
       await onSubmit(product)
     } catch (cause) {
@@ -587,11 +601,11 @@ export function ProductFormModal({
 
         {/* Paso 3: Precios y costo */}
         <div className="mb-6">
-          <SectionTitle>Precios del producto</SectionTitle>
+          <SectionTitle>{tipo === 'servicio' ? 'Precio del servicio' : 'Precios del producto'}</SectionTitle>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="precio_venta" className="mb-1 block text-sm font-bold text-muted">
-                ¿En cuánto lo vendes?
+                {tipo === 'servicio' ? '¿Cuánto cobras por cada uno?' : '¿En cuánto lo vendes?'}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg font-bold text-muted">
@@ -614,6 +628,7 @@ export function ProductFormModal({
               </p>
             </div>
 
+            {tipo === 'producto' && (
             <div>
               <label htmlFor="costo" className="mb-1 block text-sm font-bold text-muted">
                 Costo por unidad (opcional)
@@ -638,9 +653,55 @@ export function ProductFormModal({
                 Si no lo conoces, déjalo en 0. Podrás actualizarlo al registrar una compra.
               </p>
             </div>
+            )}
           </div>
 
-          {costoPendiente && (
+          {tipo === 'servicio' && (
+            <div className="mt-4 space-y-3 rounded-2xl border border-sky-300/30 bg-sky-400/10 p-4">
+              <p className="text-sm font-black text-ink">¿Qué inventario gasta? (opcional)</p>
+              <div>
+                <label htmlFor="consumo-producto" className="mb-1 block text-xs font-bold text-muted">
+                  ¿Qué producto utiliza?
+                </label>
+                <select
+                  id="consumo-producto"
+                  value={consumoProductoId}
+                  onChange={(e) => setConsumoProductoId(e.target.value)}
+                  className={plainInputClass}
+                >
+                  <option value="">Nada (ej. escaneo)</option>
+                  {productosDisponibles
+                    .filter((p) => p.tipo !== 'servicio')
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nombre} (quedan {p.stock_actual})
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="consumo-por-unidad" className="mb-1 block text-xs font-bold text-muted">
+                  ¿Cuántas unidades de eso por cada cobro?
+                </label>
+                <input
+                  id="consumo-por-unidad"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputMode="numeric"
+                  value={consumoPorUnidad}
+                  onChange={(e) => setConsumoPorUnidad(e.target.value)}
+                  className={plainInputClass}
+                  placeholder="Ej. 1"
+                />
+                <p className="mt-1 text-xs font-semibold text-muted">
+                  Ej.: una impresión descuenta 1 hoja → pon 1.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {tipo === 'producto' && costoPendiente && (
             <p className="mt-3 rounded-2xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
               Costo pendiente. Puedes guardar el producto así y completarlo cuando conozcas el precio o registres una compra.
             </p>

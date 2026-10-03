@@ -18,6 +18,8 @@ export type ProductosRow = {
   stock_minimo: number
   categoria: string
   tipo: TipoProducto
+  consumo_producto_id: string | null
+  consumo_por_unidad: number
   created_at: string
 }
 

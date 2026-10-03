@@ -50,6 +50,8 @@ const initialProducts: ProductosRow[] = [
     stock_actual: 8,
     stock_minimo: 3,
     tipo: 'producto',
+    consumo_producto_id: null,
+    consumo_por_unidad: 0,
     created_at: '2026-09-20T12:00:00Z',
   },
   {
@@ -62,6 +64,8 @@ const initialProducts: ProductosRow[] = [
     stock_actual: 2,
     stock_minimo: 3,
     tipo: 'producto',
+    consumo_producto_id: null,
+    consumo_por_unidad: 0,
     created_at: '2026-09-20T12:00:00Z',
   },
 ]
@@ -237,6 +241,8 @@ const createProductHandler = http.post(
       stock_actual: body.p_stock_inicial,
       stock_minimo: body.p_stock_minimo,
       tipo: 'producto',
+      consumo_producto_id: null,
+      consumo_por_unidad: 0,
       created_at: mockState.createWithOldTimestamp
         ? '2025-01-01T00:00:00Z'
         : new Date().toISOString(),
@@ -342,6 +348,8 @@ const initialInventoryHandler = http.post(
         stock_actual: 0,
         stock_minimo: item.stock_minimo,
         tipo: 'producto',
+      consumo_producto_id: null,
+      consumo_por_unidad: 0,
         created_at: new Date().toISOString(),
       }
       mockState.products.push(product)
@@ -422,6 +430,8 @@ const updateProductHandler = http.post(
       costo: body.p_costo,
       stock_minimo: body.p_stock_minimo,
       tipo: 'producto',
+      consumo_producto_id: null,
+      consumo_por_unidad: 0,
       stock_actual: body.p_nuevo_stock ?? product.stock_actual,
     })
     return HttpResponse.json({

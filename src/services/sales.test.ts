@@ -19,6 +19,8 @@ function createCartItem(quantity = 2): CartItem {
     stock_actual: 8,
     stock_minimo: 3,
     tipo: 'producto',
+    consumo_producto_id: null,
+    consumo_por_unidad: 0,
     created_at: '2026-09-20T12:00:00Z',
   }
   return { product, quantity }

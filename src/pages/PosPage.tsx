@@ -17,6 +17,7 @@ import { useSuspendedSale } from '../hooks/useSuspendedSale'
 import { emitDataChanged } from '../services/dataEvents'
 import { useAutoSync } from '../hooks/useAutoSync'
 import { applyStockChanges } from '../services/productsCache'
+import { ajustarStock } from '../services/products'
 import { getStockShortIds, registrarVenta, VentaError } from '../services/sales'
 import { subscribeToVentasLive } from '../services/ventasRealtime'
 import {
@@ -198,6 +199,29 @@ export function PosPage() {
 
   const confirmPayment = async (): Promise<void> => {
     if (cart.length === 0 || charging) return
+    // Guarda: si un servicio no tiene suficiente insumo (hojas), avisar antes.
+    if (!isOffline()) {
+      const consumoPorProducto = new Map<string, number>()
+      for (const item of cart) {
+        const vinculadoId = item.product.consumo_producto_id
+        if (!vinculadoId || item.product.consumo_por_unidad <= 0) continue
+        consumoPorProducto.set(
+          vinculadoId,
+          (consumoPorProducto.get(vinculadoId) ?? 0) +
+            item.quantity * item.product.consumo_por_unidad,
+        )
+      }
+      for (const [vinculadoId, usadas] of consumoPorProducto) {
+        const vinculado = products.find((p) => p.id === vinculadoId)
+        if (vinculado && usadas > vinculado.stock_actual) {
+          showNotice(
+            'error',
+            `No se puede vender: «${vinculado.nombre}» tiene ${vinculado.stock_actual} unidades y esta venta necesita ${usadas}. Recarga primero.`,
+          )
+          return
+        }
+      }
+    }
     setCharging(true)
     try {
       const idempotencyKey = saleKeyRef.current ?? crypto.randomUUID()
@@ -272,6 +296,32 @@ export function PosPage() {
           stockActual: item.product.stock_actual - item.quantity,
         })),
       )
+      // Consumo de insumos: cada servicio descuenta las unidades que usa
+      // (ej.: "Impresión B/N" descuenta 1 hoja por copia).
+      const consumoPorProducto = new Map<string, number>()
+      for (const item of cart) {
+        const vinculadoId = item.product.consumo_producto_id
+        if (!vinculadoId || item.product.consumo_por_unidad <= 0) continue
+        consumoPorProducto.set(
+          vinculadoId,
+          (consumoPorProducto.get(vinculadoId) ?? 0) +
+            item.quantity * item.product.consumo_por_unidad,
+        )
+      }
+      for (const [vinculadoId, usadas] of consumoPorProducto) {
+        const vinculado = products.find((p) => p.id === vinculadoId)
+        if (!vinculado) continue
+        const nuevoStock = Math.max(0, vinculado.stock_actual - usadas)
+        try {
+          await ajustarStock(vinculadoId, nuevoStock, false, 'Consumo por servicios')
+          applyStockChanges([{ id: vinculadoId, stockActual: nuevoStock }])
+        } catch {
+          showNotice(
+            'error',
+            `La venta quedó registrada, pero no se pudo descontar «${vinculado.nombre}». Revisa el inventario.`,
+          )
+        }
+      }
       saleKeyRef.current = null
       lastOwnSaleAt.current = Date.now()
       refresh(true)

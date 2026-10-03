@@ -50,6 +50,8 @@ describe('PosPage', () => {
       stock_actual: 4,
       stock_minimo: 1,
       tipo: 'producto',
+      consumo_producto_id: null,
+      consumo_por_unidad: 0,
       created_at: '2026-09-20T12:00:00Z',
     })
 
