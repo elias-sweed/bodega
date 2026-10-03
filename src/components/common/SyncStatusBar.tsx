@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { countPendingSales } from '../../services/offlineQueue'
+import { exportPendingSalesBackup } from '../../services/pendingSalesBackup'
 
 const POLL_MS = 5_000
 
@@ -77,9 +78,18 @@ export function SyncStatusBar() {
   }
   if (pending > 0) {
     return (
-      <div role="status" className="rounded-xl border border-sky-400/40 bg-sky-400/15 px-4 py-2 text-sm font-bold text-sky-200">
-        ⏳ {pending} venta{pending === 1 ? '' : 's'} pendiente{pending === 1 ? '' : 's'}: se
-        subirán solas a la nube.
+      <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-sky-400/40 bg-sky-400/15 px-4 py-2 text-sm font-bold text-sky-200">
+        <span>
+          ⏳ {pending} venta{pending === 1 ? '' : 's'} pendiente{pending === 1 ? '' : 's'}: se
+          subirán solas a la nube.
+        </span>
+        <button
+          type="button"
+          onClick={() => void exportPendingSalesBackup()}
+          className="rounded-lg border border-sky-300/50 bg-sky-400/20 px-3 py-1 text-xs font-black uppercase tracking-widest transition-colors hover:bg-sky-400/30"
+        >
+          ⬇️ Exportar respaldo
+        </button>
       </div>
     )
   }
