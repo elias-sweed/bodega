@@ -1,0 +1,23 @@
+{
+  "name": "EVANLU Bodega",
+  "short_name": "EVANLU",
+  "description": "Sistema de ventas, inventario y compras para tu bodega. Funciona también sin internet.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a0b3d",
+  "theme_color": "#1a0b3d",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/logo.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

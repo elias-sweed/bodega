@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PauseCircle } from 'lucide-react'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
+import { SyncStatusBar } from '../components/common/SyncStatusBar'
 import { Toast } from '../components/common/Toast'
 import { METODO_PAGO_DEFAULT, type MetodoPago } from '../components/pos/metodosPago'
 import { PaymentModal } from '../components/pos/PaymentModal'
@@ -359,6 +360,7 @@ export function PosPage() {
 
   return (
     <div className="caja-pos mx-auto flex h-full w-full max-w-7xl flex-col gap-4 bg-transparent">
+      <SyncStatusBar />
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
