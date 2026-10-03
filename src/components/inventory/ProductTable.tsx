@@ -3,16 +3,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowDown,
   ArrowUp,
-  ArrowUpDown,
   ChevronLeft,
   ChevronRight,
   Clock3,
-  Download,
   History,
   PackagePlus,
   Pencil,
   Search,
-  SlidersHorizontal,
   Tags,
   Trash2,
   TrendingUp,
@@ -20,7 +17,6 @@ import {
 } from 'lucide-react'
 import type { ProductosRow } from '../../types/database.types'
 import { formatMoney, toTitleCase } from '../../utils/format'
-import { exportCsv } from '../../utils/exportCsv'
 import { StockBadge } from './StockBadge'
 import { HelpTip } from '../common/HelpTip'
 
@@ -44,7 +40,7 @@ const PAGE_SIZE = 20
 /** Ventana (horas) para el filtro "Agregados recientemente" */
 const RECENT_HOURS = 72
 const RECENT_MS = RECENT_HOURS * 60 * 60 * 1000
-const FILTER_STORAGE_KEY = 'inventario:filtros:v1'
+const FILTER_STORAGE_KEY = 'inventario:filtros:v2'
 
 /** ¿Es reciente según su fecha en la DB? null/ausente se considera "no reciente". */
 function esRecientePorFecha(product: ProductosRow): boolean {
@@ -60,30 +56,18 @@ function fechaMs(iso: string | null | undefined): number {
   return Number.isFinite(instante) ? instante : -Infinity
 }
 
+/** Chip de filtro de stock: "todos" | "por_agotar" | "agotados" */
+type ChipFiltro = 'todos' | 'por_agotar' | 'agotados'
+
 interface PersistedFilters {
   search?: string
   category?: string
-  margen?: MargenFiltro
-  stock?: StockFiltro
-  costoMin?: string
-  costoMax?: string
-  minMin?: string
-  minMax?: string
-  showFilters?: boolean
+  chip?: ChipFiltro
   recientes?: boolean
 }
 
-type MargenFiltro = 'todos' | 'alto' | 'medio' | 'bajo'
-type StockFiltro = 'todos' | 'bajo' | 'medio' | 'alto'
-
-type SortKey =
-  | 'nombre'
-  | 'categoria'
-  | 'precio_venta'
-  | 'costo'
-  | 'stock_actual'
-  | 'stock_minimo'
-  | 'margen'
+/** Clave del sort persistido: solo las 4 opciones simples */
+type SortKey = 'nombre' | 'categoria' | 'precio_venta' | 'stock_actual'
 
 interface SortState {
   key: SortKey
@@ -91,7 +75,6 @@ interface SortState {
 }
 
 function marginPercent(product: ProductosRow): number | null {
-  // Un costo en cero significa que todavía no se conoce el costo real.
   if (product.precio_venta <= 0 || product.costo <= 0) return null
   return ((product.precio_venta - product.costo) / product.precio_venta) * 100
 }
@@ -102,26 +85,6 @@ function marginClass(margin: number): string {
   return 'border-profit/40 bg-profit/15 text-profit'
 }
 
-function marginLevel(margin: number | null): MargenFiltro | null {
-  if (margin === null) return null
-  if (margin >= 20) return 'alto'
-  if (margin >= 0) return 'medio'
-  return 'bajo'
-}
-
-function stockLevel(stock: number, minimo: number): 'bajo' | 'medio' | 'alto' {
-  if (stock <= minimo) return 'bajo'
-  if (stock <= minimo * 2) return 'medio'
-  return 'alto'
-}
-
-function stockLevelLabel(stock: number, minimo: number): string {
-  if (stock <= 0) return 'Agotado'
-  const level = stockLevel(stock, minimo)
-  if (level === 'bajo') return 'Por agotar'
-  if (level === 'medio') return 'Pocos'
-  return 'Disponible'
-}
 
 function pageNumbers(current: number, total: number): (number | '…')[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -141,11 +104,6 @@ function pageNumbers(current: number, total: number): (number | '…')[] {
 
 const thClass =
   'px-5 py-3 font-extrabold uppercase tracking-widest text-[11px] text-muted'
-
-const filterInputClass =
-  'h-11 w-full rounded-xl border border-line bg-surface-2 px-3 text-sm font-bold tabular-nums text-ink outline-none placeholder:text-muted/70 focus:border-amber-300/70 focus:bg-surface-3 focus:ring-4 focus:ring-amber-400/10'
-const filterLabelClass =
-  'mb-1 block text-[11px] font-extrabold uppercase tracking-widest text-muted'
 
 export function ProductTable({
   products,
@@ -171,17 +129,11 @@ export function ProductTable({
 
   const [search, setSearch] = useState(persisted.search ?? '')
   const [category, setCategory] = useState(persisted.category ?? 'todas')
-  const [margen, setMargen] = useState<MargenFiltro>(persisted.margen ?? 'todos')
-  const [stockFiltro, setStockFiltro] = useState<StockFiltro>(persisted.stock ?? 'todos')
-  const [costoMin, setCostoMin] = useState(persisted.costoMin ?? '')
-  const [costoMax, setCostoMax] = useState(persisted.costoMax ?? '')
-  const [minMin, setMinMin] = useState(persisted.minMin ?? '')
-  const [minMax, setMinMax] = useState(persisted.minMax ?? '')
-  const [showFilters, setShowFilters] = useState(persisted.showFilters ?? false)
+  const [chipFiltro, setChipFiltro] = useState<ChipFiltro>(persisted.chip ?? 'todos')
   const [recientes, setRecientes] = useState(persisted.recientes ?? false)
   const [page, setPage] = useState(1)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
-  const [sort, setSort] = useState<SortState | null>(null)
+  const [sort, setSort] = useState<SortState>({ key: 'nombre', dir: 'asc' })
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const topRef = useRef<HTMLDivElement>(null)
   const handledFlashRef = useRef<string | null>(null)
@@ -199,30 +151,13 @@ export function ProductTable({
     window.scrollTo({ top: 0, behavior: 'auto' })
   }
 
-  const toggleSort = (key: SortKey): void => {
-    setSort((prev) => {
-      if (prev?.key === key) {
-        return { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-      }
-      return { key, dir: 'asc' }
-    })
-    setPage(1)
-    setDirection('next')
-  }
-
-  const renderSortIcon = (key: SortKey) => {
-    if (sort?.key !== key) {
-      return <ArrowUpDown size={13} strokeWidth={2.5} aria-hidden="true" className="opacity-50" />
-    }
-    return sort.dir === 'asc' ? (
-      <ArrowUp size={13} strokeWidth={2.5} aria-hidden="true" />
-    ) : (
-      <ArrowDown size={13} strokeWidth={2.5} aria-hidden="true" />
-    )
-  }
-
-  const thSortableClass =
-    'cursor-pointer select-none transition-colors duration-200 hover:text-ink'
+  /** Opciones disponibles para el selector de orden */
+  const sortKeyLabels: { key: SortKey; label: string }[] = [
+    { key: 'nombre', label: 'Nombre' },
+    { key: 'categoria', label: 'Categoría' },
+    { key: 'precio_venta', label: 'Precio' },
+    { key: 'stock_actual', label: 'Cantidad' },
+  ]
 
   const categories = useMemo(
     () =>
@@ -244,10 +179,6 @@ export function ProductTable({
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase()
-    const cMin = costoMin === '' ? null : Number(costoMin)
-    const cMax = costoMax === '' ? null : Number(costoMax)
-    const mMin = minMin === '' ? null : Number(minMin)
-    const mMax = minMax === '' ? null : Number(minMax)
     return products.filter((product) => {
       if (
         recientes &&
@@ -264,26 +195,16 @@ export function ProductTable({
         return false
       }
       if (category !== 'todas' && product.categoria !== category) return false
-      if (margen !== 'todos' && marginLevel(marginPercent(product)) !== margen) {
-        return false
-      }
+      if (chipFiltro === 'agotados' && product.stock_actual > 0) return false
       if (
-        stockFiltro !== 'todos' &&
-        stockLevel(product.stock_actual, product.stock_minimo) !== stockFiltro
+        chipFiltro === 'por_agotar' &&
+        !(product.stock_actual > 0 && product.stock_actual <= product.stock_minimo)
       ) {
-        return false
-      }
-      if (cMin !== null && Number.isFinite(cMin) && product.costo < cMin) return false
-      if (cMax !== null && Number.isFinite(cMax) && product.costo > cMax) return false
-      if (mMin !== null && Number.isFinite(mMin) && product.stock_minimo < mMin) {
-        return false
-      }
-      if (mMax !== null && Number.isFinite(mMax) && product.stock_minimo > mMax) {
         return false
       }
       return true
     })
-  }, [products, search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, recientes, recientesIds])
+  }, [products, search, category, chipFiltro, recientes, recientesIds])
 
   const sortedProducts = useMemo(() => {
     const pinned = new Set(pinnedIds)
@@ -295,7 +216,6 @@ export function ProductTable({
       if (pa !== pb) return pa - pb
       // En "Recientes" ordena por fecha de registro: el más nuevo primero
       if (recientes) return fechaMs(b.created_at) - fechaMs(a.created_at)
-      if (!sort) return 0
       const factor = sort.dir === 'asc' ? 1 : -1
       switch (sort.key) {
         case 'nombre':
@@ -304,20 +224,8 @@ export function ProductTable({
           return a.categoria.localeCompare(b.categoria, 'es') * factor
         case 'precio_venta':
           return (a.precio_venta - b.precio_venta) * factor
-        case 'costo':
-          return (a.costo - b.costo) * factor
         case 'stock_actual':
           return (a.stock_actual - b.stock_actual) * factor
-        case 'stock_minimo':
-          return (a.stock_minimo - b.stock_minimo) * factor
-        case 'margen': {
-          const ma = marginPercent(a)
-          const mb = marginPercent(b)
-          if (ma === null && mb === null) return 0
-          if (ma === null) return 1
-          if (mb === null) return -1
-          return (ma - mb) * factor
-        }
       }
     })
     return items
@@ -329,60 +237,34 @@ export function ProductTable({
   useEffect(() => {
     setPage(1)
     setDirection('next')
-  }, [search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, recientes])
+  }, [search, category, chipFiltro, recientes])
 
   // Los filtros sobreviven a salir/volver a la sección Inventario
   useEffect(() => {
     try {
       window.sessionStorage.setItem(
         FILTER_STORAGE_KEY,
-        JSON.stringify({
-          search,
-          category,
-          margen,
-          stock: stockFiltro,
-          costoMin,
-          costoMax,
-          minMin,
-          minMax,
-          showFilters,
-          recientes,
-        }),
+        JSON.stringify({ search, category, chip: chipFiltro, recientes }),
       )
     } catch {
       // Sin almacenamiento disponible: se ignora
     }
-  }, [search, category, margen, stockFiltro, costoMin, costoMax, minMin, minMax, showFilters, recientes])
+  }, [search, category, chipFiltro, recientes])
 
   // Si la lista se achica (ej. eliminan), no quedarse en una página vacía
   useEffect(() => {
     if (page > totalPages) setPage(totalPages)
   }, [page, totalPages])
 
-  const activeFilterCount =
-    (margen !== 'todos' ? 1 : 0) +
-    (stockFiltro !== 'todos' ? 1 : 0) +
-    (costoMin !== '' ? 1 : 0) +
-    (costoMax !== '' ? 1 : 0) +
-    (minMin !== '' ? 1 : 0) +
-    (minMax !== '' ? 1 : 0) +
-    (recientes ? 1 : 0)
+  /** ¿Hay algún filtro activo además del sort? */
+  const hasActiveFilters =
+    search !== '' || category !== 'todas' || chipFiltro !== 'todos' || recientes
 
-  const clearFilters = (): void => {
-    setMargen('todos')
-    setStockFiltro('todos')
-    setCostoMin('')
-    setCostoMax('')
-    setMinMin('')
-    setMinMax('')
-    setRecientes(false)
-  }
-
-  // Limpia todo (incluye búsqueda y categoría) para que nada oculte un producto
   const resetAllFilters = (): void => {
     setSearch('')
     setCategory('todas')
-    clearFilters()
+    setChipFiltro('todos')
+    setRecientes(false)
   }
 
   // Producto recién creado: salta a su página y marca su fila unos segundos
@@ -424,48 +306,15 @@ export function ProductTable({
     scrollToTop()
   }
 
-  const handleExport = (): void => {
-    const now = new Date()
-    const pad = (n: number): string => String(n).padStart(2, '0')
-    const filename = `inventario-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.csv`
-    const header = [
-      'N.º',
-      'Producto',
-      'Código',
-      'Categoría',
-      'Precio venta',
-      'Costo',
-      'Ganancia por unidad',
-      'Stock actual',
-      'Stock mín',
-      'Estado',
-    ]
-    const rows: (string | number)[][] = sortedProducts.map((product, i) => {
-      return [
-        i + 1,
-        product.nombre,
-        product.codigo_barras ?? '',
-        product.categoria,
-        Number(product.precio_venta.toFixed(2)),
-        product.costo > 0 ? Number(product.costo.toFixed(2)) : 'Pendiente',
-        product.precio_venta > 0 && product.costo > 0
-          ? Number((product.precio_venta - product.costo).toFixed(2))
-          : '',
-        product.stock_actual,
-        product.stock_minimo,
-        stockLevelLabel(product.stock_actual, product.stock_minimo),
-      ]
-    })
-    exportCsv([header, ...rows], filename)
-  }
-
   const start = (page - 1) * PAGE_SIZE
   const pageItems = sortedProducts.slice(start, start + PAGE_SIZE)
   const end = start + pageItems.length
 
   return (
     <div ref={topRef} className="space-y-4 pb-8">
-      <div className="flex flex-wrap items-center gap-3">
+      {/* ── Fila de filtros siempre visibles ── */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Búsqueda */}
         <label className="relative block w-full max-w-xs">
           <Search
             size={18}
@@ -481,6 +330,7 @@ export function ProductTable({
           />
         </label>
 
+        {/* Categoría */}
         <label className="relative block">
           <Tags
             size={16}
@@ -502,6 +352,7 @@ export function ProductTable({
           </select>
         </label>
 
+        {/* Chip: Recientes */}
         <button
           type="button"
           onClick={() => setRecientes((value) => !value)}
@@ -510,7 +361,7 @@ export function ProductTable({
           className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-extrabold backdrop-blur-2xl transition-all duration-300 active:scale-95 ${
             recientes
               ? 'border-sky-400/40 bg-sky-400/15 text-sky-200'
-              : 'border-line bg-surface text-ink hover:bg-surface-2 hover:text-ink'
+              : 'border-line bg-surface text-ink hover:bg-surface-2'
           }`}
         >
           <Clock3 size={16} aria-hidden="true" />
@@ -523,147 +374,95 @@ export function ProductTable({
           example="Agregaste 3 productos nuevos hoy. Toca 'Recientes' para verlos rápido sin buscar uno por uno."
         />
 
+        {/* Chip: Por agotar */}
         <button
           type="button"
-          onClick={() => setShowFilters((open) => !open)}
-          aria-expanded={showFilters}
+          onClick={() =>
+            setChipFiltro((prev) => (prev === 'por_agotar' ? 'todos' : 'por_agotar'))
+          }
+          aria-pressed={chipFiltro === 'por_agotar'}
+          title="Ver productos que están por agotarse (quedan pocas unidades)"
           className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-extrabold backdrop-blur-2xl transition-all duration-300 active:scale-95 ${
-            showFilters || activeFilterCount > 0
-              ? 'border-line-strong bg-surface-3 text-ink'
-              : 'border-line bg-surface text-ink hover:bg-surface-2 hover:text-ink'
+            chipFiltro === 'por_agotar'
+              ? 'border-amber-300/50 bg-amber-400/20 text-gold'
+              : 'border-line bg-surface text-ink hover:bg-surface-2'
           }`}
         >
-          <SlidersHorizontal size={16} aria-hidden="true" />
-          Filtros
-          {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1 text-[11px] font-black text-amber-950">
-              {activeFilterCount}
-            </span>
-          )}
+          🔴 Por agotar
         </button>
 
+        {/* Chip: Agotados */}
         <button
           type="button"
-          onClick={handleExport}
-          title="Exportar los productos filtrados para Excel"
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-extrabold text-ink backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-surface-3 active:translate-y-0 active:scale-95"
+          onClick={() =>
+            setChipFiltro((prev) => (prev === 'agotados' ? 'todos' : 'agotados'))
+          }
+          aria-pressed={chipFiltro === 'agotados'}
+          title="Ver productos sin stock (agotados)"
+          className={`inline-flex h-11 items-center gap-2 rounded-2xl border px-4 text-sm font-extrabold backdrop-blur-2xl transition-all duration-300 active:scale-95 ${
+            chipFiltro === 'agotados'
+              ? 'border-rose-300/50 bg-rose-400/20 text-loss'
+              : 'border-line bg-surface text-ink hover:bg-surface-2'
+          }`}
         >
-          <Download size={16} aria-hidden="true" />
-          Exportar
+          ⬛ Agotados
         </button>
 
+        {/* Contador */}
         <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-bold text-muted backdrop-blur-xl">
           {sortedProducts.length} de {products.length}
         </span>
 
-        {activeFilterCount > 0 && (
+        {/* Limpiar todo */}
+        {hasActiveFilters && (
           <button
             type="button"
-            onClick={clearFilters}
+            onClick={resetAllFilters}
             title="Quitar todos los filtros aplicados"
             className="inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-rose-300/50 bg-rose-500/25 px-4 text-sm font-black tracking-tight text-ink shadow-sm backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-200/70 hover:bg-rose-500/40 active:translate-y-0 active:scale-95"
           >
             <X size={17} strokeWidth={3} aria-hidden="true" />
-            Limpiar ({activeFilterCount})
+            Limpiar
           </button>
         )}
+
+        {/* Selector de orden único — Fase 3 */}
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-muted">
+            🔃 Ordenar por:
+          </span>
+          <select
+            value={sort.key}
+            onChange={(e) =>
+              setSort((prev) => ({ ...prev, key: e.target.value as SortKey }))
+            }
+            aria-label="Ordenar por"
+            className="h-9 cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 pr-7 text-sm font-bold text-ink outline-none focus:border-amber-300/70 [&>option]:bg-[#241b66] [&>option]:text-slate-100"
+          >
+            {sortKeyLabels.map(({ key, label }) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() =>
+              setSort((prev) => ({ ...prev, dir: prev.dir === 'asc' ? 'desc' : 'asc' }))
+            }
+            title={sort.dir === 'asc' ? 'Orden ascendente — clic para invertir' : 'Orden descendente — clic para invertir'}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface text-ink backdrop-blur-xl transition-all duration-200 hover:bg-surface-3 active:scale-95"
+          >
+            {sort.dir === 'asc' ? (
+              <ArrowUp size={15} strokeWidth={2.5} aria-hidden="true" />
+            ) : (
+              <ArrowDown size={15} strokeWidth={2.5} aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </div>
 
-      {showFilters && (
-        <div className="fade-in rounded-[22px] border border-line bg-surface p-4 backdrop-blur-2xl">
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <div>
-              <label htmlFor="filtro-margen" className={filterLabelClass}>
-                Margen
-              </label>
-              <select
-                id="filtro-margen"
-                value={margen}
-                onChange={(e) => setMargen(e.target.value as MargenFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
-              >
-                <option value="todos">Todos</option>
-                <option value="alto">Alto (≥ 20%)</option>
-                <option value="medio">Medio (0–20%)</option>
-                <option value="bajo">Bajo (pérdida)</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="filtro-stock" className={filterLabelClass}>
-                Stock
-              </label>
-              <select
-                id="filtro-stock"
-                value={stockFiltro}
-                onChange={(e) => setStockFiltro(e.target.value as StockFiltro)}
-                className="h-11 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface px-3 text-sm font-bold text-ink outline-none backdrop-blur-xl transition-all focus:border-line-strong [&>option]:bg-[#241b66] [&>option]:text-slate-100"
-              >
-                <option value="todos">Todos</option>
-                <option value="bajo">Bajo (≤ mín)</option>
-                <option value="medio">Medio</option>
-                <option value="alto">Alto (&gt; 2× mín)</option>
-              </select>
-            </div>
-            <div>
-              <span className={filterLabelClass}>Costo S/</span>
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
-                  value={costoMin}
-                  onChange={(e) => setCostoMin(e.target.value)}
-                  placeholder="Mín"
-                  aria-label="Costo mínimo"
-                  className={filterInputClass}
-                />
-                <span className="shrink-0 text-muted">–</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  inputMode="decimal"
-                  value={costoMax}
-                  onChange={(e) => setCostoMax(e.target.value)}
-                  placeholder="Máx"
-                  aria-label="Costo máximo"
-                  className={filterInputClass}
-                />
-              </div>
-            </div>
-            <div>
-              <span className={filterLabelClass}>Stock mín</span>
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  inputMode="numeric"
-                  value={minMin}
-                  onChange={(e) => setMinMin(e.target.value)}
-                  placeholder="Mín"
-                  aria-label="Stock mínimo desde"
-                  className={filterInputClass}
-                />
-                <span className="shrink-0 text-muted">–</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  inputMode="numeric"
-                  value={minMax}
-                  onChange={(e) => setMinMax(e.target.value)}
-                  placeholder="Máx"
-                  aria-label="Stock mínimo hasta"
-                  className={filterInputClass}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* ── Tabla ── */}
       <div className="overflow-x-auto rounded-[28px] border border-line bg-surface shadow-[0_28px_70px_-38_rgba(0,0,0,0.95)]">
         {sortedProducts.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-5 py-12 text-center">
@@ -676,10 +475,10 @@ export function ProductTable({
             <p className="text-sm font-medium text-muted">
               No se encontraron productos con los filtros aplicados.
             </p>
-            {activeFilterCount > 0 && (
+            {hasActiveFilters && (
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={resetAllFilters}
                 className="mt-2 rounded-2xl border border-line bg-surface px-4 py-2 text-xs font-extrabold text-ink backdrop-blur-xl transition-all hover:bg-surface-3"
               >
                 Limpiar filtros
@@ -692,77 +491,18 @@ export function ProductTable({
               <thead>
                 <tr className="border-b border-line">
                   <th className={`${thClass} w-14`}>N.º</th>
-                  <th className={thClass}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('nombre')}
-                      title="Ordenar por producto"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Producto {renderSortIcon('nombre')}
-                    </button>
-                  </th>
+                  <th className={thClass}>Producto</th>
                   {showBarcodeColumn && <th className={thClass}>Código</th>}
-                  <th className={thClass}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('categoria')}
-                      title="Ordenar por categoría"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Categoría {renderSortIcon('categoria')}
-                    </button>
-                  </th>
+                  <th className={thClass}>Categoría</th>
+                  <th className={`${thClass} text-right`}>Precio venta</th>
                   <th className={`${thClass} text-right`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('precio_venta')}
-                      title="Ordenar por precio de venta"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Precio venta {renderSortIcon('precio_venta')}
-                    </button>
+                    <span className="inline-flex items-center gap-1.5">
+                      Ganas
+                    </span>
                   </th>
-                  <th className={`${thClass} text-right`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('margen')}
-                      title="Ordenar por lo que ganas en cada unidad"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Ganas {renderSortIcon('margen')}
-                    </button>
-                  </th>
-                  <th className={`${thClass} text-right`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('costo')}
-                      title="Ordenar por costo"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Costo {renderSortIcon('costo')}
-                    </button>
-                  </th>
-                  <th className={`${thClass} text-right`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('stock_actual')}
-                      title="Ordenar por stock"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Cantidad {renderSortIcon('stock_actual')}
-                    </button>
-                  </th>
-                  <th className={`${thClass} text-right`}>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort('stock_minimo')}
-                      title="Ordenar por stock mínimo"
-                      className={`inline-flex items-center gap-1.5 ${thSortableClass}`}
-                    >
-                      Mín. cantidad {renderSortIcon('stock_minimo')}
-                    </button>
-                  </th>
+                  <th className={`${thClass} text-right`}>Costo</th>
+                  <th className={`${thClass} text-right`}>Cantidad</th>
+                  <th className={`${thClass} text-right`}>Mín. cantidad</th>
                   <th className={`${thClass} text-right`}>
                     <span className="inline-flex items-center gap-1.5">
                       Estado
@@ -890,7 +630,7 @@ export function ProductTable({
                               <button
                                 type="button"
                                 onClick={() => onAdjustStock?.(product)}
-                                title="Corregir la cantidad que tienes"
+                                title="Ajustar stock"
                                 className="inline-flex items-center gap-1.5 rounded-xl border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-black text-gold backdrop-blur-xl transition-all duration-200 hover:bg-amber-200/60 active:scale-95"
                               >
                                 <PackagePlus size={13} strokeWidth={2.5} aria-hidden="true" />
@@ -918,6 +658,7 @@ export function ProductTable({
         )}
       </div>
 
+      {/* ── Paginación ── */}
       {sortedProducts.length > 0 && (
         <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] border border-line bg-surface px-5 py-4">
           <p className="text-xs font-bold tabular-nums text-muted">
