@@ -16,6 +16,13 @@ import { useSuspendedSale } from '../hooks/useSuspendedSale'
 import { emitDataChanged } from '../services/dataEvents'
 import { applyStockChanges } from '../services/productsCache'
 import { getStockShortIds, registrarVenta, VentaError } from '../services/sales'
+import {
+  addPendingSale,
+  countPendingSales,
+  isNetworkError,
+  isOffline,
+  type PendingSaleItem,
+} from '../services/offlineQueue'
 import type { Category } from '../types'
 import type { ProductosRow } from '../types/database.types'
 import { deriveCategories } from '../utils/categories'
@@ -162,6 +169,33 @@ export function PosPage() {
     try {
       const idempotencyKey = saleKeyRef.current ?? crypto.randomUUID()
       saleKeyRef.current = idempotencyKey
+      // Sin internet la venta NO se pierde: se guarda en la cola local y se
+      // sincroniza sola cuando vuelva la conexión (Fase 2).
+      if (isOffline()) {
+        const items: PendingSaleItem[] = cart.map((item) => ({
+          productoId: item.product.id,
+          nombre: item.product.nombre,
+          cantidad: item.quantity,
+          precioUnitario: item.product.precio_venta,
+        }))
+        await addPendingSale({
+          idempotencyKey,
+          metodoPago,
+          items,
+          total: totalPrice,
+          createdAt: new Date().toISOString(),
+        })
+        const pending = await countPendingSales()
+        clearCart()
+        setPaymentOpen(false)
+        setSearch('')
+        saleKeyRef.current = null
+        showNotice(
+          'success',
+          `Sin internet: venta guardada en este equipo. Se subirá sola cuando vuelva la conexión. (${pending} venta${pending === 1 ? '' : 's'} pendiente${pending === 1 ? '' : 's'})`,
+        )
+        return
+      }
       const result = await registrarVenta(cart, metodoPago, idempotencyKey)
       const receiptItems = cart.map((item) => {
         const serverItem = result.items.find(
@@ -218,6 +252,37 @@ export function PosPage() {
           'error',
           `No se completó la venta: sin stock suficiente para «${names.join(', ')}». Ajusta la cantidad en el carrito e inténtalo de nuevo (tu carrito se mantiene).`,
         )
+      } else if (isNetworkError(cause)) {
+        try {
+          const items: PendingSaleItem[] = cart.map((item) => ({
+            productoId: item.product.id,
+            nombre: item.product.nombre,
+            cantidad: item.quantity,
+            precioUnitario: item.product.precio_venta,
+          }))
+          const pendingSale = {
+            idempotencyKey: saleKeyRef.current ?? crypto.randomUUID(),
+            metodoPago,
+            items,
+            total: totalPrice,
+            createdAt: new Date().toISOString(),
+          }
+          await addPendingSale(pendingSale)
+          saleKeyRef.current = null
+          const pending = await countPendingSales()
+          clearCart()
+          setPaymentOpen(false)
+          setSearch('')
+          showNotice(
+            'success',
+            `Se cayó la conexión: venta guardada en este equipo. Se subirá sola cuando vuelva internet. (${pending} pendiente${pending === 1 ? '' : 's'})`,
+          )
+        } catch {
+          showNotice(
+            'error',
+            'Sin conexión y no se pudo guardar la venta en este equipo. Anota el total para no perderlo.',
+          )
+        }
       } else {
         showNotice(
           'error',
