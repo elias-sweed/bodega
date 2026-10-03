@@ -14,6 +14,7 @@ import { usePosCart } from '../hooks/usePosCart'
 import { useProducts } from '../hooks/useProducts'
 import { useSuspendedSale } from '../hooks/useSuspendedSale'
 import { emitDataChanged } from '../services/dataEvents'
+import { useAutoSync } from '../hooks/useAutoSync'
 import { applyStockChanges } from '../services/productsCache'
 import { getStockShortIds, registrarVenta, VentaError } from '../services/sales'
 import {
@@ -97,6 +98,21 @@ export function PosPage() {
     setNotice({ type, message })
     noticeTimer.current = window.setTimeout(() => setNotice(null), 4000)
   }, [])
+
+  // Sube sola las ventas guardadas offline al recuperar internet.
+  useAutoSync((summary) => {
+    if (summary.synced > 0) {
+      showNotice(
+        'success',
+        `Se subieron ${summary.synced} venta${summary.synced === 1 ? '' : 's'} que estaban guardadas sin internet.`,
+      )
+    } else if (summary.failed > 0) {
+      showNotice(
+        'error',
+        `${summary.failed} venta${summary.failed === 1 ? '' : 's'} no se pudo subir. Quedan guardadas y se reintentará sola.`,
+      )
+    }
+  })
 
   useEffect(() => {
     return () => {

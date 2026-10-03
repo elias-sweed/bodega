@@ -43,6 +43,24 @@ export async function registrarVenta(
     producto_id: item.product.id,
     cantidad: item.quantity,
   }))
+  return registrarVentaArticulos(articulos, metodoPago, idempotencyKey)
+}
+
+/** Versión para sincronizar ventas guardadas offline (sin pasar por el carrito). */
+export async function registrarVentaArticulos(
+  articulos: { producto_id: string; cantidad: number }[],
+  metodoPago: string,
+  idempotencyKey: string,
+): Promise<RegistrarVentaResult> {
+  if (!Array.isArray(articulos) || articulos.length === 0) {
+    throw new VentaError('La venta no tiene productos.', [], null)
+  }
+  if (!metodoPago) {
+    throw new VentaError('Falta el método de pago.', [], null)
+  }
+  if (!idempotencyKey) {
+    throw new VentaError('Falta la clave de idempotencia.', [], null)
+  }
 
   const { data, error } = await supabase.rpc('registrar_venta_caja', {
     p_articulos: articulos,
