@@ -267,12 +267,27 @@ export function PosPage() {
           },
         }
       })
+      const consumos = cart
+        .filter(
+          (item) =>
+            item.product.consumo_producto_id && item.product.consumo_por_unidad > 0,
+        )
+        .map((item) => {
+          const vinculado = products.find(
+            (p) => p.id === item.product.consumo_producto_id,
+          )
+          return {
+            nombre: vinculado?.nombre ?? 'Insumo',
+            cantidad: item.quantity * item.product.consumo_por_unidad,
+          }
+        })
       setLastSale({
         venta_id: result.venta_id,
         total: result.total,
         fecha: new Date().toISOString(),
         items: receiptItems,
         metodo_pago: metodoPago,
+        consumos,
       })
       const soldOut = cart.filter(
         (item) => item.quantity >= item.product.stock_actual,

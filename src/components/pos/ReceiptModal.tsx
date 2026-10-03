@@ -9,6 +9,7 @@ export type LastSale = {
   fecha: string
   items: CartItem[]
   metodo_pago: string
+  consumos?: { nombre: string; cantidad: number }[]
 }
 
 function shortId(ventaId: string): string {
@@ -65,6 +66,13 @@ function printReceipt(sale: LastSale): void {
   <p class="muted">Recibo: ${shortId(sale.venta_id)}</p>
   <p class="muted">Pago: ${sale.metodo_pago}</p>
   <p class="muted">Fecha: ${time}</p>
+  ${
+    sale.consumos && sale.consumos.length > 0
+      ? `<p class="muted">Incluyó: ${sale.consumos
+          .map((c) => `${c.cantidad} ${esc(c.nombre)}`)
+          .join(' + ')}</p>`
+      : ''
+  }
   <hr />
   <table>
     <tbody>
@@ -98,6 +106,9 @@ function whatsappMessage(sale: LastSale): string {
           item.product.precio_venta * item.quantity,
         )}`,
     ),
+    ...(sale.consumos && sale.consumos.length > 0
+      ? [`Incluyó: ${sale.consumos.map((c) => `${c.cantidad} ${c.nombre}`).join(' + ')}`]
+      : []),
     '---------------------------',
     `TOTAL: ${formatMoney(sale.total)}`,
   ]
@@ -184,6 +195,12 @@ export function ReceiptModal({ sale, onClose }: ReceiptModalProps) {
               </li>
             ))}
           </ul>
+          {sale.consumos && sale.consumos.length > 0 && (
+            <p className="mt-2 rounded-lg border border-sky-300/30 bg-sky-400/10 px-3 py-1.5 text-xs font-bold text-sky-200">
+              📦 Incluyó:{' '}
+              {sale.consumos.map((c) => `${c.cantidad} ${c.nombre}`).join(' + ')}
+            </p>
+          )}
           <div className="mt-3 flex items-baseline justify-between border-t-2 border-dashed border-slate-300 pt-3">
             <span className="text-base font-black">TOTAL</span>
             <span className="text-xl font-black">{formatMoney(sale.total)}</span>

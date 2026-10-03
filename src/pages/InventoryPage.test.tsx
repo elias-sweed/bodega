@@ -305,13 +305,13 @@ describe('InventoryPage', () => {
       screen.getByText((_content, element) => {
         return (
           element?.tagName.toLowerCase() === 'p' &&
-          element.textContent?.includes('Para sumar mercadería y calcular su costo') === true
+          element.textContent?.includes('registra la compra en la sección Compras') === true
         )
       }),
     ).toBeInTheDocument()
     expect(
-      within(screen.getByRole('dialog')).getByRole('button', { name: 'Registrar compra' }),
-    ).toBeInTheDocument()
+      within(screen.getByRole('dialog')).queryByRole('button', { name: 'Registrar compra' }),
+    ).not.toBeInTheDocument()
 
     const button = screen.getByRole('button', { name: 'Guardar cambios' })
     expect(button).toBeInTheDocument()
