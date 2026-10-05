@@ -147,7 +147,23 @@ export function PosPage() {
       ),
     [products],
   )
-  const categories = useMemo(() => deriveCategories(products), [products])
+  const categories = useMemo(
+    () => deriveCategories(products.filter((p) => p.tipo !== 'servicio')),
+    [products],
+  )
+  const serviciosCategory = useMemo<Category>(
+    () => ({
+      id: '__servicios__',
+      label: 'Servicios',
+      emoji: '🛠️',
+      className: 'bg-sky-100 text-sky-900 hover:bg-sky-200',
+    }),
+    [],
+  )
+  const hasServices = useMemo(
+    () => products.some((product) => product.tipo === 'servicio'),
+    [products],
+  )
 
   const query = normalizeText(search)
   const isSearching = query.length > 0
@@ -158,7 +174,11 @@ export function PosPage() {
       : selectedCategory
         ? orderProductsForCaja(
             products.filter(
-              (product) => product.categoria === selectedCategory.id,
+              (product) =>
+                selectedCategory.id === '__servicios__'
+                  ? product.tipo === 'servicio'
+                  : product.tipo !== 'servicio' &&
+                    product.categoria === selectedCategory.id,
             ),
           )
         : []
@@ -526,7 +546,9 @@ export function PosPage() {
           onSearchEnter={handleSearchEnter}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          categories={categories}
+          categories={
+            hasServices ? [serviciosCategory, ...categories] : categories
+          }
           filteredProducts={filteredProducts}
           outOfStockProducts={outOfStockProducts}
           cartQtyById={cartQtyById}

@@ -293,13 +293,9 @@ export function InventoryPage() {
             <span className="rounded-full border border-line bg-surface px-3 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
-            <button
-              type="button"
-              onClick={() => setVista(vista === 'servicios' ? 'productos' : 'servicios')}
-              className="rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-0.5 text-xs font-black text-sky-300 backdrop-blur-xl transition-colors hover:bg-sky-400/20"
-            >
+            <span className="rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-0.5 text-xs font-black text-sky-300 backdrop-blur-xl">
               {services.length} {services.length === 1 ? 'servicio' : 'servicios'}
-            </button>
+            </span>
             {lowStockCount > 0 && (
               <span className="rounded-full border border-rose-400/40 bg-rose-400/15 px-3 py-0.5 text-xs font-black text-loss backdrop-blur-xl">
                 {lowStockCount} con stock bajo
@@ -356,6 +352,29 @@ export function InventoryPage() {
           </div>
         )}
       </header>
+
+      <div className="flex shrink-0 gap-2">
+        {(
+          [
+            { id: 'productos', label: 'Productos', count: totalProducts },
+            { id: 'servicios', label: 'Servicios', count: services.length },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setVista(tab.id)}
+            aria-pressed={vista === tab.id}
+            className={`rounded-2xl border px-5 py-2.5 text-sm font-black uppercase tracking-widest transition-colors ${
+              vista === tab.id
+                ? 'border-amber-300/60 bg-amber-400/20 text-ink'
+                : 'border-line bg-surface text-muted hover:bg-surface-3'
+            }`}
+          >
+            {tab.label} ({tab.count})
+          </button>
+        ))}
+      </div>
 
       {loading && products.length === 0 ? (
         <InventorySkeleton />
