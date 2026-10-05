@@ -40,8 +40,9 @@ type Notice = {
 
 function orderProductsForCaja(products: ProductosRow[]): ProductosRow[] {
   return [...products].sort((a, b) => {
-    const agotadoA = a.stock_actual <= 0 ? 1 : 0
-    const agotadoB = b.stock_actual <= 0 ? 1 : 0
+    // Los servicios no tienen stock: nunca cuentan como "agotados".
+    const agotadoA = a.tipo !== 'servicio' && a.stock_actual <= 0 ? 1 : 0
+    const agotadoB = b.tipo !== 'servicio' && b.stock_actual <= 0 ? 1 : 0
     return agotadoA - agotadoB || a.nombre.localeCompare(b.nombre, 'es')
   })
 }
@@ -140,7 +141,10 @@ export function PosPage() {
   }, [])
 
   const outOfStockProducts = useMemo(
-    () => products.filter((product) => product.stock_actual <= 0),
+    () =>
+      products.filter(
+        (product) => product.tipo !== 'servicio' && product.stock_actual <= 0,
+      ),
     [products],
   )
   const categories = useMemo(() => deriveCategories(products), [products])
@@ -290,7 +294,9 @@ export function PosPage() {
         consumos,
       })
       const soldOut = cart.filter(
-        (item) => item.quantity >= item.product.stock_actual,
+        (item) =>
+          item.product.tipo !== 'servicio' &&
+          item.quantity >= item.product.stock_actual,
       )
       clearCart()
       setPaymentOpen(false)
@@ -306,10 +312,12 @@ export function PosPage() {
         `Venta por ${formatMoney(result.total)} registrada${soldOutText}`,
       )
       applyStockChanges(
-        cart.map((item) => ({
-          id: item.product.id,
-          stockActual: item.product.stock_actual - item.quantity,
-        })),
+        cart
+          .filter((item) => item.product.tipo !== 'servicio')
+          .map((item) => ({
+            id: item.product.id,
+            stockActual: item.product.stock_actual - item.quantity,
+          })),
       )
       // Consumo de insumos: cada servicio descuenta las unidades que usa
       // (ej.: "Impresión B/N" descuenta 1 hoja por copia).

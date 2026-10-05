@@ -119,7 +119,11 @@ export function useSuspendedSale(userId: string | undefined) {
           skipped += 1
           continue
         }
-        const quantity = Math.min(cantidad, product.stock_actual)
+        // Los servicios no tienen stock físico: se retoman con su cantidad completa.
+        const quantity =
+          product.tipo === 'servicio'
+            ? cantidad
+            : Math.min(cantidad, product.stock_actual)
         if (quantity <= 0) {
           skipped += 1
           continue

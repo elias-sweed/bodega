@@ -195,10 +195,19 @@ export function ProductTable({
         return false
       }
       if (category !== 'todas' && product.categoria !== category) return false
-      if (chipFiltro === 'agotados' && product.stock_actual > 0) return false
+      if (
+        chipFiltro === 'agotados' &&
+        (product.tipo === 'servicio' || product.stock_actual > 0)
+      ) {
+        return false
+      }
       if (
         chipFiltro === 'por_agotar' &&
-        !(product.stock_actual > 0 && product.stock_actual <= product.stock_minimo)
+        !(
+          product.tipo !== 'servicio' &&
+          product.stock_actual > 0 &&
+          product.stock_actual <= product.stock_minimo
+        )
       ) {
         return false
       }
@@ -527,7 +536,9 @@ export function ProductTable({
               </thead>
               <tbody>
                 {pageItems.map((product, i) => {
-                  const lowStock = product.stock_actual <= product.stock_minimo
+                  const lowStock =
+                    product.tipo !== 'servicio' &&
+                    product.stock_actual <= product.stock_minimo
                   const margin = marginPercent(product)
                   const pinned = pinnedIds.includes(product.id)
                   const isFlashTarget = highlightId === product.id
@@ -603,6 +614,7 @@ export function ProductTable({
                         <StockBadge
                           stockActual={product.stock_actual}
                           stockMinimo={product.stock_minimo}
+                          tipo={product.tipo}
                         />
                       </td>
                       <td className="px-5 py-3 text-right">
