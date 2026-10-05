@@ -15,6 +15,7 @@ interface PosProductAreaProps {
   selectedCategory: Category | null
   onSelectCategory: (category: Category | null) => void
   categories: Category[]
+  hasServices: boolean
   filteredProducts: ProductosRow[]
   outOfStockProducts: ProductosRow[]
   cartQtyById: Map<string, number>
@@ -40,6 +41,7 @@ export function PosProductArea({
   selectedCategory,
   onSelectCategory,
   categories,
+  hasServices,
   filteredProducts,
   outOfStockProducts,
   cartQtyById,
@@ -133,6 +135,27 @@ export function PosProductArea({
                   onSelectCategory(category)
                 }}
               />
+            )}
+            {hasServices && (
+              <button
+                type="button"
+                onClick={() =>
+                  onSelectCategory({
+                    id: '__servicios__',
+                    label: 'Servicios',
+                    emoji: '🛠️',
+                    className: '',
+                  })
+                }
+                className="flex w-full items-center justify-between gap-3 rounded-[22px] border border-sky-300/40 bg-sky-400/10 px-5 py-4 text-left shadow-sm transition-colors hover:bg-sky-400/20 active:scale-[0.99]"
+              >
+                <span className="text-base font-black tracking-tight text-ink">
+                  🛠️ Servicios
+                </span>
+                <span className="text-xs font-black uppercase tracking-widest text-sky-300">
+                  Impresiones, copias, escaneo…
+                </span>
+              </button>
             )}
             {outOfStockProducts.length > 0 && (
               <ProductGrid

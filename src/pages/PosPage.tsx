@@ -151,15 +151,6 @@ export function PosPage() {
     () => deriveCategories(products.filter((p) => p.tipo !== 'servicio')),
     [products],
   )
-  const serviciosCategory = useMemo<Category>(
-    () => ({
-      id: '__servicios__',
-      label: 'Servicios',
-      emoji: '🛠️',
-      className: 'bg-sky-100 text-sky-900 hover:bg-sky-200',
-    }),
-    [],
-  )
   const hasServices = useMemo(
     () => products.some((product) => product.tipo === 'servicio'),
     [products],
@@ -546,9 +537,8 @@ export function PosPage() {
           onSearchEnter={handleSearchEnter}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          categories={
-            hasServices ? [serviciosCategory, ...categories] : categories
-          }
+          categories={categories}
+          hasServices={hasServices}
           filteredProducts={filteredProducts}
           outOfStockProducts={outOfStockProducts}
           cartQtyById={cartQtyById}
