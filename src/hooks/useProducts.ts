@@ -86,6 +86,9 @@ export function useProducts() {
       stock_minimo: number
       nuevoStock?: number
       motivo?: string
+      tipo?: 'producto' | 'servicio'
+      consumo_producto_id?: string | null
+      consumo_por_unidad?: number
     }): Promise<void> => {
       await actualizarProducto({
         p_id: id,
@@ -97,6 +100,9 @@ export function useProducts() {
         p_stock_minimo: input.stock_minimo,
         p_nuevo_stock: input.nuevoStock ?? null,
         p_motivo: input.motivo ?? '',
+        p_tipo: input.tipo ?? null,
+        p_consumo_producto_id: input.consumo_producto_id ?? null,
+        p_consumo_por_unidad: input.consumo_por_unidad ?? null,
       })
       await refreshProductsCache()
     },

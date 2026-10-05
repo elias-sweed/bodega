@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { Check, Minus, PackageSearch, Sparkles, TrendingUp, X } from 'lucide-react'
 import { fetchProductByName, fetchProductCategories } from '../../services/products'
 import type { ProductosInsert, ProductosRow } from '../../types/database.types'
-import { formatCostoUnidad, formatMoney, toTitleCase } from '../../utils/format'
+import { formatCostoUnidad, formatMoney, normalizeText, toTitleCase } from '../../utils/format'
 import { CategoryChips } from './CategoryChips'
 import { CategoryField } from './CategoryField'
 
@@ -12,6 +12,8 @@ interface ProductFormModalProps {
   onClose: () => void
   onSubmit: (product: ProductosInsert) => Promise<void>
   initial?: ProductosRow | null
+  /** Fuerza el tipo inicial al crear (ej. abrir desde "Nuevo servicio"). */
+  initialTipo?: 'producto' | 'servicio'
   productosDisponibles?: ProductosRow[]
   initialPrefill?: {
     nombre: string
@@ -247,6 +249,7 @@ export function ProductFormModal({
   onClose,
   onSubmit,
   initial,
+  initialTipo,
   productosDisponibles = [],
   initialPrefill = null,
 }: ProductFormModalProps) {
@@ -284,7 +287,7 @@ export function ProductFormModal({
     }
   })
   const [categories, setCategories] = useState<string[]>([])
-  const [tipo, setTipo] = useState<'producto' | 'servicio'>(() => initial?.tipo ?? 'producto')
+  const [tipo, setTipo] = useState<'producto' | 'servicio'>(() => initial?.tipo ?? initialTipo ?? 'producto')
   const [paqueteOpen, setPaqueteOpen] = useState(false)
   const [opcionesOpen, setOpcionesOpen] = useState(false)
   const [paquetePrecio, setPaquetePrecio] = useState('')
@@ -467,7 +470,7 @@ export function ProductFormModal({
         consumo_producto_id:
           tipo === 'servicio' && consumoProductoId ? consumoProductoId : null,
         consumo_por_unidad:
-          tipo === 'servicio'
+          tipo === 'servicio' && consumoProductoId
             ? Math.max(0, Math.round(Number(consumoPorUnidad) || 0))
             : 0,
       }
@@ -533,26 +536,39 @@ export function ProductFormModal({
           />
         </div>
 
-        {/* Producto o Servicio */}
+        {/* Al crear queda fijo según el botón (producto o servicio).
+            Solo al editar se puede cambiar, para corregir cosas viejas. */}
         <div className="mb-6">
           <SectionTitle>Tipo</SectionTitle>
-          <div className="flex gap-2">
-            {(['producto', 'servicio'] as const).map((opcion) => (
-              <button
-                key={opcion}
-                type="button"
-                onClick={() => setTipo(opcion)}
-                aria-pressed={tipo === opcion}
-                className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
-                  tipo === opcion
-                    ? 'border-amber-300/60 bg-amber-400/20 text-ink'
-                    : 'border-line bg-surface text-muted hover:bg-surface-2'
-                }`}
-              >
-                {opcion === 'producto' ? '📦 Producto' : '🛠️ Servicio'}
-              </button>
-            ))}
-          </div>
+          {initial ? (
+            <div className="flex gap-2">
+              {(['producto', 'servicio'] as const).map((opcion) => (
+                <button
+                  key={opcion}
+                  type="button"
+                  onClick={() => setTipo(opcion)}
+                  aria-pressed={tipo === opcion}
+                  className={`flex-1 rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-widest transition-colors ${
+                    tipo === opcion
+                      ? 'border-amber-300/60 bg-amber-400/20 text-ink'
+                      : 'border-line bg-surface text-muted hover:bg-surface-2'
+                  }`}
+                >
+                  {opcion === 'producto' ? '📦 Producto' : '🛠️ Servicio'}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <span
+              className={`block rounded-2xl border px-4 py-3 text-center text-sm font-black uppercase tracking-widest ${
+                tipo === 'servicio'
+                  ? 'border-sky-300/60 bg-sky-400/20 text-ink'
+                  : 'border-amber-300/60 bg-amber-400/20 text-ink'
+              }`}
+            >
+              {tipo === 'servicio' ? '🛠️ Servicio' : '📦 Producto'}
+            </span>
+          )}
           <p className="mt-2 text-xs font-semibold text-muted">
             {tipo === 'servicio'
               ? 'Se vende siempre, sin agotarse (ej. impresión, escaneo, tipeo).'
@@ -659,32 +675,44 @@ export function ProductFormModal({
               <p className="text-sm font-black text-ink">¿Qué inventario gasta? (opcional)</p>
               <div>
                 <label htmlFor="consumo-producto" className="mb-1 block text-xs font-bold text-muted">
-                  ¿Qué producto utiliza?
+                  ¿Qué producto usa?
                 </label>
-                <select
-                  id="consumo-producto"
-                  value={consumoProductoId}
-                  onChange={(e) => {
-                    setConsumoProductoId(e.target.value)
-                    // Si no gasta nada (ej. escaneo, tipeo), el consumo queda en 0.
-                    if (e.target.value === '') setConsumoPorUnidad('0')
-                    else setConsumoPorUnidad((prev) => (prev === '0' ? '1' : prev))
-                  }}
-                  className={plainInputClass}
-                >
-                  <option value="">Nada (ej. escaneo)</option>
-                  {productosDisponibles
-                    .filter((p) => p.tipo !== 'servicio')
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.nombre} (quedan {p.stock_actual})
-                      </option>
-                    ))}
-                </select>
+                {(() => {
+                  const papeles = productosDisponibles.filter(
+                    (p) =>
+                      p.tipo !== 'servicio' &&
+                      normalizeText(p.nombre).includes('papel'),
+                  )
+                  return papeles.length === 0 ? (
+                    <p className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-ink">
+                      Aún no tienes "Papel bond" en Inventario. Créalo como
+                      producto para que este servicio descuente las hojas que
+                      use. Si el servicio no gasta nada, elige "Nada".
+                    </p>
+                  ) : (
+                    <select
+                      id="consumo-producto"
+                      value={consumoProductoId}
+                      onChange={(e) => {
+                        setConsumoProductoId(e.target.value)
+                        if (e.target.value === '') setConsumoPorUnidad('0')
+                        else setConsumoPorUnidad((prev) => (prev === '0' ? '1' : prev))
+                      }}
+                      className={plainInputClass}
+                    >
+                      <option value="">Nada (ej. escaneo, tipeo)</option>
+                      {papeles.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.nombre} (quedan {p.stock_actual})
+                        </option>
+                      ))}
+                    </select>
+                  )
+                })()}
               </div>
               <div>
                 <label htmlFor="consumo-por-unidad" className="mb-1 block text-xs font-bold text-muted">
-                  ¿Cuántas unidades de eso por cada cobro?
+                  ¿Cuántas hojas usa cada cobro?
                 </label>
                 <input
                   id="consumo-por-unidad"
@@ -698,7 +726,9 @@ export function ProductFormModal({
                   placeholder="Ej. 1"
                 />
                 <p className="mt-1 text-xs font-semibold text-muted">
-                  Ej.: una copia o impresión descuenta 1 hoja → pon 1. Si el servicio no gasta papel (escaneo, tipeo), elige "Nada".
+                  Ej.: cada copia o impresión usa 1 hoja → pon 1. Si el
+                  servicio no gasta papel (escaneo, tipeo), elige "Nada" arriba
+                  y pon 0.
                 </p>
               </div>
             </div>

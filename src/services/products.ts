@@ -72,6 +72,9 @@ export async function insertProduct(
     p_costo: product.costo,
     p_stock_inicial: product.stock_actual,
     p_stock_minimo: product.stock_minimo,
+    p_tipo: product.tipo ?? 'producto',
+    p_consumo_producto_id: product.consumo_producto_id ?? null,
+    p_consumo_por_unidad: product.consumo_por_unidad ?? 0,
   })
 
   if (error) {
@@ -124,8 +127,16 @@ export async function actualizarProducto(input: {
   p_stock_minimo: number
   p_nuevo_stock: number | null
   p_motivo: string
+  p_tipo?: 'producto' | 'servicio' | null
+  p_consumo_producto_id?: string | null
+  p_consumo_por_unidad?: number | null
 }): Promise<ActualizarProductoResult> {
-  const { data, error } = await supabase.rpc('actualizar_producto', input)
+  const { data, error } = await supabase.rpc('actualizar_producto', {
+    ...input,
+    p_tipo: input.p_tipo ?? null,
+    p_consumo_producto_id: input.p_consumo_producto_id ?? null,
+    p_consumo_por_unidad: input.p_consumo_por_unidad ?? null,
+  })
   if (error) {
     throwSupabaseError(error, 'No se pudo actualizar el producto. Inténtalo de nuevo.')
   }

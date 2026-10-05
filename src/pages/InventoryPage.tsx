@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { AlertTriangle, ClipboardList, PackagePlus, RotateCcw } from 'lucide-react'
+import { AlertTriangle, ClipboardList, PackagePlus, Repeat, RotateCcw } from 'lucide-react'
 import { Toast } from '../components/common/Toast'
 import { HelpTip } from '../components/common/HelpTip'
 import { ConfirmDeleteModal } from '../components/inventory/ConfirmDeleteModal'
@@ -13,6 +13,7 @@ import {
   StockAdjustModal,
   type StockAdjustPayload,
 } from '../components/inventory/StockAdjustModal'
+import { ServiceTable } from '../components/inventory/ServiceTable'
 import { useAuth } from '../hooks/useAuth'
 import { useInventoryModals } from '../hooks/useInventoryModals'
 import { useProducts } from '../hooks/useProducts'
@@ -112,9 +113,20 @@ export function InventoryPage() {
   }, [initialNewName, setSearchParams])
 
   const lowStockCount = products.filter(
-    (product) => product.stock_actual <= product.stock_minimo,
+    (product) =>
+      product.tipo !== 'servicio' && product.stock_actual <= product.stock_minimo,
   ).length
-  const totalProducts = products.length
+  const physicalProducts = useMemo(
+    () => products.filter((product) => product.tipo !== 'servicio'),
+    [products],
+  )
+  const services = useMemo(
+    () => products.filter((product) => product.tipo === 'servicio'),
+    [products],
+  )
+  const totalProducts = physicalProducts.length
+  const [vista, setVista] = useState<'productos' | 'servicios'>('productos')
+  const [creatingService, setCreatingService] = useState(false)
 
   useEffect(
     () => () => {
@@ -153,7 +165,13 @@ export function InventoryPage() {
       markRecientes([resolvedId])
       setFocusProductId(resolvedId)
     }
-    showNotice('success', `Producto "${product.nombre}" agregado correctamente`)
+    setCreatingService(false)
+    showNotice(
+      'success',
+      product.tipo === 'servicio'
+        ? `Servicio "${product.nombre}" agregado correctamente`
+        : `Producto "${product.nombre}" agregado correctamente`,
+    )
   }
 
   const handleLoadInitialInventory = async (
@@ -200,6 +218,9 @@ export function InventoryPage() {
         precio_venta: product.precio_venta,
         costo: product.costo,
         stock_minimo: product.stock_minimo,
+        tipo: product.tipo,
+        consumo_producto_id: product.consumo_producto_id,
+        consumo_por_unidad: product.consumo_por_unidad,
       })
       setEditingProduct(null)
       showNotice('success', `Producto "${product.nombre}" actualizado`)
@@ -272,6 +293,13 @@ export function InventoryPage() {
             <span className="rounded-full border border-line bg-surface px-3 py-0.5 text-xs font-bold text-muted backdrop-blur-xl">
               {totalProducts} {totalProducts === 1 ? 'producto' : 'productos'}
             </span>
+            <button
+              type="button"
+              onClick={() => setVista(vista === 'servicios' ? 'productos' : 'servicios')}
+              className="rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-0.5 text-xs font-black text-sky-300 backdrop-blur-xl transition-colors hover:bg-sky-400/20"
+            >
+              {services.length} {services.length === 1 ? 'servicio' : 'servicios'}
+            </button>
             {lowStockCount > 0 && (
               <span className="rounded-full border border-rose-400/40 bg-rose-400/15 px-3 py-0.5 text-xs font-black text-loss backdrop-blur-xl">
                 {lowStockCount} con stock bajo
@@ -305,6 +333,19 @@ export function InventoryPage() {
               type="button"
               onClick={() => {
                 setPrefill(null)
+                setCreatingService(true)
+                setModalOpen(true)
+              }}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-widest text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
+            >
+              <Repeat size={19} aria-hidden="true" />
+              Nuevo servicio
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPrefill(null)
+                setCreatingService(false)
                 setModalOpen(true)
               }}
               className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px 35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
@@ -336,7 +377,17 @@ export function InventoryPage() {
             Reintentar
           </button>
         </div>
-      ) : totalProducts === 0 ? (
+      ) : vista === 'servicios' ? (
+        <div className="fade-in">
+          <ServiceTable
+            services={services}
+            catalog={products}
+            isAdmin={isAdmin}
+            onEdit={(product) => setEditingProduct(product)}
+            onDelete={(product) => handleDeleteRequest(product)}
+          />
+        </div>
+      ) : products.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-[28px] border border-line bg-surface p-12 text-center backdrop-blur-2xl">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-surface text-muted">
             <PackagePlus size={26} aria-hidden="true" />
@@ -372,7 +423,7 @@ export function InventoryPage() {
       ) : (
         <div className="fade-in">
           <ProductTable
-            products={products}
+            products={physicalProducts}
             isAdmin={isAdmin}
             onEdit={(product) => setEditingProduct(product)}
             onAdjustStock={(product) => setAdjustingProduct(product)}
@@ -395,6 +446,7 @@ export function InventoryPage() {
       {modalOpen && (
         <ProductFormModal
           initialPrefill={prefill}
+          initialTipo={creatingService ? 'servicio' : 'producto'}
           productosDisponibles={products}
           onClose={() => {
             setModalOpen(false)
