@@ -664,7 +664,12 @@ export function ProductFormModal({
                 <select
                   id="consumo-producto"
                   value={consumoProductoId}
-                  onChange={(e) => setConsumoProductoId(e.target.value)}
+                  onChange={(e) => {
+                    setConsumoProductoId(e.target.value)
+                    // Si no gasta nada (ej. escaneo, tipeo), el consumo queda en 0.
+                    if (e.target.value === '') setConsumoPorUnidad('0')
+                    else setConsumoPorUnidad((prev) => (prev === '0' ? '1' : prev))
+                  }}
                   className={plainInputClass}
                 >
                   <option value="">Nada (ej. escaneo)</option>
@@ -693,7 +698,7 @@ export function ProductFormModal({
                   placeholder="Ej. 1"
                 />
                 <p className="mt-1 text-xs font-semibold text-muted">
-                  Ej.: una impresión descuenta 1 hoja → pon 1.
+                  Ej.: una copia o impresión descuenta 1 hoja → pon 1. Si el servicio no gasta papel (escaneo, tipeo), elige "Nada".
                 </p>
               </div>
             </div>
