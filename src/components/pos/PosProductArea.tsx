@@ -96,6 +96,7 @@ export function PosProductArea({
             onAdd={onAdd}
             onIncrease={onIncrease}
             onDecrease={onDecrease}
+            catalog={products}
           />
         ) : selectedCategory ? (
           <div className="fade-in">
@@ -115,6 +116,7 @@ export function PosProductArea({
               onAdd={onAdd}
               onIncrease={onIncrease}
               onDecrease={onDecrease}
+              catalog={products}
             />
           </div>
         ) : products.length === 0 ? (
@@ -166,6 +168,7 @@ export function PosProductArea({
                 onAdd={onAdd}
                 onIncrease={onIncrease}
                 onDecrease={onDecrease}
+                catalog={products}
               />
             )}
           </div>

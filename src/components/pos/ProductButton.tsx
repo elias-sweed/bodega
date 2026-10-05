@@ -9,6 +9,8 @@ interface ProductButtonProps {
   onAdd: () => void
   onIncrease?: () => void
   onDecrease?: () => void
+  /** Insumo vinculado (papel): su stock es el límite del servicio */
+  insumo?: ProductosRow
 }
 
 function stockLevel(stockActual: number, stockMinimo: number): number {
@@ -29,6 +31,7 @@ export function ProductButton({
   onAdd,
   onIncrease,
   onDecrease,
+  insumo,
 }: ProductButtonProps) {
   const esServ = product.tipo === 'servicio'
   const agotado = !esServ && product.stock_actual <= 0
@@ -87,7 +90,9 @@ export function ProductButton({
         >
           {esServ ? (
             <span className="text-xs font-black uppercase tracking-widest text-sky-300">
-              Servicio
+              {insumo
+                ? `Servicio · quedan ${insumo.stock_actual} de ${insumo.nombre}`
+                : 'Servicio'}
             </span>
           ) : (
           <>

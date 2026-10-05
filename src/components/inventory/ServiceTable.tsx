@@ -75,7 +75,7 @@ export function ServiceTable({
                     {insumo && service.consumo_por_unidad > 0 ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-xs font-black text-sky-300">
                         <Repeat size={12} aria-hidden="true" />
-                        {service.consumo_por_unidad} × {insumo.nombre}
+                        {service.consumo_por_unidad} × {insumo.nombre} · quedan {insumo.stock_actual}
                       </span>
                     ) : (
                       <span className="inline-flex items-center rounded-full border border-line bg-surface-2 px-3 py-1 text-xs font-bold text-muted">

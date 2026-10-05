@@ -877,7 +877,7 @@ export function ProductFormModal({
               </p>
             </div>
 
-            {showStockField && tipo === 'producto' ? (
+            {showStockField && tipo === 'producto' && (
               <div>
                 <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
                   ¿Cuántas unidades hay ahorita? (opcional)
@@ -897,7 +897,8 @@ export function ProductFormModal({
                   Si no lo sabes, déjalo en 0 y ajústalo después.
                 </p>
               </div>
-            ) : (
+            )}
+            {tipo === 'producto' && !showStockField && (
               <div className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3">
                 <p className="text-sm font-extrabold text-ink">
                   Stock actual: {values.stock_actual}

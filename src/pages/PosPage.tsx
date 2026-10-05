@@ -83,15 +83,52 @@ export function PosPage() {
     highlightTimer.current = window.setTimeout(() => setHighlightId(null), 1200)
   }, [])
 
-  const handleAddProduct = useCallback((product: ProductosRow): void => {
-    addProduct(product)
-    flashHighlight(product.id)
-  }, [addProduct, flashHighlight])
+  // Guarda: el servicio descuenta papel (insumo); si ya no alcanza, avisa.
+  const validarInsumo = useCallback(
+    (product: ProductosRow, nuevaCantidad: number): boolean => {
+      if (
+        product.tipo !== 'servicio' ||
+        !product.consumo_producto_id ||
+        product.consumo_por_unidad <= 0
+      ) {
+        return true
+      }
+      const insumo = products.find((p) => p.id === product.consumo_producto_id)
+      const necesarias = nuevaCantidad * product.consumo_por_unidad
+      if (insumo && necesarias > insumo.stock_actual) {
+        showNotice(
+          'error',
+          `No alcanza «${insumo.nombre}»: esta venta necesita ${necesarias} y quedan ${insumo.stock_actual}. Recarga primero.`,
+        )
+        return false
+      }
+      return true
+    },
+    [products],
+  )
 
-  const handleIncreaseQuantity = useCallback((productId: string): void => {
-    increaseQuantity(productId)
-    flashHighlight(productId)
-  }, [increaseQuantity, flashHighlight])
+  const handleAddProduct = useCallback(
+    (product: ProductosRow): void => {
+      const nuevaCantidad = (cartQtyById.get(product.id) ?? 0) + 1
+      if (!validarInsumo(product, nuevaCantidad)) return
+      addProduct(product)
+      flashHighlight(product.id)
+    },
+    [addProduct, flashHighlight, validarInsumo, cartQtyById],
+  )
+
+  const handleIncreaseQuantity = useCallback(
+    (productId: string): void => {
+      const product = products.find((p) => p.id === productId)
+      if (product) {
+        const nuevaCantidad = (cartQtyById.get(productId) ?? 0) + 1
+        if (!validarInsumo(product, nuevaCantidad)) return
+      }
+      increaseQuantity(productId)
+      flashHighlight(productId)
+    },
+    [increaseQuantity, flashHighlight, validarInsumo, cartQtyById, products],
+  )
 
   const handleDecreaseQuantity = useCallback((productId: string): void => {
     decreaseQuantity(productId)

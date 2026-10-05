@@ -9,6 +9,8 @@ interface ProductGridProps {
   onAdd: (product: ProductosRow) => void
   onIncrease: (productId: string) => void
   onDecrease: (productId: string) => void
+  /** Catálogo completo, para mostrar el stock del insumo de los servicios */
+  catalog?: ProductosRow[]
 }
 
 export function ProductGrid({
@@ -19,6 +21,7 @@ export function ProductGrid({
   onAdd,
   onIncrease,
   onDecrease,
+  catalog,
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
@@ -48,6 +51,13 @@ export function ProductGrid({
             onAdd={() => onAdd(product)}
             onIncrease={() => onIncrease(product.id)}
             onDecrease={() => onDecrease(product.id)}
+            insumo={
+              product.tipo === 'servicio' && product.consumo_producto_id
+                ? (catalog ?? products).find(
+                    (p) => p.id === product.consumo_producto_id,
+                  )
+                : undefined
+            }
           />
         ))}
       </div>
