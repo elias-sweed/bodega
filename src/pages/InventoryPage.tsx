@@ -315,9 +315,9 @@ export function InventoryPage() {
         {isAdmin && (
           <div className="flex flex-wrap items-center gap-2.5">
             <HelpTip
-              title="¿Inventario inicial o Nuevo producto?"
+              title="¿Inventario inicial o Agregar producto nuevo?"
               label="¿Cuál uso?"
-              text="Usa 'Cargar inventario inicial' para contar lo que YA tienes en la bodega ahora mismo. Usa 'Nuevo producto' cuando agregas algo que nunca habías vendido. Las compras de mercadería que llegan después no van aquí: van en Compras."
+              text="Usa 'Contar lo que ya tenía' para contar lo que YA tienes en la bodega ahora mismo. Usa 'Agregar producto nuevo' cuando agregas algo que nunca habías vendido. Las compras de mercadería que llegan después no van aquí: van en Compras."
               example="Ya vendes atún y tienes 15 latas: eso es inventario inicial. Quieres empezar a vender chocolate: ese es nuevo producto."
             />
             <button
@@ -336,7 +336,7 @@ export function InventoryPage() {
               className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-widest text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
             >
               <ClipboardList size={19} aria-hidden="true" />
-              Cargar inventario inicial
+              Contar lo que ya tenía
             </button>
             <button
               type="button"
@@ -360,7 +360,7 @@ export function InventoryPage() {
               className="inline-flex h-12 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-6 text-base font-black uppercase tracking-[0.12em] text-slate-900 shadow-[0_14px 35px_-12px_rgba(251,191,36,0.6)] transition-colors hover:brightness-105 active:scale-[0.98]"
             >
               <PackagePlus size={19} aria-hidden="true" />
-              Nuevo producto
+              Agregar producto nuevo
             </button>
           </div>
         )}
@@ -382,8 +382,8 @@ export function InventoryPage() {
               Cerrar
             </button>
           </div>
-          <p><strong className="font-extrabold">📦 Cargar inventario inicial</strong> = solo la primera vez, para contar lo que YA tenías en la tienda antes de usar la app.</p>
-          <p><strong className="font-extrabold">➕ Nuevo producto</strong> = solo para productos que nunca habías vendido.</p>
+          <p><strong className="font-extrabold">📦 Contar lo que ya tenía</strong> = solo la primera vez, para contar lo que YA tenías en la tienda antes de usar la app.</p>
+          <p><strong className="font-extrabold">➕ Agregar producto nuevo</strong> = solo para productos que nunca habías vendido.</p>
           <p><strong className="font-extrabold">🛒 Compras</strong> = cada vez que llega mercadería (repone o compras de lo mismo). Aquí es donde se suma el stock.</p>
         </div>
       )}
@@ -458,7 +458,7 @@ export function InventoryPage() {
                 className="inline-flex h-11 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-4 text-sm font-black text-ink transition-colors hover:bg-sky-400/25"
               >
                 <ClipboardList size={17} aria-hidden="true" />
-                Cargar inventario inicial
+                Contar lo que ya tenía
               </button>
               <button
                 type="button"
@@ -469,7 +469,7 @@ export function InventoryPage() {
                 className="inline-flex h-11 items-center gap-2 rounded-2xl border border-amber-300/40 bg-linear-to-r from-amber-200 via-amber-400 to-amber-600 px-4 text-sm font-black text-slate-900 transition-colors hover:brightness-105"
               >
                 <PackagePlus size={17} aria-hidden="true" />
-                Nuevo producto
+                Agregar producto nuevo
               </button>
             </div>
           )}

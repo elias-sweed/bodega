@@ -509,7 +509,7 @@ export function ProductFormModal({
               Inventario
             </p>
             <h2 id="nuevo-producto-title" className="text-2xl font-black tracking-tighter text-ink">
-              {initial ? 'Editar producto' : 'Nuevo producto'}
+              {initial ? 'Editar producto' : 'Agregar producto nuevo'}
             </h2>
           </div>
           <button
@@ -525,7 +525,7 @@ export function ProductFormModal({
         {!initial && (
           <p className="mb-6 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
             ⚠️ <strong className="font-black">Usa esto solo si es la primera vez que vendes este producto.</strong>{' '}
-            Si ya existía y solo compraste más mercadería, ve a <strong className="font-black">Compras</strong>. Si lo tenías desde antes de usar la app, usa <strong className="font-black">Cargar inventario inicial</strong>.
+            Si ya existía y solo compraste más mercadería, ve a <strong className="font-black">Compras</strong>. Si lo tenías desde antes de usar la app, usa <strong className="font-black">Contar lo que ya tenía</strong>.
           </p>
         )}
 

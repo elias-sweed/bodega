@@ -234,7 +234,7 @@ const [categories, setCategories] = useState<string[]>(CATEGORIAS)
                 Inventario
               </p>
               <h2 id="cargar-inventario-title" className="text-2xl font-black tracking-tighter text-ink">
-                Cargar inventario inicial
+                Contar lo que ya tenía
               </h2>
             </div>
           </div>
@@ -255,7 +255,7 @@ const [categories, setCategories] = useState<string[]>(CATEGORIAS)
 
         <p className="mb-5 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
           ⚠️ <strong className="font-black">Usa esto solo una vez, al empezar a usar la app.</strong>{' '}
-          Lo que compres después va en <strong className="font-black">Compras</strong>, no aquí. Y un producto que nunca habías vendido se registra en <strong className="font-black">Nuevo producto</strong>.
+          Lo que compres después va en <strong className="font-black">Compras</strong>, no aquí. Y un producto que nunca habías vendido se registra en <strong className="font-black">Agregar producto nuevo</strong>.
         </p>
 
         <section className="mb-6">
@@ -274,7 +274,7 @@ const [categories, setCategories] = useState<string[]>(CATEGORIAS)
               className="inline-flex h-10 items-center gap-2 rounded-2xl border border-amber-300/35 bg-amber-400/10 px-4 text-sm font-extrabold text-ink transition-colors hover:bg-amber-400/20"
             >
               <Plus size={16} strokeWidth={3} aria-hidden="true" />
-              Agregar producto nuevo
+              Agregar otro producto
             </button>
           </div>
 
