@@ -522,6 +522,13 @@ export function ProductFormModal({
           </button>
         </div>
 
+        {!initial && (
+          <p className="mb-6 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
+            ⚠️ <strong className="font-black">Usa esto solo si es la primera vez que vendes este producto.</strong>{' '}
+            Si ya existía y solo compraste más mercadería, ve a <strong className="font-black">Compras</strong>. Si lo tenías desde antes de usar la app, usa <strong className="font-black">Cargar inventario inicial</strong>.
+          </p>
+        )}
+
         {/* Paso 1: ¿Qué es? */}
         <div className="mb-6">
           <SectionTitle>¿Qué es?</SectionTitle>
