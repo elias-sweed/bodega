@@ -79,6 +79,9 @@ export function InventoryPage() {
   const [recientesIds, setRecientesIds] = useState<string[]>(getRecientesIds)
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const noticeTimer = useRef<number | null>(null)
+  const [guiaAbierta, setGuiaAbierta] = useState<boolean>(
+    () => !window.localStorage.getItem('bodega:guiaInventarioCerrada'),
+  )
 
   const {
     modalOpen,
@@ -319,6 +322,16 @@ export function InventoryPage() {
             />
             <button
               type="button"
+              onClick={() => {
+                window.localStorage.removeItem('bodega:guiaInventarioCerrada')
+                setGuiaAbierta(true)
+              }}
+              className="inline-flex h-12 items-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-black uppercase tracking-widest text-muted transition-colors hover:bg-surface-2 hover:text-ink active:scale-[0.98]"
+            >
+              ¿Cuál uso?
+            </button>
+            <button
+              type="button"
               onClick={() => setInitialStockOpen(true)}
               className="inline-flex h-12 items-center gap-2 rounded-2xl border border-sky-300/35 bg-sky-400/15 px-5 text-sm font-black uppercase tracking-widest text-ink transition-colors hover:bg-sky-400/25 active:scale-[0.98]"
             >
@@ -352,6 +365,28 @@ export function InventoryPage() {
           </div>
         )}
       </header>
+
+      {guiaAbierta && (
+        <div className="mb-4 rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-3 text-sm leading-relaxed text-ink">
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <p className="font-black">🟠 ¿Cuál uso?</p>
+            <button
+              type="button"
+              aria-label="Cerrar guía"
+              onClick={() => {
+                window.localStorage.setItem('bodega:guiaInventarioCerrada', '1')
+                setGuiaAbierta(false)
+              }}
+              className="text-xs font-black uppercase tracking-wider text-muted hover:text-ink"
+            >
+              Cerrar
+            </button>
+          </div>
+          <p><strong className="font-extrabold">📦 Cargar inventario inicial</strong> = solo la primera vez, para contar lo que YA tenías en la tienda antes de usar la app.</p>
+          <p><strong className="font-extrabold">➕ Nuevo producto</strong> = solo para productos que nunca habías vendido.</p>
+          <p><strong className="font-extrabold">🛒 Compras</strong> = cada vez que llega mercadería (repone o compras de lo mismo). Aquí es donde se suma el stock.</p>
+        </div>
+      )}
 
       <div className="flex shrink-0 gap-2">
         {(
