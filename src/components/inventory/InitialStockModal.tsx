@@ -253,6 +253,11 @@ const [categories, setCategories] = useState<string[]>(CATEGORIAS)
           <strong className="font-extrabold">Stock inicial</strong>, no como una compra ni como un gasto.
         </div>
 
+        <p className="mb-5 rounded-2xl border border-gold/40 bg-gold/10 px-4 py-3 text-sm font-semibold leading-relaxed text-ink">
+          ⚠️ <strong className="font-black">Usa esto solo una vez, al empezar a usar la app.</strong>{' '}
+          Lo que compres después va en <strong className="font-black">Compras</strong>, no aquí. Y un producto que nunca habías vendido se registra en <strong className="font-black">Nuevo producto</strong>.
+        </p>
+
         <section className="mb-6">
           <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
             <div>
