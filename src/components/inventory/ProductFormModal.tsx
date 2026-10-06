@@ -288,7 +288,7 @@ export function ProductFormModal({
   })
   const [categories, setCategories] = useState<string[]>([])
   const [tipo, setTipo] = useState<'producto' | 'servicio'>(() => initial?.tipo ?? initialTipo ?? 'producto')
-  const [paqueteOpen, setPaqueteOpen] = useState(false)
+  const [paqueteOpen, setPaqueteOpen] = useState(() => initial === undefined)
   const [opcionesOpen, setOpcionesOpen] = useState(false)
   const [paquetePrecio, setPaquetePrecio] = useState('')
   const [paqueteUnidades, setPaqueteUnidades] = useState('')
@@ -394,6 +394,16 @@ export function ProductFormModal({
 
   const showStockField = initial === undefined
 
+  // Al crear un producto: si dijo que la caja/paquete trae N unidades,
+  // esas N unidades son el stock inicial (es lo que está comprando).
+  const stockInicialAutomatico =
+    showStockField &&
+    tipo === 'producto' &&
+    Number.isFinite(paqueteUnidadesNum) &&
+    paqueteUnidadesNum > 0
+      ? Math.round(paqueteUnidadesNum)
+      : 0
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     setError(null)
@@ -425,14 +435,6 @@ export function ProductFormModal({
       return
     }
 
-    if (showStockField && tipo === 'producto') {
-      const stockActual = values.stock_actual.trim() === '' ? 0 : Number(values.stock_actual)
-      if (!Number.isFinite(stockActual) || stockActual < 0) {
-        setError('Escribe cuántas unidades hay o déjalo en 0 si todavía no lo sabes.')
-        return
-      }
-    }
-
     setSubmitting(true)
     try {
       const nombre = toTitleCase(values.nombre.trim())
@@ -461,9 +463,7 @@ export function ProductFormModal({
           tipo === 'servicio'
             ? 0
             : showStockField
-              ? values.stock_actual.trim() === ''
-                ? 0
-                : Number(values.stock_actual)
+              ? stockInicialAutomatico
               : (initial?.stock_actual ?? 0),
         stock_minimo: tipo === 'servicio' ? 0 : stockMinimo,
         tipo,
@@ -847,6 +847,11 @@ export function ProductFormModal({
                   </button>
                 </div>
               )}
+              {showStockField && Number.isFinite(paqueteUnidadesNum) && paqueteUnidadesNum > 0 && (
+                <p className="text-xs font-semibold text-muted">
+                  Al guardar, el producto empezará con {Math.round(paqueteUnidadesNum)} unidades en stock.
+                </p>
+              )}
             </div>
           )}
         </>)}
@@ -878,25 +883,11 @@ export function ProductFormModal({
             </div>
 
             {showStockField && tipo === 'producto' && (
-              <div>
-                <label htmlFor="stock_actual" className="mb-1 block text-sm font-bold text-muted">
-                  ¿Cuántas unidades hay ahorita? (opcional)
-                </label>
-                <input
-                  id="stock_actual"
-                  type="number"
-                  min="0"
-                  step="1"
-                  inputMode="numeric"
-                  value={values.stock_actual}
-                  onChange={(e) => setField('stock_actual', e.target.value)}
-                  className={plainInputClass}
-                  placeholder="Ej. 30"
-                />
-                <p className="mt-1 text-xs font-semibold text-muted">
-                  Si no lo sabes, déjalo en 0 y ajústalo después.
-                </p>
-              </div>
+              <p className="rounded-2xl border border-sky-300/30 bg-sky-400/10 px-4 py-3 text-sm font-semibold text-ink">
+                {stockInicialAutomatico > 0
+                  ? `Al guardar, tu producto quedará con ${stockInicialAutomatico} unidades en stock (las que trae tu caja/paquete).`
+                  : 'Pon cuántas unidades trae la caja/paquete que estás comprando y el stock inicial se pondrá solo. Si compras suelto, empezará en 0 y lo registras luego en Compras.'}
+              </p>
             )}
             {tipo === 'producto' && !showStockField && (
               <div className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3">

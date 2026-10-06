@@ -33,9 +33,6 @@ async function fillNewProduct(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '2.50')
   await user.type(screen.getByLabelText('Costo por unidad (opcional)'), '1.20')
   await user.type(screen.getByLabelText('¿Cuántos deben quedar para avisarte?'), '2')
-  const stockInput = screen.getByLabelText('¿Cuántas unidades hay ahorita? (opcional)')
-  await user.clear(stockInput)
-  await user.type(stockInput, '10')
 }
 
 describe('InventoryPage', () => {
@@ -54,7 +51,7 @@ describe('InventoryPage', () => {
     expect(screen.getByText('1 con stock bajo')).toBeInTheDocument()
   })
 
-  it('crea un producto con stock inicial mediante la RPC simulada', async () => {
+  it('crea un producto nuevo y arranca con stock en 0 con aviso de compras', async () => {
     const user = userEvent.setup()
     renderInventory()
     await screen.findByText('Gaseosa Inca Kola')
@@ -66,11 +63,11 @@ describe('InventoryPage', () => {
     await waitFor(() => expect(mockState.createCalls).toBe(1))
     expect(await screen.findByText('Galleta Test')).toBeInTheDocument()
     expect(mockState.products.find((item) => item.nombre === 'Galleta Test')).toMatchObject({
-      stock_actual: 10,
+      stock_actual: 0,
       precio_venta: 2.5,
       costo: 1.2,
     })
-    expect(mockState.incomes.some((item) => item.motivo === 'Stock inicial')).toBe(true)
+    expect(mockState.incomes.some((item) => item.motivo === 'Stock inicial')).toBe(false)
   })
 
   it('crea un producto sin costo y lo marca como pendiente', async () => {
@@ -85,15 +82,38 @@ describe('InventoryPage', () => {
       'General',
     )
     await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '3.00')
-    await user.type(screen.getByLabelText('¿Cuántas unidades hay ahorita? (opcional)'), '2')
     await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
 
     await waitFor(() => expect(mockState.createCalls).toBe(1))
     expect(mockState.products.find((item) => item.nombre === 'Producto Sin Costo')).toMatchObject({
       costo: 0,
-      stock_actual: 2,
+      stock_actual: 0,
     })
     expect(await screen.findByText('Costo pendiente')).toBeInTheDocument()
+  })
+
+  it('al crear un producto con caja, el stock inicial son las unidades de la caja', async () => {
+    const user = userEvent.setup()
+    renderInventory()
+    await screen.findByText('Gaseosa Inca Kola')
+
+    await user.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+    await user.type(screen.getByPlaceholderText('Ej. Inca Kola sin azúcar 500ml'), 'Galleta Por Caja')
+    await user.type(
+      screen.getByPlaceholderText('Escribe o busca una categoría…'),
+      'Snacks',
+    )
+    await user.type(screen.getByLabelText('¿En cuánto lo vendes?'), '2.00')
+    await user.type(screen.getByLabelText('La caja / paquete costó (S/)'), '24.00')
+    await user.type(screen.getByLabelText('¿Cuántas unidades trae?'), '24')
+    await user.type(screen.getByLabelText('¿Cuántos deben quedar para avisarte?'), '2')
+    await user.click(screen.getByRole('button', { name: 'Guardar producto' }))
+
+    await waitFor(() => expect(mockState.createCalls).toBe(1))
+    expect(mockState.products.find((item) => item.nombre === 'Galleta Por Caja')).toMatchObject({
+      stock_actual: 24,
+      costo: 1,
+    })
   })
 
   it('permite editar el precio de venta dejando el costo pendiente', async () => {
@@ -300,7 +320,8 @@ describe('InventoryPage', () => {
     await screen.findByText('Gaseosa Inca Kola')
 
     await user.click(screen.getAllByRole('button', { name: 'Editar' })[0])
-    expect(screen.queryByLabelText('¿Cuántas unidades hay ahorita? (opcional)')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('¿Cuántas unidades tienes?')).not.toBeInTheDocument()
+    expect(screen.queryByText('¿Ya tienes algunas unidades en tu tienda?')).not.toBeInTheDocument()
     expect(
       screen.getByText((_content, element) => {
         return (
